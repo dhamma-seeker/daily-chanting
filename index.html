@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <title>บทสวดมนต์ประจำวัน</title>
+  <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#161310" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="บทสวดมนต์">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="iconbtn hidden" id="backBtn" aria-label="กลับ">‹</button>
+    <h1 id="title">บทสวดมนต์ประจำวัน</h1>
+    <button class="iconbtn hidden" id="gearBtn" aria-label="ตั้งค่า">Aa</button>
+  </header>
+
+  <main class="wrap" id="view"></main>
+
+  <!-- แผงตั้งค่า -->
+  <div class="scrim" id="scrim"></div>
+  <section class="controls" id="controls" aria-label="ตั้งค่าการอ่าน">
+    <div class="row">
+      <span>ขนาดตัวอักษร</span>
+      <div class="seg-ctl">
+        <button id="fsDown" aria-label="เล็กลง">A−</button>
+        <button id="fsUp" aria-label="ใหญ่ขึ้น">A+</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>คำแปลไทย</span>
+      <div class="seg-ctl">
+        <button data-thai="show">แสดง</button>
+        <button data-thai="hide">ซ่อน</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>ธีม</span>
+      <div class="seg-ctl">
+        <button data-theme="auto">อัตโนมัติ</button>
+        <button data-theme="light">สว่าง</button>
+        <button data-theme="dark">มืด</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
