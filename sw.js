@@ -1,6 +1,6 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
 // *** เวลามีการแก้ไฟล์ ให้เปลี่ยนเลข CACHE เพื่อให้โหลดใหม่ ***
-const CACHE = "suadmon-v4";
+const CACHE = "suadmon-v5";
 
 const ASSETS = [
   "./",
