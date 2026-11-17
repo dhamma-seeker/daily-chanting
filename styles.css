@@ -302,27 +302,33 @@ body.hide-thai .segment .pali { }
   background: color-mix(in srgb, var(--accent) 16%, var(--surface));
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 }
-.upo-card .emoji { font-size: 28px; flex: none; }
 .upo-card .meta { flex: 1; min-width: 0; }
 .upo-card .meta b { display: block; font-size: 17px; font-weight: 600; }
 .upo-card .meta span { color: var(--ink-soft); font-size: 14px; }
 .upo-card .chev { color: var(--ink-soft); font-size: 22px; }
 
+.upo-card .meta .sub { display: block; font-size: 12.5px; margin-top: 4px; opacity: .8; }
 .upo-panel {
   margin: 4px 0 16px; padding: 14px 16px;
   border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
 }
 .upo-today { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
 .upo-list { list-style: none; margin: 0; padding: 0; }
-.upo-list li {
-  display: flex; gap: 12px; align-items: baseline;
-  padding: 7px 0; border-top: 1px solid var(--line);
+.upo-list li { padding: 10px 0; border-top: 1px solid var(--line); }
+.upo-list li.now {
+  margin: 0 -10px; padding: 10px; border-radius: 12px; border-top: 0;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
 }
-.upo-list .when { flex: none; width: 74px; color: var(--accent); font-size: 14px; }
-.upo-list .what { font-size: 15px; }
-.upo-list .what small { display: block; color: var(--ink-soft); font-size: 13px; }
-.upo-list li.main .what { font-weight: 600; }
-.upo-foot { margin: 8px 0 0; color: var(--ink-soft); font-size: 12.5px; }
+.upo-range { font-size: 15px; line-height: 1.6; }
+.upo-badge {
+  display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px;
+  background: var(--accent); color: #fff; font-size: 12.5px; vertical-align: 1px;
+}
+.upo-badge.soft { background: var(--surface-2); color: var(--accent); }
+.upo-day { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; }
+.upo-day b { color: var(--ink); font-weight: 600; }
+.upo-phase { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.upo-foot { margin: 10px 0 0; color: var(--ink-soft); font-size: 12.5px; line-height: 1.6; }
 
 .seg-head {
   margin: 22px 0 8px; font-size: 16px; font-weight: 600; color: var(--accent);
@@ -331,3 +337,35 @@ body.hide-thai .segment .pali { }
 .ref { margin-top: 4px; font-size: 12px; }
 .ref, .ref a { color: var(--ink-soft); text-decoration: none; }
 .ref a:hover { text-decoration: underline; }
+
+/* ---------- บาลีคำต่อคำ ---------- */
+.pali .w {
+  display: inline-flex; flex-direction: column; align-items: flex-start;
+  vertical-align: top; max-width: 100%; margin-bottom: 2px;
+}
+.pali .w .t, .pali .w .r { overflow-wrap: anywhere; }
+.pali .w .r {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: max(11px, calc(var(--fs) * .52));
+  font-weight: 300; line-height: 1.25; color: var(--ink-soft); letter-spacing: .01em;
+}
+body.hide-roman .pali .w .r { display: none; }
+body.hide-roman .pali .w { display: inline; }
+
+/* ---------- หน้าพระสูตร ---------- */
+.sutta-head { margin: 8px 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.sutta-head h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+.sutta-head p { margin: 2px 0; color: var(--ink-soft); font-size: 14px; }
+.sutta-head .src { font-size: 12.5px; }
+.sutta-head a { color: var(--accent); }
+.sutta-para { padding: 12px 0 14px; border-bottom: 1px solid var(--line); scroll-margin-top: 72px; }
+.sutta-para.target {
+  margin: 0 -10px; padding: 12px 10px 14px; border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.sutta-para .para-no { font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+.sutta-para .pali { color: var(--pali); font-size: var(--fs); line-height: 1.7; }
+.sutta-para .thai { color: var(--thai); font-size: calc(var(--fs) * .85); line-height: 1.75; margin-top: 8px; }
+body.hide-thai .sutta-para .thai { display: none; }
+.exp-note { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-style: italic; }
+.ref a { color: var(--accent); }

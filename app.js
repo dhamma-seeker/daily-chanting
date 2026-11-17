@@ -14,6 +14,8 @@ const PREF = {
   set fs(v) { localStorage.setItem("fs", v); apply(); },
   get thai() { return localStorage.getItem("thai") || "show"; },
   set thai(v) { localStorage.setItem("thai", v); apply(); },
+  get roman() { return localStorage.getItem("roman") || "show"; },
+  set roman(v) { localStorage.setItem("roman", v); apply(); },
   get theme() { return localStorage.getItem("theme") || "auto"; },
   set theme(v) { localStorage.setItem("theme", v); apply(); },
 };
@@ -21,6 +23,7 @@ const PREF = {
 function apply() {
   document.documentElement.style.setProperty("--fs", PREF.fs + "px");
   document.body.classList.toggle("hide-thai", PREF.thai === "hide");
+  document.body.classList.toggle("hide-roman", PREF.roman === "hide");
   if (PREF.theme === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", PREF.theme);
   syncControlButtons();
@@ -31,57 +34,124 @@ function syncControlButtons() {
     b.classList.toggle("active", b.dataset.thai === PREF.thai));
   document.querySelectorAll("[data-theme]").forEach(b =>
     b.classList.toggle("active", b.dataset.theme === PREF.theme));
+  document.querySelectorAll("[data-roman]").forEach(b =>
+    b.classList.toggle("active", b.dataset.roman === PREF.roman));
 }
 
 function esc(s) {
   return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
 
+// ---------- บาลีคำต่อคำ (อักษรไทย บน / โรมัน ล่าง) ----------
+function renderWords(lines) {
+  return lines.map(line => line.map(([t, r]) =>
+    `<span class="w"><span class="t">${esc(t)}</span><span class="r">${esc(r)}</span></span>`).join(" "))
+    .join("<br>");
+}
+
 // ---------- อ้างอิงพระสูตร ----------
-// "AN 3.70:4.4–4.5 · 5.2" -> ลิงก์ไป tripitaka-mcp.com ที่ท่อนแรก
+// "AN 3.70:4.4–4.5 · 5.2 · AN 8.41:2.1" -> ลิงก์เปิดพระสูตรเต็มในแอป ตรงย่อหน้านั้น
 function refLink(ref) {
-  const m = ref.match(/^(AN|SN|MN|DN|Snp)\s*([\d.]+)(?::([\d.]+))?/);
-  if (!m) return `<div class="ref">${esc(ref)}</div>`;
-  const id = (m[1] + m[2]).toLowerCase();
-  const anchor = m[3] ? `#${id}:${m[3]}` : "";
-  return `<div class="ref"><a href="https://tripitaka-mcp.com/read/${id}${anchor}" target="_blank" rel="noopener">${esc(ref)}</a></div>`;
+  let cur = null;
+  const parts = ref.split("·").map(p => p.trim()).filter(Boolean).map(p => {
+    const m = p.match(/^(AN|SN|MN|DN|Snp)\s*(\d+\.\d+)(?::(\d+))?/);
+    let para = null;
+    if (m) { cur = (m[1] + m[2]).toLowerCase(); para = m[3] || null; }
+    else { const n = p.match(/^(\d+)/); para = n ? n[1] : null; }
+    if (cur && typeof SUTTAS !== "undefined" && SUTTAS[cur])
+      return `<a href="#/sutta/${cur}${para ? "/" + para : ""}">${esc(p)}</a>`;
+    return esc(p);
+  });
+  return `<div class="ref">📖 ${parts.join(" · ")}</div>`;
+}
+
+// ---------- หน้าพระสูตรเต็ม ----------
+function renderSutta(id, para) {
+  const st = SUTTAS[id];
+  titleEl.textContent = st.title;
+  backBtn.classList.remove("hidden");
+  gearBtn.classList.remove("hidden");
+  const body = st.paras.map(p => {
+    const exp = p.lines.some(l => l.expanded)
+      ? `<div class="exp-note">ต้นฉบับย่อส่วนนี้ไว้ (…pe…) แอปเติมให้เต็มแล้ว</div>` : "";
+    return `<section class="sutta-para${p.n === para ? " target" : ""}" id="p-${esc(p.n)}">
+      <div class="para-no">${esc(st.ref)}:${esc(p.n)}</div>
+      <div class="pali">${renderWords(p.lines.map(l => l.w))}</div>${exp}
+      <div class="thai">${esc(p.thai)}</div>
+    </section>`;
+  }).join("");
+  view.innerHTML = `
+    <div class="sutta-head">
+      <h2>${esc(st.title)}</h2>
+      <p>${esc(st.sub)}</p>
+      <p class="src">บาลีฉบับ SuttaCentral (ฐานข้อมูล tripitaka-mcp) · คำแปลภาษาชาวบ้าน ·
+        <a href="https://tripitaka-mcp.com/read/${esc(id)}" target="_blank" rel="noopener">ดูต้นฉบับออนไลน์</a></p>
+    </div>
+    ${body}
+    <div class="end-mark">๛</div>`;
+  const t = para && document.getElementById("p-" + para);
+  if (t) setTimeout(() => t.scrollIntoView({ block: "start" }), 0);
+  else window.scrollTo(0, 0);
 }
 
 // ---------- วันอุโบสถ ----------
-function thDate(d) {
-  return d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "short" });
+const pad2 = n => String(n).padStart(2, "0");
+function thDay(d) {
+  return d.toLocaleDateString("th-TH", { weekday: "short", day: "numeric", month: "short" });
 }
-function countdownText(n) {
-  return n === 1 ? "พรุ่งนี้" : `อีก ${n} วัน`;
+function thTime(d) {
+  const r = new Date(d.getTime() + 30000);       // ปัดเป็นนาทีที่ใกล้สุด
+  return `${pad2(r.getHours())}:${pad2(r.getMinutes())} น.`;
 }
+function thWhen(d) { return `${thDay(d)} ${thTime(d)}`; }
+function untilText(ms) {
+  const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
+  if (h >= 48) return `อีก ${Math.floor(h / 24)} วัน`;
+  if (h >= 24) return `อีก 1 วัน ${h - 24} ชม.`;
+  if (h >= 1) return `อีก ${h} ชม. ${m} นาที`;
+  return `อีก ${m} นาที`;
+}
+function periodLabel(p) { return p.days.map(d => d.label).join(" และ "); }
+
 function uposathaHomeCard() {
   if (typeof UPO === "undefined") return "";
   const st = UPO.status();
-  const nx = st.next[0];
-  const head = st.today
-    ? `<b>วันนี้วันอุโบสถ</b><span>${esc(st.today.label)}</span>`
-    : `<b>${countdownText(nx.inDays)} ถึงวันอุโบสถ</b><span>${esc(thDate(nx.date))} · ${esc(nx.label)}</span>`;
-  return `<button class="upo-card${st.today ? " is-today" : ""}" data-session="uposatha">
-    <span class="emoji">${st.today ? "🌕" : "🗓️"}</span>
-    <span class="meta">${head}</span>
+  const cur = st.current, nx = st.next[0];
+  const head = cur
+    ? `<b>${cur.phase.icon} อยู่ในวันอุโบสถ · ${esc(st.todayDay.label)}</b>
+       <span>ถึง ${esc(thWhen(cur.end))} · ${esc(untilText(cur.end - st.now))}</span>`
+    : `<b>${esc(untilText(nx.start - st.now))} ถึงวันอุโบสถ</b>
+       <span>เริ่ม ${esc(thWhen(nx.start))} · ${esc(periodLabel(nx))}</span>`;
+  return `<button class="upo-card${cur ? " is-today" : ""}" data-session="uposatha">
+    <span class="meta">${head}<span class="sub">บทสวด ข้อปฏิบัติ และพระสูตรเรื่องอุโบสถ</span></span>
     <span class="chev">›</span>
   </button>`;
 }
+
+function periodRow(p, now) {
+  const isNow = p.start <= now && now < p.end;
+  const days = p.days.map(d =>
+    `<div class="upo-day"><b>${esc(d.label)}</b> ${esc(thWhen(d.start))} ถึง ${esc(thWhen(d.end))}</div>`).join("");
+  const badge = isNow ? `<span class="upo-badge">กำลังถือ · เหลือ${esc(untilText(p.end - now).slice(3))}</span>`
+    : `<span class="upo-badge soft">${esc(untilText(p.start - now))}</span>`;
+  return `<li class="${isNow ? "now" : ""}">
+    <div class="upo-range">${p.phase.icon} เริ่ม <b>${esc(thWhen(p.start))}</b><br>จบ <b>${esc(thWhen(p.end))}</b> ${badge}</div>
+    ${days}
+    <div class="upo-phase">${esc(p.phase.name)} ${esc(thWhen(p.phase.time))}</div>
+  </li>`;
+}
+
 function uposathaPanel() {
   if (typeof UPO === "undefined") return "";
   const st = UPO.status(new Date(), 6);
-  const today = st.today
-    ? `<div class="upo-today">🌕 วันนี้วันอุโบสถ · ${esc(st.today.label)}</div>`
-    : `<div class="upo-today">ยังไม่ถึงวันอุโบสถ · ${countdownText(st.next[0].inDays)}</div>`;
-  const rows = st.next.map(d => `<li class="${d.main ? "main" : ""}">
-      <span class="when">${countdownText(d.inDays)}</span>
-      <span class="what">${esc(thDate(d.date))}<small>${esc(d.label)}</small></span>
-    </li>`).join("");
+  const list = (st.current ? [st.current] : []).concat(st.next);
   return `<section class="upo-panel">
-    ${today}
-    <ol class="upo-list">${rows}</ol>
-    <p class="upo-foot">นับวัน ๘, ๑๔, ๑๕ ของปักษ์ตามพระสูตร จากเวลาจันทร์เพ็ญและจันทร์ดับจริง ·
-      วันใหม่เริ่มตอนรุ่งอรุณ (๖ โมงเช้า) · อาจต่างจากปฏิทินไทยได้ ๑ วัน</p>
+    <div class="upo-today">${st.current ? "ตอนนี้อยู่ในวันอุโบสถ" : "ช่วงถืออุโบสถครั้งถัดไป"}</div>
+    <ol class="upo-list">${list.map(p => periodRow(p, st.now)).join("")}</ol>
+    <p class="upo-foot">วัน ๘, ๑๔, ๑๕ ของปักษ์ตามพระสูตร (AN 3.37, Snp 2.14) ·
+      ๘ ค่ำ คือวันที่ดวงจันทร์ครึ่งดวง ๑๕ ค่ำ คือวันจันทร์เพ็ญหรือจันทร์ดับ ถือรวม ๑๔ ค่ำ ก่อนหน้าด้วย ·
+      แต่ละวันนับจากค่ำ ๑๘:๐๐ ถึงค่ำวันรุ่งขึ้น ๑๘:๐๐ เพราะพระสูตรว่า "คืนนี้และวันนี้" (อิมัญจะ รัตติง อิมัญจะ ทิวะสัง) ·
+      เวลาข้างขึ้นข้างแรมคำนวณทางดาราศาสตร์ ตามเวลาของเครื่อง</p>
   </section>`;
 }
 
@@ -95,7 +165,7 @@ function renderHome() {
   const hour = new Date().getHours();
   const suggest = (hour >= 4 && hour < 15) ? "morning" : "night";
 
-  const cards = SESSIONS.map(s => {
+  const cards = SESSIONS.filter(s => s.id !== "uposatha").map(s => {
     const count = s.order.length;
     const hint = s.id === suggest ? " · แนะนำตอนนี้" : "";
     return `<button class="session-card" data-session="${s.id}">
@@ -146,7 +216,9 @@ function renderSession(id) {
       const ref = seg.ref ? refLink(seg.ref) : "";
       if (!seg.pali) return `<div class="segment guide"><div class="guide-text">${esc(seg.thai)}</div>${ref}</div>`;
       const isTodo = typeof TODO !== "undefined" && seg.pali === TODO;
-      const pali = `<div class="pali${isTodo ? " todo" : ""}">${esc(seg.pali)}</div>`;
+      const pali = seg.w
+        ? `<div class="pali">${renderWords(seg.w)}</div>`
+        : `<div class="pali${isTodo ? " todo" : ""}">${esc(seg.pali)}</div>`;
       const thai = seg.thai ? `<div class="thai">${esc(seg.thai)}</div>` : "";
       return `<div class="segment">${pali}${thai}${ref}</div>`;
     }).join("");
@@ -178,7 +250,12 @@ function closeControls() { controls.classList.remove("open"); scrim.classList.re
 gearBtn.addEventListener("click", () =>
   controls.classList.contains("open") ? closeControls() : openControls());
 scrim.addEventListener("click", closeControls);
-backBtn.addEventListener("click", () => location.hash = "");
+let navDepth = 0;   // จำนวนหน้าที่เปิดต่อกันในแอป (ใช้ย้อนกลับจากหน้าพระสูตร)
+window.addEventListener("hashchange", () => navDepth++);
+backBtn.addEventListener("click", () => {
+  if (location.hash.startsWith("#/sutta/") && navDepth > 0) history.back();
+  else location.hash = "";
+});
 
 document.getElementById("fsUp").addEventListener("click", () =>
   PREF.fs = Math.min(34, PREF.fs + 2));
@@ -188,11 +265,15 @@ document.querySelectorAll("[data-thai]").forEach(b =>
   b.addEventListener("click", () => PREF.thai = b.dataset.thai));
 document.querySelectorAll("[data-theme]").forEach(b =>
   b.addEventListener("click", () => PREF.theme = b.dataset.theme));
+document.querySelectorAll("[data-roman]").forEach(b =>
+  b.addEventListener("click", () => PREF.roman = b.dataset.roman));
 
 // ---------- Router ----------
 function route() {
   const h = location.hash.replace(/^#\/?/, "");
-  if (h && SESSIONS.some(s => s.id === h)) renderSession(h);
+  const m = h.match(/^sutta\/([a-z0-9.]+)(?:\/(\d+))?$/);
+  if (m && typeof SUTTAS !== "undefined" && SUTTAS[m[1]]) { closeControls(); renderSutta(m[1], m[2] || null); }
+  else if (h && SESSIONS.some(s => s.id === h)) renderSession(h);
   else renderHome();
 }
 window.addEventListener("hashchange", route);

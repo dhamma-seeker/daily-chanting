@@ -101,3 +101,21 @@ if __name__ == "__main__":
     for line in sys.stdin:
         line = line.rstrip("\n")
         print(convert(line) if line.strip() else "")
+
+
+def word_pairs(line):
+    """แยกบรรทัดบาลีโรมันเป็นคู่ [อักษรไทย, โรมัน] ทีละคำ สำหรับวางเทียบคำต่อคำ"""
+    line = unicodedata.normalize("NFC", line).replace("ṃ", "ṁ").replace("…pe…", " …pe… ")
+    line = re.sub(r"[—–]", " ", line)
+    out = []
+    for tok in line.split():
+        if tok == "…pe…":
+            out.append(["ฯลฯ", "…pe…"]); continue
+        core = re.sub(r"[‘’“”\"]", "", tok.lower())
+        core = re.sub(r"[,;:.?!…\d-]", "", core)
+        if not core:
+            if tok.strip(".") and not re.search(r"\d", tok):
+                out.append(["…", tok])
+            continue
+        out.append([word2thai(core), tok])
+    return out

@@ -13,11 +13,12 @@
 // ============================================================
 
 const UPO = (() => {
-  const DAWN_HOUR = 6;
+  const EVENING_HOUR = 18;
   const DAY = 86400000;
   const rad = d => d * Math.PI / 180;
 
-  // JDE ของจันทร์ดับ (k จำนวนเต็ม) หรือจันทร์เพ็ญ (k ลงท้าย .5)
+  // JDE ของข้างขึ้นข้างแรมแต่ละช่วง (k = จำนวนเต็ม + 0 จันทร์ดับ, .25 ขึ้น ๘ ค่ำ (ครึ่งดวง),
+  // .5 จันทร์เพ็ญ, .75 แรม ๘ ค่ำ (ครึ่งดวง))
   function phaseJDE(k) {
     const T = k / 1236.85, T2 = T * T, T3 = T2 * T, T4 = T3 * T;
     let jde = 2451550.09766 + 29.530588861 * k + 0.00015437 * T2
@@ -29,21 +30,38 @@ const UPO = (() => {
     const F = rad(160.7108 + 390.67050284 * k - 0.0016118 * T2 - 0.00000227 * T3
       + 0.000000011 * T4);
     const O = rad(124.7746 - 1.56375588 * k + 0.0020672 * T2 + 0.00000215 * T3);
-    const s = Math.sin;
-    const full = Math.abs(k % 1) > 0.25;
-    const c = full
-      ? [-0.40614, 0.17302, 0.01614, 0.01043, 0.00734, -0.00515, 0.00209]
-      : [-0.40720, 0.17241, 0.01608, 0.01039, 0.00739, -0.00514, 0.00208];
-    jde += c[0] * s(Mp) + c[1] * E * s(M) + c[2] * s(2 * Mp) + c[3] * s(2 * F)
-      + c[4] * E * s(Mp - M) + c[5] * E * s(Mp + M) + c[6] * E * E * s(2 * M)
-      - 0.00111 * s(Mp - 2 * F) - 0.00057 * s(Mp + 2 * F)
-      + 0.00056 * E * s(2 * Mp + M) - 0.00042 * s(3 * Mp)
-      + 0.00042 * E * s(M + 2 * F) + 0.00038 * E * s(M - 2 * F)
-      - 0.00024 * E * s(2 * Mp - M) - 0.00017 * s(O)
-      - 0.00007 * s(Mp + 2 * M) + 0.00004 * s(2 * Mp - 2 * F) + 0.00004 * s(3 * M)
-      + 0.00003 * s(Mp + M - 2 * F) + 0.00003 * s(2 * Mp + 2 * F)
-      - 0.00003 * s(Mp + M + 2 * F) + 0.00003 * s(Mp - M + 2 * F)
-      - 0.00002 * s(Mp - M - 2 * F) - 0.00002 * s(3 * Mp + M) + 0.00002 * s(4 * Mp);
+    const s = Math.sin, co = Math.cos;
+    const frac = ((k % 1) + 1) % 1;
+    if (frac < 0.1 || Math.abs(frac - 0.5) < 0.1) {
+      const full = frac > 0.25;
+      const c = full
+        ? [-0.40614, 0.17302, 0.01614, 0.01043, 0.00734, -0.00515, 0.00209]
+        : [-0.40720, 0.17241, 0.01608, 0.01039, 0.00739, -0.00514, 0.00208];
+      jde += c[0] * s(Mp) + c[1] * E * s(M) + c[2] * s(2 * Mp) + c[3] * s(2 * F)
+        + c[4] * E * s(Mp - M) + c[5] * E * s(Mp + M) + c[6] * E * E * s(2 * M)
+        - 0.00111 * s(Mp - 2 * F) - 0.00057 * s(Mp + 2 * F)
+        + 0.00056 * E * s(2 * Mp + M) - 0.00042 * s(3 * Mp)
+        + 0.00042 * E * s(M + 2 * F) + 0.00038 * E * s(M - 2 * F)
+        - 0.00024 * E * s(2 * Mp - M) - 0.00017 * s(O)
+        - 0.00007 * s(Mp + 2 * M) + 0.00004 * s(2 * Mp - 2 * F) + 0.00004 * s(3 * M)
+        + 0.00003 * s(Mp + M - 2 * F) + 0.00003 * s(2 * Mp + 2 * F)
+        - 0.00003 * s(Mp + M + 2 * F) + 0.00003 * s(Mp - M + 2 * F)
+        - 0.00002 * s(Mp - M - 2 * F) - 0.00002 * s(3 * Mp + M) + 0.00002 * s(4 * Mp);
+    } else {
+      // ครึ่งดวง (first / last quarter)
+      jde += -0.62801 * s(Mp) + 0.17172 * E * s(M) - 0.01183 * E * s(Mp + M)
+        + 0.00862 * s(2 * Mp) + 0.00804 * s(2 * F) + 0.00454 * E * s(Mp - M)
+        + 0.00204 * E * E * s(2 * M) - 0.0018 * s(Mp - 2 * F) - 0.0007 * s(Mp + 2 * F)
+        - 0.0004 * s(3 * Mp) - 0.00034 * E * s(2 * Mp - M) + 0.00032 * E * s(M + 2 * F)
+        + 0.00032 * E * s(M - 2 * F) - 0.00028 * E * E * s(Mp + 2 * M)
+        + 0.00027 * E * s(2 * Mp + M) - 0.00017 * s(O) - 0.00005 * s(Mp - M - 2 * F)
+        + 0.00004 * s(2 * Mp + 2 * F) - 0.00004 * s(Mp + M + 2 * F) + 0.00004 * s(Mp - 2 * M)
+        + 0.00003 * s(Mp + M - 2 * F) + 0.00003 * s(3 * M) + 0.00002 * s(2 * Mp - 2 * F)
+        + 0.00002 * s(Mp - M + 2 * F) - 0.00002 * s(3 * Mp + M);
+      const W = 0.00306 - 0.00038 * E * co(M) + 0.00026 * co(Mp) - 0.00002 * co(Mp - M)
+        + 0.00002 * co(Mp + M) + 0.00002 * co(2 * F);
+      jde += frac < 0.5 ? W : -W;
+    }
     // ส่วนแก้จากดาวเคราะห์ (A1–A14)
     const A = [
       [299.77, 0.107408, -0.009173, 0.000325], [251.88, 0.016321, 0, 0.000165],
@@ -61,61 +79,60 @@ const UPO = (() => {
   // JDE (เวลา TT) -> Date (UTC) ลบ ΔT ราว 69 วินาที
   const jdeToDate = jde => new Date((jde - 2440587.5) * DAY - 69000);
 
-  // ลำดับวัน (นับตามรุ่งอรุณของเวลาเครื่อง)
-  function dayIndex(date) {
-    const d = new Date(date.getTime() - DAWN_HOUR * 3600000);
-    return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY);
+  // ช่วงอุโบสถ: เริ่มค่ำ ๑๘:๐๐ ถึงค่ำวันรุ่งขึ้น ๑๘:๐๐ ตามเวลาเครื่อง
+  // ("อิมัญจะ รัตติง อิมัญจะ ทิวะสัง" คืนก่อน แล้ววัน)
+  function periodOf(t) {
+    const d = new Date(t.getTime());
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), EVENING_HOUR);
+    if (d < start) start.setDate(start.getDate() - 1);
+    return start;   // เวลาเริ่มของช่วงที่ t ตกอยู่
   }
-  const indexToDate = i => {
-    const u = new Date(i * DAY);
-    return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate(), 12);
-  };
-
-  // วันจันทร์เพ็ญ/ดับรอบ ๆ วันที่ให้มา
-  function phasesAround(date) {
-    const yrs = (date.getTime() - Date.UTC(2000, 0, 6)) / (365.25 * DAY);
-    const k0 = Math.floor(yrs * 12.3685) - 2;
-    const out = [];
-    for (let k = k0; k <= k0 + 8; k += 0.5) {
-      const t = jdeToDate(phaseJDE(k));
-      out.push({ full: k % 1 !== 0, time: t, day: dayIndex(t) });
-    }
-    return out;
-  }
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
   const TH = n => String(n).replace(/\d/g, d => "๐๑๒๓๔๕๖๗๘๙"[d]);
+  const NAME = {
+    0: { side: "แรม", moon: "จันทร์ดับ", icon: "🌑" },
+    0.25: { side: "ขึ้น", moon: "ครึ่งดวง ข้างขึ้น", icon: "🌓" },
+    0.5: { side: "ขึ้น", moon: "จันทร์เพ็ญ", icon: "🌕" },
+    0.75: { side: "แรม", moon: "ครึ่งดวง ข้างแรม", icon: "🌗" },
+  };
 
-  // วันอุโบสถทั้งหมดในช่วงนั้น เรียงตามวัน
-  function uposathaDays(date) {
-    const ph = phasesAround(date);
-    const days = [];
-    for (let i = 1; i < ph.length; i++) {
-      const prev = ph[i - 1], cur = ph[i];
-      const side = cur.full ? "ขึ้น" : "แรม";
-      const len = cur.day - prev.day;            // จำนวนวันของปักษ์นี้
-      const end = cur.full ? "วันจันทร์เพ็ญ" : "วันจันทร์ดับ";
-      days.push({ day: prev.day + 8, label: `${side} ${TH(8)} ค่ำ`, main: false });
-      if (len >= 15) {
-        days.push({ day: cur.day - 1, label: `${side} ${TH(14)} ค่ำ`, main: false });
-        days.push({ day: cur.day, label: `${side} ${TH(15)} ค่ำ · ${end}`, main: true, time: cur.time });
+  // ช่วงอุโบสถรอบวันที่ให้มา เรียงตามเวลา
+  // แต่ละช่วง = { start, end, days:[{start,end,label}], phase:{time,name,icon} }
+  function periods(date) {
+    const yrs = (date.getTime() - Date.UTC(2000, 0, 6)) / (365.25 * DAY);
+    const k0 = Math.floor(yrs * 12.3685) - 1;
+    const out = [];
+    for (let k = k0; k <= k0 + 4; k += 0.25) {
+      const frac = Math.round((((k % 1) + 1) % 1) * 4) / 4;
+      const time = jdeToDate(phaseJDE(k));
+      const p = periodOf(time);
+      const n = NAME[frac];
+      let days;
+      if (frac === 0.25 || frac === 0.75) {
+        days = [{ start: p, end: addDays(p, 1), label: `${n.side} ${TH(8)} ค่ำ` }];
       } else {
-        days.push({ day: cur.day, label: `${side} ${TH(14)} ค่ำ · ${end} (ปักษ์ขาด)`, main: true, time: cur.time });
+        days = [
+          { start: addDays(p, -1), end: p, label: `${n.side} ${TH(14)} ค่ำ` },
+          { start: p, end: addDays(p, 1), label: `${n.side} ${TH(15)} ค่ำ` },
+        ];
       }
+      out.push({ start: days[0].start, end: days[days.length - 1].end, days,
+        phase: { time, name: n.moon, icon: n.icon } });
     }
-    return days.sort((a, b) => a.day - b.day);
+    return out.sort((a, b) => a.start - b.start);
   }
 
-  // สถานะวันนี้ + วันอุโบสถถัดไป n วัน
+  // สถานะ ณ ตอนนี้ + ช่วงอุโบสถถัดไป n ช่วง
   function status(now = new Date(), n = 6) {
-    const today = dayIndex(now);
-    const all = uposathaDays(now);
-    const todayUpo = all.find(d => d.day === today) || null;
-    const next = all.filter(d => d.day > today).slice(0, n)
-      .map(d => ({ ...d, inDays: d.day - today, date: indexToDate(d.day) }));
-    return { today: todayUpo && { ...todayUpo, date: indexToDate(today) }, next };
+    const all = periods(now);
+    const current = all.find(p => p.start <= now && now < p.end) || null;
+    const todayDay = current && current.days.find(d => d.start <= now && now < d.end);
+    const next = all.filter(p => p.start > now).slice(0, n);
+    return { now, current, todayDay, next };
   }
 
-  return { status, phaseJDE, jdeToDate, uposathaDays, dayIndex, TH };
+  return { status, periods, phaseJDE, jdeToDate, TH };
 })();
 
 if (typeof module !== "undefined") module.exports = UPO;

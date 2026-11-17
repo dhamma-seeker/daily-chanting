@@ -1,6 +1,6 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
 // *** เวลามีการแก้ไฟล์ ให้เปลี่ยนเลข CACHE เพื่อให้โหลดใหม่ ***
-const CACHE = "suadmon-v6";
+const CACHE = "suadmon-v7";
 
 const ASSETS = [
   "./",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./styles.css",
   "./data.js",
   "./uposatha.js",
+  "./suttas.js",
   "./uposatha-cal.js",
   "./app.js",
   "./manifest.webmanifest",
@@ -42,6 +43,7 @@ self.addEventListener("fetch", (e) => {
   // network-first สำหรับ data.js และ HTML (ให้เนื้อหาใหม่ขึ้นเร็ว)
   const url = new URL(req.url);
   const freshFirst = url.pathname.endsWith("data.js") || url.pathname.endsWith("uposatha.js") ||
+                     url.pathname.endsWith("suttas.js") || url.pathname.endsWith("uposatha-cal.js") ||
                      url.pathname.endsWith(".html") ||
                      url.pathname.endsWith("/");
 

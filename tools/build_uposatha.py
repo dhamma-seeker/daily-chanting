@@ -2,7 +2,7 @@
 import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from pali2thai import convert
+from pali2thai import word_pairs
 from uposatha_src import CHANTS, SESSION
 
 
@@ -12,8 +12,9 @@ def seg(t):
     if t[0] == "guide":
         return {"pali": "", "thai": t[1], "ref": t[2]}
     ref, pali, thai = t
-    lines = [convert(l) for l in pali.split("\n")]
-    return {"pali": "\n".join(lines), "thai": thai, "ref": ref}
+    w = [word_pairs(l) for l in pali.split("\n")]
+    return {"pali": "\n".join(" ".join(p[0] for p in line) for line in w),
+            "w": w, "thai": thai, "ref": ref}
 
 
 out = {cid: {"title": c["title"], "note": c.get("note", ""),
