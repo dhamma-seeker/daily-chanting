@@ -5,3 +5,4 @@
 # เครื่องมือ/ระบบ
 .DS_Store
 .claude/
+__pycache__/
