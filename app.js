@@ -37,6 +37,54 @@ function esc(s) {
   return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
 
+// ---------- อ้างอิงพระสูตร ----------
+// "AN 3.70:4.4–4.5 · 5.2" -> ลิงก์ไป tripitaka-mcp.com ที่ท่อนแรก
+function refLink(ref) {
+  const m = ref.match(/^(AN|SN|MN|DN|Snp)\s*([\d.]+)(?::([\d.]+))?/);
+  if (!m) return `<div class="ref">${esc(ref)}</div>`;
+  const id = (m[1] + m[2]).toLowerCase();
+  const anchor = m[3] ? `#${id}:${m[3]}` : "";
+  return `<div class="ref"><a href="https://tripitaka-mcp.com/read/${id}${anchor}" target="_blank" rel="noopener">${esc(ref)}</a></div>`;
+}
+
+// ---------- วันอุโบสถ ----------
+function thDate(d) {
+  return d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "short" });
+}
+function countdownText(n) {
+  return n === 1 ? "พรุ่งนี้" : `อีก ${n} วัน`;
+}
+function uposathaHomeCard() {
+  if (typeof UPO === "undefined") return "";
+  const st = UPO.status();
+  const nx = st.next[0];
+  const head = st.today
+    ? `<b>วันนี้วันอุโบสถ</b><span>${esc(st.today.label)}</span>`
+    : `<b>${countdownText(nx.inDays)} ถึงวันอุโบสถ</b><span>${esc(thDate(nx.date))} · ${esc(nx.label)}</span>`;
+  return `<button class="upo-card${st.today ? " is-today" : ""}" data-session="uposatha">
+    <span class="emoji">${st.today ? "🌕" : "🗓️"}</span>
+    <span class="meta">${head}</span>
+    <span class="chev">›</span>
+  </button>`;
+}
+function uposathaPanel() {
+  if (typeof UPO === "undefined") return "";
+  const st = UPO.status(new Date(), 6);
+  const today = st.today
+    ? `<div class="upo-today">🌕 วันนี้วันอุโบสถ · ${esc(st.today.label)}</div>`
+    : `<div class="upo-today">ยังไม่ถึงวันอุโบสถ · ${countdownText(st.next[0].inDays)}</div>`;
+  const rows = st.next.map(d => `<li class="${d.main ? "main" : ""}">
+      <span class="when">${countdownText(d.inDays)}</span>
+      <span class="what">${esc(thDate(d.date))}<small>${esc(d.label)}</small></span>
+    </li>`).join("");
+  return `<section class="upo-panel">
+    ${today}
+    <ol class="upo-list">${rows}</ol>
+    <p class="upo-foot">นับวัน ๘, ๑๔, ๑๕ ของปักษ์ตามพระสูตร จากเวลาจันทร์เพ็ญและจันทร์ดับจริง ·
+      วันใหม่เริ่มตอนรุ่งอรุณ (๖ โมงเช้า) · อาจต่างจากปฏิทินไทยได้ ๑ วัน</p>
+  </section>`;
+}
+
 // ---------- หน้าแรก ----------
 function renderHome() {
   titleEl.textContent = "บทสวดมนต์ประจำวัน";
@@ -63,6 +111,7 @@ function renderHome() {
       <h2>สวดมนต์ประจำวัน</h2>
       <p>บาลี แล้วตามด้วยคำแปลไทย</p>
     </div>
+    ${uposathaHomeCard()}
     <div class="session-grid">${cards}</div>
     <div class="home-note">
       เพิ่มลงหน้าจอโฮม: บน iPhone/iPad กดปุ่มแชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม” ·
@@ -93,10 +142,13 @@ function renderSession(id) {
     if (!c) return "";
     const note = c.note ? `<p class="chant-note">${esc(c.note)}</p>` : "";
     const segs = c.segments.map(seg => {
+      if (seg.head) return `<h4 class="seg-head">${esc(seg.head)}</h4>`;
+      const ref = seg.ref ? refLink(seg.ref) : "";
+      if (!seg.pali) return `<div class="segment guide"><div class="guide-text">${esc(seg.thai)}</div>${ref}</div>`;
       const isTodo = typeof TODO !== "undefined" && seg.pali === TODO;
       const pali = `<div class="pali${isTodo ? " todo" : ""}">${esc(seg.pali)}</div>`;
       const thai = seg.thai ? `<div class="thai">${esc(seg.thai)}</div>` : "";
-      return `<div class="segment">${pali}${thai}</div>`;
+      return `<div class="segment">${pali}${thai}${ref}</div>`;
     }).join("");
     return `<section class="chant" id="c-${i}">
       <div class="chant-head"><span class="num">${i + 1}</span><h3>${esc(c.title)}</h3></div>
@@ -105,6 +157,7 @@ function renderSession(id) {
   }).join("");
 
   view.innerHTML = `
+    ${s.id === "uposatha" ? uposathaPanel() : ""}
     <nav class="toc"><ol>${toc}</ol></nav>
     ${body}
     <div class="end-mark">๛</div>`;
