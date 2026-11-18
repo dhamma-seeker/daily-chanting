@@ -22,7 +22,7 @@ for cid in ORDER + NIGHTLY:
 out = {cid: {"title": c["title"], "note": c.get("note", ""),
              "segments": [seg(t) for t in c["segments"]]} for cid, c in CHANTS.items()}
 js = ("// ============================================================\n"
-      "//  บทสวดก่อนนอน (และ นโม ที่ใช้ร่วมทุกหมวด)  ⚠️ ไฟล์นี้สร้างอัตโนมัติ อย่าแก้ตรงนี้\n"
+      "//  บทสวดก่อนนอน และบทที่ใช้ร่วม/สวดเช้า (นโม, โมรปริตร)  ⚠️ ไฟล์นี้สร้างอัตโนมัติ อย่าแก้ตรงนี้\n"
       "//  แก้ที่ tools/night_src.py แล้วรัน: python3 -I tools/build_night.py\n"
       "// ============================================================\n\n"
       f"Object.assign(CHANTS, {json.dumps(out, ensure_ascii=False, indent=2)});\n\n"
