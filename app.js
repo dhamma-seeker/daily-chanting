@@ -330,6 +330,12 @@ function dayList(per, now, live) {
   return per.days.length > 3 ? `<details class="upo-more"><summary>ดูทุกวัน (${per.days.length} วัน)</summary>${rows}</details>` : rows;
 }
 
+// ทางเข้าโหมด "ระลึก ๕ ประการ · ใจผ่องใส" (ใต้การ์ดดวงจันทร์ และในบท "ระลึก ๕ ประการ ชำระใจ")
+function anEntryHTML(title = "ระลึกทีละข้อ") {
+  return `<a class="an-entry" href="#/anussati"><span class="an-mini" aria-hidden="true"></span>
+    <span class="meta"><b>${esc(title)}</b><span>ใจผ่องใส · ระลึกถึงพระพุทธ พระธรรม พระสงฆ์ ศีล เทวดา</span></span>${ICON.chev}</a>`;
+}
+
 function uposathaPanel() {
   if (typeof UPO === "undefined") return "";
   const st = UPO.status(new Date(), 6);
@@ -373,6 +379,7 @@ function uposathaPanel() {
       <span class="tag soon">${esc(untilText(p.start - st.now))}</span></li>`;
   }).join("");
   return `${hero}
+    ${anEntryHTML("ระลึก ๕ ประการ")}
     <h2 class="section-label">ครั้งต่อ ๆ ไป</h2>
     <ul class="later card">${later}</ul>
     <details class="howto card">
@@ -641,7 +648,7 @@ function renderSession(id, { keep = false } = {}) {
     const segs = c.segments.map(seg => seg.head ? `<h3 class="seg-head">${esc(seg.head)}</h3>` : segmentHTML(seg)).join("");
     return `<section class="chant" id="c-${i}">
       <div class="chant-head"><span class="of">บทที่ ${i + 1} จาก ${n}</span><h2>${esc(c.title)}</h2>${note}</div>
-      ${cid === "uposatha-anussati" ? `<a class="an-entry" href="#/anussati"><span class="an-mini" aria-hidden="true"></span><span class="meta"><b>ระลึกทีละข้อ</b><span>ใจผ่องใส · ดวงแก้วใสขึ้นทีละคุณ</span></span>${ICON.chev}</a>` : ""}
+      ${cid === "uposatha-anussati" ? anEntryHTML() : ""}
       ${segs}
     </section>`;
   }).join("");
