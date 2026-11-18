@@ -183,7 +183,7 @@ body {
 }
 .chant-head .num {
   flex: none;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent);
   border-radius: 999px;
   min-width: 24px;
@@ -277,7 +277,7 @@ body.hide-thai .segment .pali { }
   font-size: 15px;
   cursor: pointer;
 }
-.seg-ctl button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.seg-ctl button.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .seg-ctl button:active { transform: scale(.95); }
 
 .scrim {
@@ -325,7 +325,7 @@ body.hide-thai .segment .pali { }
 .upo-range { font-size: 15px; line-height: 1.6; }
 .upo-badge {
   display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px;
-  background: var(--accent); color: #fff; font-size: 12.5px; vertical-align: 1px;
+  background: var(--accent); color: var(--on-accent); font-size: 12.5px; vertical-align: 1px;
 }
 .upo-badge.soft { background: var(--surface-2); color: var(--accent); }
 .upo-day { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; }
