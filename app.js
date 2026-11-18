@@ -601,7 +601,7 @@ function renderHome({ keep = false } = {}) {
 
   view.innerHTML = `
     <header class="brand">
-      <span class="logo">${ICON.lotus}</span>
+      <img class="logo" src="icon.svg?v=2" alt="" width="48" height="48">
       <div class="txt"><h1>${APP_TITLE}</h1><p>เป็นฆราวาส ตามพระสูตร</p></div>
       <a class="iconbtn aa" href="#/settings" aria-label="ตั้งค่าการอ่าน">Aa</a>
     </header>

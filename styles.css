@@ -179,10 +179,7 @@ body.has-fab .wrap { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); 
 
 /* ---------- Home ---------- */
 .brand { display: flex; align-items: center; gap: 12px; padding: 6px 0 4px; }
-.brand .logo {
-  width: 44px; height: 44px; border-radius: 12px; flex: none;
-  display: grid; place-items: center; background: var(--primary); color: var(--on-primary);
-}
+.brand .logo { width: 48px; height: 48px; flex: none; display: block; }
 .brand .logo svg.i { width: 26px; height: 26px; stroke-width: 1.75; }
 .brand .txt { flex: 1; min-width: 0; }
 .brand h1 { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.3; }
