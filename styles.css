@@ -453,15 +453,17 @@ body.hide-pali.hide-roman .sutta-para .pali + .thai { border-top: 0; padding-top
 .set-preview .segment { margin: 0; padding: 16px; max-height: 32vh; overflow: auto; }
 .set-preview .lbl .editing { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--primary); }
 .set-preview .lbl .editing::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--gold); }
-/* ชั้นที่กำลังปรับ: ไฮไลต์ ชั้นอื่นจางลง (ใช้ box-shadow แทน padding เพื่อไม่ให้ข้อความขยับ) */
+/* ชั้นที่กำลังปรับ: ไฮไลต์ขึ้นทันที ชั้นอื่นจางลง แล้วค่อย ๆ กลับปกติเมื่อเอาคลาส flash ออก
+   (ใช้ box-shadow แทน padding เพื่อไม่ให้ข้อความขยับ) */
 .set-preview { --hl: color-mix(in srgb, var(--gold) 22%, transparent); }
-.set-preview .w .t, .set-preview .w .r, .set-preview .thai { transition: opacity .2s ease, background-color .2s ease, box-shadow .2s ease; border-radius: 4px; }
-.set-preview[data-edit="pali"] .w .t,
-.set-preview[data-edit="roman"] .w .r,
-.set-preview[data-edit="thai"] .thai { background: var(--hl); box-shadow: 0 0 0 3px var(--hl); }
-.set-preview[data-edit="pali"] .w .r, .set-preview[data-edit="pali"] .thai,
-.set-preview[data-edit="roman"] .w .t, .set-preview[data-edit="roman"] .thai,
-.set-preview[data-edit="thai"] .w .t, .set-preview[data-edit="thai"] .w .r { opacity: .35; }
+.set-preview .w .t, .set-preview .w .r, .set-preview .thai { transition: opacity .9s ease, background-color .9s ease, box-shadow .9s ease; border-radius: 4px; }
+.set-preview.flash .w .t, .set-preview.flash .w .r, .set-preview.flash .thai { transition: none; }
+.set-preview.flash[data-edit="pali"] .w .t,
+.set-preview.flash[data-edit="roman"] .w .r,
+.set-preview.flash[data-edit="thai"] .thai { background: var(--hl); box-shadow: 0 0 0 3px var(--hl); }
+.set-preview.flash[data-edit="pali"] .w .r, .set-preview.flash[data-edit="pali"] .thai,
+.set-preview.flash[data-edit="roman"] .w .t, .set-preview.flash[data-edit="roman"] .thai,
+.set-preview.flash[data-edit="thai"] .w .t, .set-preview.flash[data-edit="thai"] .w .r { opacity: .35; }
 .seg-ctl {
   display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 4px;
   padding: 4px; border-radius: 14px; background: var(--surface-2);

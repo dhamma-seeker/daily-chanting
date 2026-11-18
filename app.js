@@ -560,7 +560,9 @@ function renderSutta(id, para) {
 
 // ---------- หน้าตั้งค่าการอ่าน ----------
 let setTab = "pali";
+let flashedTab = null, flashTimer = 0;
 function renderSettings() {
+  flashedTab = null;
   setChrome({ title: "ตั้งค่าการอ่าน", gear: false });
   const sample = {
     w: [[["อัฏฐะมิยัง", "Aṭṭhamiyaṁ,"], ["ภิกขะเว", "bhikkhave,"], ["ปักขัสสะ", "pakkhassa"], ["จะตุนนัง", "catunnaṁ"], ["มะหาราชานัง", "mahārājānaṁ"]]],
@@ -584,6 +586,15 @@ function renderSettingsBody() {
   const L = LAYERS[setTab], v = PREFS[setTab];
   const pv = document.querySelector(".set-preview");
   if (pv) pv.dataset.edit = setTab;
+  // ไฮไลต์ชั่วคราว เฉพาะตอนเข้าหน้าครั้งแรกและตอนเปลี่ยนแท็บ (ปรับค่าอื่นในแท็บเดิมไม่กะพริบซ้ำ)
+  if (pv && flashedTab !== setTab) {
+    flashedTab = setTab;
+    pv.classList.remove("flash");
+    void pv.offsetWidth;
+    pv.classList.add("flash");
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => pv.classList.remove("flash"), 1200);
+  }
   const el = document.getElementById("editingLbl");
   if (el) el.textContent = v.on ? `กำลังปรับ: ${L.label}` : `${L.label} ซ่อนอยู่`;
   const radio = (k, val, on, label, extra = "") =>
