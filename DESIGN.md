@@ -5,6 +5,7 @@
 
 - Canvas ดีไซน์ตั้งต้น (Claude Design): https://claude.ai/artifact/SF2vixGQ1R4Mq7Mq5aJUBK
   เป็นภาพตั้งต้นเท่านั้น หลังทำโค้ดจริงมีการปรับเพิ่มหลายจุดที่ไม่ได้กลับไปแก้ใน canvas
+- การเคลื่อนไหวและแสง (แสงทอง / ฉัพพรรณรังสี): ดู [MOTION.md](MOTION.md)
 - ที่มาของระบบ: skill [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
   product = Church/Religious Organization → style **Accessible & Ethical + Soft UI Evolution**
 
