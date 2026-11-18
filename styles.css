@@ -120,8 +120,11 @@ button:disabled { cursor: not-allowed; opacity: .4; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 svg.i { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
+/* ลดการเคลื่อนไหว: ปิดอนิเมชันทั้งหมด ยกเว้นชิ้นที่มี data-fade ซึ่งเปลี่ยนเป็นแบบจาง/เรือง (opacity) ไม่มีการขยับ
+   ตามแนวทางของ Apple: เมื่อลดการเคลื่อนไหว ให้ใช้การจางแทนการเคลื่อนที่ — ดูท้ายไฟล์ */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+  *:not([data-fade]), *:not([data-fade])::before, *:not([data-fade])::after { animation: none !important; }
 }
 
 /* ---------- Top bar ---------- */
@@ -622,7 +625,8 @@ body.chant-mode { overflow: hidden; }
   box-shadow: 0 0 24px rgba(253, 230, 138, .25), inset 0 0 24px rgba(253, 230, 138, .15);
   animation: breathe 8s ease-in-out 5.6s 3;
 }
-.cm-done .still-note { font-size: 16px; color: #FDE68A; min-height: 1.5em; opacity: 0; animation: stillNote 24.6s 5.4s both; }
+.cm-done .still-note { font-size: 17px; font-weight: 500; color: #FDE68A; min-height: 1.5em; opacity: 0; animation: none; transition: opacity .6s ease; }
+.cm-done .still-note.on { opacity: 1; }
 
 @keyframes petalOpen {
   from { transform: rotate(0deg) scale(.15); opacity: 0; }
@@ -645,7 +649,6 @@ body.chant-mode { overflow: hidden; }
   50% { transform: scale(1.12); opacity: 1; }
   100% { transform: scale(.62); opacity: 0; }
 }
-@keyframes stillNote { 0% { opacity: 0; } 3% { opacity: 1; } 96% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } }
 
 /* ---------- Toast ---------- */
@@ -660,8 +663,17 @@ body.chant-mode { overflow: hidden; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .cm-done .still-note { opacity: 1; }
+  /* แบบจาง: จังหวะเดียวกับปกติ แต่เปลี่ยนแค่ความทึบ ไม่ขยาย ไม่หมุน */
+  .bloom .lotus[data-fade], .bloom .core[data-fade] { animation: fadeOnly 1.2s both; }
+  .bloom .glow[data-fade] { animation: glowFade 1.6s .9s both; }
+  .bloom .rays[data-fade] { animation: raysFade 3.4s 2.2s both; }
+  .bloom .breath[data-fade] { transform: scale(.95); animation: breathFade 8s ease-in-out 5.6s 3; }
+  .arrive .moon-wrap[data-fade]::after { inset: -25%; animation: glowFade 1.6s .3s both; }
 }
+@keyframes fadeOnly { from { opacity: 0; } }
+@keyframes glowFade { 0% { opacity: 0; } 35% { opacity: .9; } 100% { opacity: 0; } }
+@keyframes raysFade { 0% { opacity: 0; } 10% { opacity: .8; } 60% { opacity: .8; } 100% { opacity: 0; } }
+@keyframes breathFade { 0% { opacity: .15; } 50% { opacity: 1; } 100% { opacity: .15; } }
 
 /* ---------- นับถอยหลัง ---------- */
 .cd { font-variant-numeric: tabular-nums; letter-spacing: .01em; white-space: nowrap; }
@@ -709,7 +721,7 @@ body.chant-mode { overflow: hidden; }
 .arrive .moon-wrap::after { animation: glowOut 1.6s .5s both; }
 .arrive .live-badge, .arrive .big, .arrive h2 { animation: fadeUp .8s .9s both; }
 /* ประกาย: ข้ามวัน */
-.glint .tl-seg.now .tl-bar { animation: glintBar 1.8s ease-out both; }
+.glint .tl-seg.now .tl-bar { animation: glintBar 1.8s ease-out both; }   /* เงาเรืองอย่างเดียว ไม่ขยับ จึงเล่นได้แม้ลดการเคลื่อนไหว (data-fade) */
 @keyframes coreIn { from { transform: scale(.6); opacity: 0; } }
 @keyframes glintBar {
   0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }

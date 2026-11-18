@@ -263,7 +263,7 @@ function dayTimeline(per, now) {
     const pct = frac(+d.start, +d.end, +now) * 100;
     const mark = isNow ? `<span class="tl-now" data-mark data-s="${+d.start}" data-e="${+d.end}" style="left:${pct}%"><span class="tl-dot"></span>${compact ? "" : `<span class="tl-tag" style="transform:translateX(-${pct}%)">ตอนนี้</span>`}</span>` : "";
     return `<div class="tl-seg${isNow ? " now" : ""}">
-      <div class="tl-bar"><span class="tl-fill" data-fill data-s="${+d.start}" data-e="${+d.end}" style="width:${pct}%"></span>${mark}</div>
+      <div class="tl-bar" data-fade><span class="tl-fill" data-fill data-s="${+d.start}" data-e="${+d.end}" style="width:${pct}%"></span>${mark}</div>
       ${compact ? "" : `<span class="tl-lbl">${esc(d.label)}</span>`}</div>`;
   }).join("");
   const k = per.days.findIndex(d => d.start <= now && now < d.end);
@@ -279,7 +279,7 @@ function uposathaHomeCard() {
     const L = liveInfo(st), cur = st.current;
     return `<a class="upo-live${fxClass()}" href="#/uposatha">
       <div class="top">
-        <span class="moon-wrap">${moonSVG(L.p, 76, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
+        <span class="moon-wrap" data-fade>${moonSVG(L.p, 76, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
         <div class="meta">
           <span class="live-badge"><span class="dot" aria-hidden="true"></span>กำลังถืออุโบสถ</span>
           <span class="big">${esc(L.title)}</span>
@@ -338,7 +338,7 @@ function uposathaPanel() {
     const L = liveInfo(st), cur = st.current;
     hero = `<section class="upo-hero live${fxClass()}" aria-labelledby="upoHeroT">
       <div class="center">
-        <span class="moon-wrap">${moonSVG(L.p, 140, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
+        <span class="moon-wrap" data-fade>${moonSVG(L.p, 140, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
         <span class="live-badge"><span class="dot" aria-hidden="true"></span>กำลังถืออุโบสถ</span>
         <h2 id="upoHeroT">${esc(L.day.label)}</h2>
         <span class="sub">${esc(L.sub)}</span>
@@ -473,9 +473,9 @@ function showRiteEnd(per) {
   el.setAttribute("aria-labelledby", "riteT");
   el.innerHTML = `<section class="cm-done">
       <div class="bloom" aria-hidden="true">
-        <span class="rays" style="background:${RAYS_BG}"></span>
-        <span class="glow"></span>
-        <span class="core">${moonSVG(p, 150, { glow: isFullOrNew(p), craters: true })}</span>
+        <span class="rays" data-fade style="background:${RAYS_BG}"></span>
+        <span class="glow" data-fade></span>
+        <span class="core" data-fade>${moonSVG(p, 150, { glow: isFullOrNew(p), craters: true })}</span>
       </div>
       <h2 id="riteT" tabindex="-1">อนุโมทนา</h2>
       <p>ถืออุโบสถครบแล้ว · ${esc(periodLabel(per))}</p>
@@ -902,7 +902,7 @@ const LOTUS_SVG = (() => {
   ];
   const g = ring.map(p => `<path class="petal" d="${petal}" fill="url(#${p.back ? "ptB" : "ptF"})" stroke="#EAB308" stroke-opacity=".55" stroke-width=".8"
     style="--r:${p.r}deg;--s:${p.s};--d:${p.d}s"/>`).join("");
-  return `<svg class="lotus" viewBox="0 0 120 120">
+  return `<svg class="lotus" data-fade viewBox="0 0 120 120">
     <defs>
       <linearGradient id="ptF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FDE68A"/><stop offset=".55" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
       <linearGradient id="ptB" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#EAB308"/><stop offset="1" stop-color="#FDE68A"/></linearGradient>
@@ -959,6 +959,7 @@ function renderChant(sid, idx) {
   addEventListener("keydown", chantKeys);
   document.addEventListener("visibilitychange", onVis);
   cleanupPage = () => {
+    clearStill();
     removeEventListener("keydown", chantKeys);
     document.removeEventListener("visibilitychange", onVis);
     releaseWake();
@@ -967,7 +968,25 @@ function renderChant(sid, idx) {
 }
 function onVis() { if (document.visibilityState === "visible" && CM && !wakeLock) requestWake(); }
 
+// ช่วงนิ่ง: ข้อความนำหายใจตรงจังหวะวงแสง (เข้า 4s / ออก 4s × 3 รอบ เริ่มที่ 5.6s)
+// เป็นข้อความ ไม่ใช่การเคลื่อนไหว จึงใช้ได้แม้ตั้งลดการเคลื่อนไหว และบอกชัดว่ายังทำงานอยู่ ไม่ได้ค้าง
+let stillTimers = [];
+function clearStill() { stillTimers.forEach(clearTimeout); stillTimers = []; }
+function runStill(el) {
+  clearStill();
+  if (!el) return;
+  const at = (ms, fn) => stillTimers.push(setTimeout(fn, ms));
+  at(4600, () => { el.textContent = "นิ่งสักครู่ หายใจตามวงแสง"; el.classList.add("on"); });
+  for (let r = 0; r < 3; r++) {
+    at(5600 + r * 8000, () => { el.textContent = `หายใจเข้า…  รอบที่ ${r + 1} จาก 3`; });
+    at(9600 + r * 8000, () => { el.textContent = `หายใจออก…  รอบที่ ${r + 1} จาก 3`; });
+  }
+  at(29600, () => { el.textContent = "จบช่วงนิ่ง"; });
+  at(32600, () => el.classList.remove("on"));
+}
+
 function paintChant() {
+  clearStill();
   const host = document.getElementById("cm");
   if (!host || !CM) return;
   const { steps, i } = CM, n = steps.length, done = i >= n;
@@ -983,23 +1002,24 @@ function paintChant() {
 
   if (done) {
     const chants = new Set(steps.map(x => x.ci)).size;
-    const still = STILL ? `<span class="breath"></span>` : "";
+    const still = STILL ? `<span class="breath" data-fade></span>` : "";
     host.innerHTML = `${head}
       <section class="cm-done" aria-labelledby="cmDoneT">
         <div class="bloom" aria-hidden="true">
-          <span class="rays" style="background:${RAYS_BG}"></span>
-          <span class="glow"></span>${still}
+          <span class="rays" data-fade style="background:${RAYS_BG}"></span>
+          <span class="glow" data-fade></span>${still}
           ${LOTUS_SVG}
         </div>
         <h2 id="cmDoneT" tabindex="-1">สาธุ</h2>
         <p>จบ${esc(CM.title)} · ครบ ${chants} บท ${n} ท่อน</p>
-        ${STILL ? `<p class="still-note">นิ่งสักครู่ หายใจตามวงแสง</p>` : ""}
+        ${STILL ? `<p class="still-note" id="stillNote" aria-hidden="true"></p><p class="sr-only">ช่วงนิ่ง หายใจตามวงแสง 3 รอบ</p>` : ""}
         <div class="actions">
           <a class="btn primary block" href="#/">กลับหน้าแรก</a>
           <button type="button" class="btn secondary block" data-cm="restart">สวดอีกครั้ง</button>
         </div>
       </section>`;
     host.querySelector("#cmDoneT").focus({ preventScroll: true });
+    if (STILL) runStill(host.querySelector("#stillNote"));
     return;
   }
 
