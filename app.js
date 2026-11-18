@@ -120,10 +120,21 @@ function apply() {
 // ============================================================
 //  ส่วนประกอบข้อความ
 // ============================================================
+// คู่คำ [บาลีไทย, โรมัน, ระดับเน้น?] · ระดับ 1 = เน้นอ่อน, 2 = เน้นเข้ม (คำที่ต่างกันในท่อนที่คล้ายกัน)
 function renderWords(lines) {
-  return lines.map(line => line.map(([t, r]) =>
-    `<span class="w"><span class="t">${esc(t)}</span><span class="r" lang="pi-Latn">${esc(r)}</span></span>`).join(""))
+  return lines.map(line => line.map(([t, r, k]) =>
+    `<span class="w${k ? " k" + k : ""}"><span class="t">${esc(t)}</span><span class="r" lang="pi-Latn">${esc(r)}</span></span>`).join(""))
     .join("<br>");
+}
+// คำแปลที่มีช่วงเน้น seg.tm = [[เริ่ม, จบ, ระดับ], ...]
+function thaiHTML(seg) {
+  if (!seg.tm) return esc(seg.thai);
+  let out = "", at = 0;
+  for (const [a, b, k] of seg.tm) {
+    out += esc(seg.thai.slice(at, a)) + `<mark class="k${k}">${esc(seg.thai.slice(a, b))}</mark>`;
+    at = b;
+  }
+  return out + esc(seg.thai.slice(at));
 }
 function paliBlock(seg) {
   if (seg.w) return `<div class="pali has-w" lang="pi">${renderWords(seg.w)}</div>`;
@@ -133,8 +144,9 @@ function paliBlock(seg) {
 function segmentHTML(seg, extraClass = "") {
   const ref = seg.ref ? refLink(seg.ref) : "";
   if (!seg.pali) return `<div class="segment guide ${extraClass}"><div class="guide-text">${esc(seg.thai)}</div>${ref}</div>`;
-  const thai = seg.thai ? `<div class="thai">${esc(seg.thai)}</div>` : "";
-  return `<div class="segment ${extraClass}">${paliBlock(seg)}${thai}${ref}</div>`;
+  const thai = seg.thai ? `<div class="thai">${thaiHTML(seg)}</div>` : "";
+  const tag = seg.tag ? `<div class="seg-tag">${esc(seg.tag)}</div>` : "";
+  return `<div class="segment${seg.tag ? " has-tag" : ""} ${extraClass}">${tag}${paliBlock(seg)}${thai}${ref}</div>`;
 }
 
 // "AN 3.70:4.4–4.5 · 5.2 · AN 8.41:2.1" -> ลิงก์เปิดพระสูตรเต็มในแอป ตรงย่อหน้านั้น
