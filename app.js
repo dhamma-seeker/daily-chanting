@@ -569,7 +569,7 @@ function renderSettings() {
   };
   view.innerHTML = `
     <section class="set-preview" aria-label="ตัวอย่าง">
-      <div class="lbl"><b>ตัวอย่าง</b><span>เปลี่ยนตามที่ปรับทันที</span></div>
+      <div class="lbl"><b>ตัวอย่าง</b><span class="editing" id="editingLbl" aria-live="polite"></span></div>
       ${segmentHTML(sample)}
     </section>
     <div id="setBody"></div>`;
@@ -582,6 +582,10 @@ function renderSettingsBody() {
   if (!host) return;
   const focusKey = document.activeElement?.dataset?.k;
   const L = LAYERS[setTab], v = PREFS[setTab];
+  const pv = document.querySelector(".set-preview");
+  if (pv) pv.dataset.edit = setTab;
+  const el = document.getElementById("editingLbl");
+  if (el) el.textContent = v.on ? `กำลังปรับ: ${L.label}` : `${L.label} ซ่อนอยู่`;
   const radio = (k, val, on, label, extra = "") =>
     `<button type="button" role="radio" aria-checked="${on}" data-k="${k}:${val}"${extra}>${label}</button>`;
 
