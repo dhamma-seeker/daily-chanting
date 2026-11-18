@@ -1,6 +1,6 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
-// *** เวลามีการแก้ไฟล์ ให้เปลี่ยนเลข CACHE เพื่อให้โหลดใหม่ ***
-const CACHE = "suadmon-v7";
+// เลข CACHE เปลี่ยนเมื่อเพิ่ม/ลบไฟล์ใน ASSETS (ไฟล์ที่แก้เฉย ๆ อัปเดตเองอยู่แล้ว)
+const CACHE = "suadmon-v8";
 
 const ASSETS = [
   "./",
@@ -36,36 +36,26 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+// เน็ตก่อนทุกไฟล์ (ถามเซิร์ฟเวอร์ว่ามีของใหม่ไหม) ถ้าเน็ตช้าเกิน 4 วินาทีหรือไม่มีเน็ต ใช้ของในเครื่อง
+// แบบนี้แก้ไฟล์แล้ว push ขึ้นไป เปิดแอปครั้งถัดไปก็ได้ของใหม่ทันที ไม่ต้องเปลี่ยนเลข CACHE ก็ได้
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
-
-  // network-first สำหรับ data.js และ HTML (ให้เนื้อหาใหม่ขึ้นเร็ว)
   const url = new URL(req.url);
-  const freshFirst = url.pathname.endsWith("data.js") || url.pathname.endsWith("uposatha.js") ||
-                     url.pathname.endsWith("suttas.js") || url.pathname.endsWith("uposatha-cal.js") ||
-                     url.pathname.endsWith(".html") ||
-                     url.pathname.endsWith("/");
+  if (url.origin !== self.location.origin) return;
 
-  if (freshFirst) {
-    e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          return res;
-        })
-        .catch(() => caches.match(req).then((r) => r || caches.match("./index.html")))
-    );
-    return;
-  }
-
-  // cache-first สำหรับไฟล์อื่น
-  e.respondWith(
-    caches.match(req).then((r) => r || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+  e.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const net = fetch(req, { cache: "no-cache" }).then((res) => {
+      if (res.ok) cache.put(req, res.clone()).catch(() => {});
       return res;
-    }))
-  );
+    });
+    const cached = await cache.match(req, { ignoreSearch: true });
+    if (!cached) {
+      try { return await net; }
+      catch { return (await cache.match("./index.html")) || Response.error(); }
+    }
+    const timeout = new Promise((r) => setTimeout(() => r(cached), 4000));
+    return Promise.race([net.catch(() => cached), timeout]);
+  })());
 });

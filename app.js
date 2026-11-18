@@ -156,6 +156,70 @@ function uposathaPanel() {
 }
 
 // ---------- หน้าแรก ----------
+// ---------- การ์ดติดตั้งแอป (แสดงเฉพาะตอนเปิดในเบราว์เซอร์) ----------
+let installEvt = null;
+const UA = navigator.userAgent;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isAndroid = /Android/i.test(UA);
+const isIOS = !isAndroid && (/iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+const inAppBrowser = /Line\/|FBAN|FBAV|FB_IAB|Instagram|Messenger|MicroMessenger|TikTok/i.test(UA);
+const isSamsung = /SamsungBrowser/i.test(UA);
+
+function chromeIntentURL() {
+  const u = new URL(location.href);
+  return `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;package=com.android.chrome;end`;
+}
+
+function installCard() {
+  if (isStandalone()) return "";
+  let body;
+  if (inAppBrowser) {
+    body = `<p>ตอนนี้เปิดอยู่ในแอปแชต ซึ่งติดตั้งไม่ได้ กดปุ่มนี้เพื่อเปิดใน Chrome ก่อนครับ</p>
+      <a class="install-btn" href="${isAndroid ? chromeIntentURL() : location.href}">เปิดใน Chrome</a>
+      <p class="install-alt">ถ้ากดแล้วไม่เปิด: แตะปุ่ม ⋮ มุมขวาบน แล้วเลือก “เปิดในเบราว์เซอร์”</p>`;
+  } else if (installEvt) {
+    body = `<p>ติดตั้งครั้งเดียว จะมีไอคอน 🪷 บนหน้าจอมือถือ แตะเปิดได้ทุกวัน ไม่ต้องจำเว็บ</p>
+      <button class="install-btn" id="installBtn">📲 ติดตั้งแอปลงมือถือ</button>
+      <p class="install-alt">มีหน้าต่างถามขึ้นมา ให้แตะ “ติดตั้ง”</p>`;
+  } else if (isIOS) {
+    body = `<ol class="install-steps">
+      <li>แตะปุ่มแชร์ <b>⬆︎</b> ที่แถบด้านล่าง</li>
+      <li>เลื่อนลง แตะ <b>“เพิ่มไปยังหน้าจอโฮม”</b></li>
+      <li>แตะ <b>“เพิ่ม”</b> มุมขวาบน</li></ol>`;
+  } else if (isSamsung) {
+    body = `<ol class="install-steps">
+      <li>แตะปุ่ม <b>☰</b> ที่มุมขวาล่าง</li>
+      <li>แตะ <b>“เพิ่มหน้าไปยัง”</b> แล้วเลือก <b>“หน้าจอหลัก”</b></li>
+      <li>แตะ <b>“เพิ่ม”</b></li></ol>`;
+  } else if (isAndroid) {
+    body = `<ol class="install-steps">
+      <li>แตะปุ่ม <b>⋮</b> ที่มุมขวาบน</li>
+      <li>แตะ <b>“ติดตั้งแอป”</b> หรือ <b>“เพิ่มลงในหน้าจอหลัก”</b></li>
+      <li>แตะ <b>“ติดตั้ง”</b></li></ol>`;
+  } else return "";
+  return `<section class="install-card">
+    <h3>ติดตั้งแอปลงมือถือ</h3>${body}
+    <button class="install-later" id="installLater">ไว้ทีหลัง</button>
+  </section>`;
+}
+
+function bindInstallCard() {
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.onclick = async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    await installEvt.userChoice.catch(() => {});
+    installEvt = null;
+    renderHome();
+  };
+  const later = document.getElementById("installLater");
+  if (later) later.onclick = () => {
+    try { sessionStorage.setItem("install-later", "1"); } catch {}
+    later.closest(".install-card").remove();
+  };
+  try { if (sessionStorage.getItem("install-later")) document.querySelector(".install-card")?.remove(); } catch {}
+}
+
 function renderHome() {
   titleEl.textContent = "บทสวดมนต์ประจำวัน";
   backBtn.classList.add("hidden");
@@ -181,15 +245,14 @@ function renderHome() {
       <h2>สวดมนต์ประจำวัน</h2>
       <p>บาลี แล้วตามด้วยคำแปลไทย</p>
     </div>
+    ${installCard()}
     ${uposathaHomeCard()}
     <div class="session-grid">${cards}</div>
-    <div class="home-note">
-      เพิ่มลงหน้าจอโฮม: บน iPhone/iPad กดปุ่มแชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม” ·
-      ใช้งานได้แม้ไม่มีเน็ต
-    </div>`;
+    <div class="home-note">ใช้งานได้แม้ไม่มีเน็ต · แอปอัปเดตเองเมื่อเปิดตอนมีเน็ต</div>`;
 
   view.querySelectorAll("[data-session]").forEach(el =>
     el.addEventListener("click", () => location.hash = "#/" + el.dataset.session));
+  bindInstallCard();
   window.scrollTo(0, 0);
 }
 
@@ -281,8 +344,67 @@ window.addEventListener("hashchange", route);
 apply();
 route();
 
-// ---------- Service worker ----------
+// ---------- Service worker + อัปเดตอัตโนมัติ ----------
+// GitHub Pages ใส่ Last-Modified เป็นเวลา deploy ล่าสุดให้ทุกไฟล์ ถาม index.html ไฟล์เดียวก็รู้ว่ามีของใหม่ไหม
+// เปิดแอป/สลับกลับมาที่แอป: ถ้ามีของใหม่ จำตำแหน่งที่อ่านอยู่ แล้วโหลดใหม่ตรงที่เดิม
+const UPD = {
+  base: null,
+  async stamp() {
+    try {
+      const r = await fetch("index.html", { method: "HEAD", cache: "no-store" });
+      return r.ok ? (r.headers.get("last-modified") || r.headers.get("etag")) : null;
+    } catch { return null; }
+  },
+  async check() {
+    const v = await this.stamp();
+    if (!v) return;
+    if (!this.base) { this.base = v; return; }
+    if (v === this.base) return;
+    try {
+      sessionStorage.setItem("upd-pos", JSON.stringify({ hash: location.hash, y: scrollY }));
+    } catch {}
+    const reg = await navigator.serviceWorker?.getRegistration().catch(() => null);
+    await reg?.update().catch(() => {});
+    location.reload();
+  },
+};
+
+(function restoreAfterUpdate() {
+  let pos = null;
+  try { pos = JSON.parse(sessionStorage.getItem("upd-pos")); sessionStorage.removeItem("upd-pos"); } catch {}
+  if (!pos) return;
+  if (pos.hash === location.hash) requestAnimationFrame(() => scrollTo(0, pos.y));
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = "✓ อัปเดตแอปเป็นรุ่นล่าสุดแล้ว";
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+})();
+
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () =>
-    navigator.serviceWorker.register("sw.js").catch(() => {}));
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").then(reg => reg.update()).catch(() => {});
+    UPD.check();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") UPD.check();
+  });
 }
+
+// ---------- ติดตั้งลงมือถือ ----------
+// ลิงก์ที่ส่งทาง LINE จะเปิดในเบราว์เซอร์ของ LINE ซึ่งติดตั้งไม่ได้ ส่งต่อไปเบราว์เซอร์หลักของเครื่องให้เลย
+if (/Line\//.test(navigator.userAgent) && !/openExternalBrowser/.test(location.search)) {
+  const u = new URL(location.href);
+  u.searchParams.set("openExternalBrowser", "1");
+  location.replace(u.href);
+}
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  installEvt = e;
+  if (!location.hash || location.hash === "#/") renderHome();
+});
+window.addEventListener("appinstalled", () => {
+  installEvt = null;
+  try { localStorage.setItem("installed", "1"); } catch {}
+  if (!location.hash || location.hash === "#/") renderHome();
+});
