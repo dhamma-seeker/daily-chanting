@@ -1,6 +1,7 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
 // เลข CACHE เปลี่ยนเมื่อเพิ่ม/ลบไฟล์ใน ASSETS (ไฟล์ที่แก้เฉย ๆ อัปเดตเองอยู่แล้ว)
-const CACHE = "suadmon-v8";
+const CACHE = "suadmon-v9";
+const FONT_CACHE = "suadmon-fonts-v1";   // ฟอนต์จาก Google Fonts แยกแคช ไม่ลบตอนเปลี่ยนรุ่น
 
 const ASSETS = [
   "./",
@@ -31,7 +32,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      Promise.all(keys.filter((k) => k !== CACHE && k !== FONT_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -42,6 +43,25 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // ฟอนต์: ไฟล์ CSS ของ Google Fonts ใช้เน็ตก่อน (มีอัปเดตได้) ส่วนไฟล์ฟอนต์ใช้ของในเครื่องก่อน (ไม่เปลี่ยนตาม URL)
+  // ฟอนต์ที่ผู้ใช้เคยเลือกจึงใช้ได้ตอนไม่มีเน็ต
+  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
+    e.respondWith((async () => {
+      const cache = await caches.open(FONT_CACHE);
+      const cached = await cache.match(req);
+      if (cached && url.hostname === "fonts.gstatic.com") return cached;
+      try {
+        const res = await fetch(req);
+        if (res.ok || res.type === "opaque") cache.put(req, res.clone()).catch(() => {});
+        return res;
+      } catch {
+        return cached || Response.error();
+      }
+    })());
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
 
   e.respondWith((async () => {

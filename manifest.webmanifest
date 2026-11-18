@@ -1,18 +1,38 @@
 {
-  "name": "บทสวดมนต์ประจำวัน",
-  "short_name": "บทสวดมนต์",
-  "description": "บทสวดมนต์เช้าและก่อนนอน บาลีพร้อมคำแปลไทย ใช้ได้ออฟไลน์",
+  "name": "สุตตะ ฆราวาส",
+  "short_name": "สุตตะ ฆราวาส",
+  "description": "เป็นฆราวาส ตามพระสูตร · บทสวดบาลีพร้อมคำแปลไทย วันอุโบสถ ใช้ได้ออฟไลน์",
   "lang": "th",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f6f1e7",
-  "theme_color": "#b5731f",
+  "background_color": "#F5F6FA",
+  "theme_color": "#1E3A8A",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
