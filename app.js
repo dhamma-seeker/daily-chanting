@@ -336,6 +336,43 @@ function anEntryHTML(title = "ระลึกทีละข้อ") {
     <span class="meta"><b>${esc(title)}</b><span>ใจผ่องใส · ระลึกถึงพระพุทธ พระธรรม พระสงฆ์ ศีล เทวดา</span></span>${ICON.chev}</a>`;
 }
 
+// ---------- พระสูตรประจำคืน (ในหน้าสวดก่อนนอน) ----------
+// ข้อมูลและรอบเวียนอยู่ใน night.js: NIGHTLY, nightIndex, nightlyRotation, nightlyMode, nightlyPick, nightlyIn, nightlySet
+const nightlyName = id => CHANTS[id].title.replace(/^พระสูตรประจำคืน:\s*/, "");
+const nightlyRef = id => (CHANTS[id].note.match(/^[A-Z][A-Za-z]*\s[\d.:–-]+/) || [""])[0];
+function nightlyWhen(k) {
+  if (k === 0) return "คืนนี้";
+  if (k === 1) return "คืนพรุ่งนี้";
+  const base = new Date(Date.now() - 6 * 3600e3);          // คืนหนึ่งนับ 06:00–06:00 เหมือน nightIndex()
+  return `อีก ${k} คืน · ${thDay(new Date(base.getTime() + k * 86400e3))}`;
+}
+function nightlyPanelHTML(cid) {
+  if (typeof NIGHTLY === "undefined" || !NIGHTLY.includes(cid)) return "";
+  const mode = nightlyMode();
+  if (mode === "all" && cid !== NIGHTLY[0]) return "";
+  const radio = (k, on, label) => `<button type="button" role="radio" aria-checked="${on}" data-nl="${k}">${label}</button>`;
+  const modes = radio("mode:rotate", mode === "rotate", "เวียนคืนละบท") + radio("mode:all", mode === "all", "สวดครบทุกบท");
+  let body;
+  if (mode === "rotate") {
+    const pick = nightlyPick(), rot = nightlyRotation();
+    const opts = NIGHTLY.map(id => {
+      const on = id === pick;
+      return `<button type="button" role="radio" class="nl-opt" aria-checked="${on}" data-nl="pick:${id}">
+        <span class="nl-dot" aria-hidden="true"></span>
+        <span class="meta"><b>${esc(nightlyName(id))}</b><span>${esc(nightlyRef(id))} · ตามรอบ: ${esc(nightlyWhen(nightlyIn(id)))}</span></span>
+        ${on ? `<span class="nl-tag">คืนนี้</span>` : ""}</button>`;
+    }).join("");
+    const tomorrow = nightlyName(nightlyRotation(nightIndex() + 1));
+    const note = pick !== rot ? `คืนนี้เลือกเองแล้ว พรุ่งนี้กลับไปตามรอบ (${tomorrow})`
+      : `แตะเพื่อสวดบทอื่นแทนเฉพาะคืนนี้ · พรุ่งนี้: ${tomorrow}`;
+    body = `<div class="nl-list" role="radiogroup" aria-label="เลือกพระสูตรของคืนนี้">${opts}</div><p class="nl-note">${esc(note)}</p>`;
+  } else {
+    body = `<p class="nl-note">สวดครบทั้ง ${NIGHTLY.length} พระสูตรทุกคืน: ${NIGHTLY.map(id => esc(nightlyName(id))).join(" · ")}</p>`;
+  }
+  return `<section class="nightly card" aria-labelledby="nlT"><h3 id="nlT">พระสูตรประจำคืน</h3>
+    <div class="seg-ctl" style="--n:2" role="radiogroup" aria-labelledby="nlT">${modes}</div>${body}</section>`;
+}
+
 function uposathaPanel() {
   if (typeof UPO === "undefined") return "";
   const st = UPO.status(new Date(), 6);
@@ -649,6 +686,7 @@ function renderSession(id, { keep = false } = {}) {
     return `<section class="chant" id="c-${i}">
       <div class="chant-head"><span class="of">บทที่ ${i + 1} จาก ${n}</span><h2>${esc(c.title)}</h2>${note}</div>
       ${cid === "uposatha-anussati" ? anEntryHTML() : ""}
+      ${s.id === "night" ? nightlyPanelHTML(cid) : ""}
       ${segs}
     </section>`;
   }).join("");
@@ -668,6 +706,21 @@ function renderSession(id, { keep = false } = {}) {
   fab.innerHTML = `${ICON.play}<span>สวดทีละท่อน</span>`;
   document.body.appendChild(fab);
   document.body.classList.add("has-fab");
+
+  // พระสูตรประจำคืน: เปลี่ยนโหมด / เลือกบทของคืนนี้ แล้ววาดหน้าใหม่ โดยให้แผงยังอยู่ในจอและโฟกัสอยู่ที่ปุ่มเดิม
+  view.querySelectorAll("[data-nl]").forEach(b =>
+    b.addEventListener("click", () => {
+      const key = b.dataset.nl, [k, v] = key.split(":");
+      if (k === "mode") nightlySet({ mode: v });
+      else nightlySet({ pick: { night: nightIndex(), id: v } });
+      renderSession(id, { keep: true });
+      const panel = view.querySelector(".nightly");
+      if (panel) {
+        const top = panel.getBoundingClientRect().top, tb = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tb-h")) || 64;
+        if (top < tb + 60 || top > innerHeight - 120) panel.scrollIntoView({ block: "start", behavior: "auto" });
+        view.querySelector(`[data-nl="${key}"]`)?.focus();
+      }
+    }));
 
   view.querySelectorAll("[data-jump]").forEach(a =>
     a.addEventListener("click", e => {

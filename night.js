@@ -9701,17 +9701,38 @@ Object.assign(CHANTS, {
 const NIGHTLY = ["night-dhammacakka", "night-bahira", "night-kalama"];
 const NIGHT_ORDER = ["namo", "night-sarana", "night-ratana", "night-sila", "night-pajja", "@nightly", "night-karaniya", "phae-metta", "night-metta-ton", "night-uthit", "mora-2", "night-sihaseyya"];
 
-// พระสูตรประจำคืน: เวียนวันละบท นับวันแบบเวลาท้องถิ่น และเปลี่ยนบทตอน 06:00
-// (สวดหลังเที่ยงคืนยังได้บทเดิมของคืนนั้น)
-function nightlyPick(d = new Date()) {
+// ---------- พระสูตรประจำคืน ----------
+// โหมด rotate: เวียนคืนละบทตามปฏิทิน (คืนหนึ่งนับจาก 06:00 ถึง 06:00 วันรุ่งขึ้น)
+//              ผู้ใช้เลือกบทอื่นแทนได้เฉพาะคืนนั้น คืนต่อไปกลับไปตามรอบ
+// โหมด all:    สวดครบทุกบททุกคืน
+// เก็บใน localStorage "nightly-v1" = { mode: "rotate"|"all", pick: { night: <เลขคืน>, id } }
+const NIGHTLY_KEY = "nightly-v1";
+function nightIndex(d = new Date()) {
   const t = new Date(d.getTime() - 6 * 3600e3);
-  const day = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 86400e3);
-  return NIGHTLY[((day % NIGHTLY.length) + NIGHTLY.length) % NIGHTLY.length];
+  return Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 86400e3);
 }
+const nightlyRotation = (n = nightIndex()) => NIGHTLY[((n % NIGHTLY.length) + NIGHTLY.length) % NIGHTLY.length];
+function nightlyState() {
+  try { const s = JSON.parse(localStorage.getItem(NIGHTLY_KEY)); return s && typeof s === "object" ? s : {}; }
+  catch { return {}; }
+}
+function nightlySave(s) { try { localStorage.setItem(NIGHTLY_KEY, JSON.stringify(s)); } catch {} }
+const nightlyMode = () => nightlyState().mode === "all" ? "all" : "rotate";
+function nightlyPick(d = new Date()) {
+  const n = nightIndex(d), p = nightlyState().pick;
+  return p && p.night === n && NIGHTLY.includes(p.id) ? p.id : nightlyRotation(n);
+}
+// อีกกี่คืนบทนี้จะมาตามรอบ (0 = คืนนี้)
+function nightlyIn(id, d = new Date()) {
+  const n = nightIndex(d);
+  for (let k = 0; k < NIGHTLY.length; k++) if (nightlyRotation(n + k) === id) return k;
+  return -1;
+}
+function nightlySet(change) { nightlySave(Object.assign(nightlyState(), change)); }
 {
   const s = SESSIONS.find(x => x.id === "night");
   Object.defineProperty(s, "order", {
-    get: () => NIGHT_ORDER.map(x => x === "@nightly" ? nightlyPick() : x),
+    get: () => NIGHT_ORDER.flatMap(x => x !== "@nightly" ? [x] : nightlyMode() === "all" ? NIGHTLY : [nightlyPick()]),
     enumerable: true, configurable: true,
   });
 }
