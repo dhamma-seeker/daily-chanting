@@ -174,18 +174,25 @@ function labelPhase(label) {
   return m[1] === "ขึ้น" ? n / 30 : 0.5 + n / 30;
 }
 let moonSeq = 0;
-function moonSVG(p, size, { glow = false, craters = false, alt = "" } = {}) {
+// ring: { s, e } เวลาเริ่ม/จบของวงแสงรอบดวงจันทร์ (ms) อัปเดตทุกวินาทีโดย tickUpo()
+function moonSVG(p, size, { glow = false, craters = false, alt = "", ring = null } = {}) {
   const d = moonPath(p), id = "mc" + (++moonSeq);
   const lit = d ? `<path d="${d}" fill="url(#mLit)"/>` : "";
   const crat = craters && d ? `<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>
     <g clip-path="url(#${id})" fill="#B45309" opacity=".14"><circle cx="38" cy="40" r="7"/><circle cx="60" cy="58" r="9"/><circle cx="57" cy="32" r="4"/><circle cx="40" cy="64" r="4"/></g>` : "";
   const g = glow && d ? `<circle cx="50" cy="50" r="50" fill="url(#mGlow)"/>` : "";
   const a11y = alt ? `role="img" aria-label="${esc(alt)}"` : 'aria-hidden="true"';
-  return `<svg ${a11y} width="${size}" height="${size}" viewBox="0 0 100 100" style="flex:none">${g}
+  const rw = size < 60 ? 4 : 2.6;
+  const rg = ring ? `<circle cx="50" cy="50" r="47" fill="none" stroke="#FDE68A" stroke-opacity=".18" stroke-width="${rw}"/>
+    <circle class="moon-ring" data-rs="${+ring.s}" data-re="${+ring.e}" cx="50" cy="50" r="47" fill="none" stroke="#FACC15"
+      stroke-width="${rw}" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="${100 - frac(+ring.s, +ring.e, Date.now()) * 100}"
+      transform="rotate(-90 50 50)"/>` : "";
+  return `<svg ${a11y} width="${size}" height="${size}" viewBox="0 0 100 100" style="flex:none;overflow:visible">${g}
     <circle cx="50" cy="50" r="40" fill="#22325A"/>${lit}${crat}
-    <circle cx="50" cy="50" r="40" fill="none" stroke="#FDE68A" stroke-opacity=".38" stroke-width="${size < 40 ? 2.4 : 1.2}"/></svg>`;
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#FDE68A" stroke-opacity=".38" stroke-width="${size < 40 ? 2.4 : 1.2}"/>${rg}</svg>`;
 }
 const isFullOrNew = p => Math.abs(p - 0.5) < 0.02;
+const frac = (s, e, now) => Math.min(1, Math.max(0, (now - s) / (e - s)));
 
 // ============================================================
 //  วันอุโบสถ
@@ -207,30 +214,72 @@ function untilText(ms) {
   if (h >= 1) return `อีก ${h} ชม. ${m} นาที`;
   return `อีก ${m} นาที`;
 }
+
+// countdown ปรับความละเอียดตามระยะ: ≥48 ชม. วัน+ชม. · 1–48 ชม. ชม:นาที:วินาที · <1 ชม. นาที:วินาที
+function cdParts(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(t / 86400), h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60;
+  if (h >= 48) {
+    const hh = h % 24;
+    const txt = `${d} วัน${hh ? ` ${hh} ชม.` : ""}`;
+    return { mode: "far", text: txt, sr: txt };
+  }
+  if (h >= 1) return { mode: "near", text: `${h}:${pad2(m)}:${pad2(s)}`, sr: `${h} ชั่วโมง ${m} นาที` };
+  return { mode: "final", text: `${pad2(m)}:${pad2(s)}`, sr: `${m} นาที` };
+}
+// ตัวเลขที่วิ่งซ่อนจากโปรแกรมอ่านหน้าจอ แล้วมีข้อความคู่กันที่อัปเดตทุก 10 นาที (ไม่อ่านรัวทุกวินาที)
+function cdHTML(target) {
+  const c = cdParts(target - Date.now());
+  return `<span class="cd cd-${c.mode}" data-cd="${+target}" aria-hidden="true">${c.text}</span><span class="sr-only" data-cd-sr="${+target}">${c.sr}</span>`;
+}
+
 const periodLabel = p => p.days.map(d => d.label).join(" และ ");
 const keyDay = p => p.days[p.days.length - 1];            // วัน ๘ หรือ ๑๕ ค่ำ ของช่วง
+const sameDate = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+function startRel(d, now) {
+  const y = new Date(now); y.setDate(y.getDate() - 1);
+  if (sameDate(d, now)) return `เริ่มวันนี้ ${thHM(d)}`;
+  if (sameDate(d, y)) return `เริ่มเมื่อค่ำวาน ${thHM(d)}`;
+  return `เริ่ม ${thShort(d)}`;
+}
 function liveInfo(st) {
   const cur = st.current, now = st.now;
   const day = st.todayDay || cur.days.find(d => d.start <= now && now < d.end) || cur.days[0];
-  const idx = cur.days.indexOf(day);
-  const pct = Math.round(Math.min(1, Math.max(0, (now - cur.start) / (cur.end - cur.start))) * 100);
+  const idx = cur.days.indexOf(day), n = cur.days.length;
   const isKey = day === keyDay(cur);
   return {
-    day, idx, pct, p: labelPhase(day.label),
+    day, idx, n, p: labelPhase(day.label),
     title: day.label + (isKey ? ` · ${cur.phase.name}` : ""),
-    sub: cur.days.length > 1 ? `วันที่ ${idx + 1} จาก ${cur.days.length} ของช่วงนี้` : "ถือหนึ่งวันหนึ่งคืน",
-    left: untilText(cur.end - now).replace(/^อีก /, ""),
+    sub: (n > 1 ? `วันที่ ${idx + 1} จาก ${n} · ` : "") + startRel(day.start, now),
   };
+}
+
+// แถบแบ่งตามวัน: วันที่ผ่าน = เต็ม, วันนี้ = เติมถึงตอนนี้ + ป้าย "ตอนนี้", วันที่ยังไม่ถึง = ว่าง
+// เกิน 3 วัน: ช่องเล็กไม่มีชื่อ + "วันที่ k จาก n"
+function dayTimeline(per, now) {
+  const n = per.days.length, compact = n > 3;
+  const segs = per.days.map(d => {
+    const isNow = d.start <= now && now < d.end;
+    const pct = frac(+d.start, +d.end, +now) * 100;
+    const mark = isNow ? `<span class="tl-now" data-mark data-s="${+d.start}" data-e="${+d.end}" style="left:${pct}%"><span class="tl-dot"></span>${compact ? "" : `<span class="tl-tag" style="transform:translateX(-${pct}%)">ตอนนี้</span>`}</span>` : "";
+    return `<div class="tl-seg${isNow ? " now" : ""}">
+      <div class="tl-bar"><span class="tl-fill" data-fill data-s="${+d.start}" data-e="${+d.end}" style="width:${pct}%"></span>${mark}</div>
+      ${compact ? "" : `<span class="tl-lbl">${esc(d.label)}</span>`}</div>`;
+  }).join("");
+  const k = per.days.findIndex(d => d.start <= now && now < d.end);
+  const cap = compact && k >= 0 ? `<div class="tl-cap">วันที่ ${k + 1} จาก ${n}</div>` : "";
+  return `<div class="timeline${compact ? " compact" : ""}" style="--n:${n}" role="img"
+    aria-label="${esc(per.days.map(d => d.label).join(", "))}${k >= 0 ? ` · ตอนนี้ ${esc(per.days[k].label)}` : ""}">${segs}</div>${cap}`;
 }
 
 function uposathaHomeCard() {
   if (typeof UPO === "undefined") return "";
   const st = UPO.status();
   if (st.current) {
-    const L = liveInfo(st);
-    return `<a class="upo-live" href="#/uposatha">
+    const L = liveInfo(st), cur = st.current;
+    return `<a class="upo-live${fxClass()}" href="#/uposatha">
       <div class="top">
-        ${moonSVG(L.p, 72, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label })}
+        <span class="moon-wrap">${moonSVG(L.p, 76, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
         <div class="meta">
           <span class="live-badge"><span class="dot" aria-hidden="true"></span>กำลังถืออุโบสถ</span>
           <span class="big">${esc(L.title)}</span>
@@ -238,8 +287,8 @@ function uposathaHomeCard() {
         </div>
       </div>
       <div class="meter">
-        <div class="lbls"><span>เหลืออีก <b>${esc(L.left)}</b></span><span>จบ ${esc(thShort(st.current.end))}</span></div>
-        <div class="bar" role="progressbar" aria-label="ผ่านไปแล้วของช่วงถืออุโบสถ" aria-valuenow="${L.pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${L.pct}%"></span></div>
+        <div class="lbls"><span>เหลืออีก <b>${cdHTML(cur.end)}</b></span><span>จบ ${esc(thShort(cur.end))}</span></div>
+        ${dayTimeline(cur, st.now)}
       </div>
       <span class="cta">เปิดบทสวดวันอุโบสถ ${ICON.chev}</span>
     </a>`;
@@ -248,16 +297,21 @@ function uposathaHomeCard() {
   const kd = keyDay(nx), p = labelPhase(kd.label);
   return `<a class="upo-card" href="#/uposatha">
     <span class="moon-col">
-      <span class="moon-tile" style="width:64px;height:64px">${moonSVG(p, 52, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label })}</span>
+      <span class="moon-tile" style="width:64px;height:64px">${moonSVG(p, 52, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label, ring: approachRing(nx) })}</span>
       <span class="moon-name">${esc(nx.phase.name.replace("จันทร์", "").replace(/^ครึ่งดวง.*/, "ครึ่งดวง") || nx.phase.name)}</span>
     </span>
     <span class="meta">
       <span class="eyebrow">วันอุโบสถครั้งถัดไป</span>
-      <span class="big">${esc(untilText(nx.start - st.now))}</span>
+      <span class="big">อีก ${cdHTML(nx.start)}</span>
       <span class="sub">เริ่ม ${esc(thWhen(nx.start))} · ${esc(periodLabel(nx))}</span>
     </span>
     <span class="chev">${ICON.chev}</span>
   </a>`;
+}
+// วงแสงก่อนเริ่ม: แสดงเฉพาะ 24 ชม. สุดท้าย เต็มวงตอนถึงเวลาเริ่ม
+const APPROACH = 24 * 3600000;
+function approachRing(per) {
+  return per.start - Date.now() <= APPROACH ? { s: per.start - APPROACH, e: per.start } : null;
 }
 
 function dayRows(per, now, live) {
@@ -270,6 +324,11 @@ function dayRows(per, now, live) {
     return `<li>${moon}<span class="meta"><b>${esc(d.label)}</b><span>${esc(thDM(d.start))} – ${esc(thDM(d.end))}</span></span>${tag}</li>`;
   }).join("");
 }
+// รายการวัน: เกิน 3 วันพับไว้ใน "ดูทุกวัน"
+function dayList(per, now, live) {
+  const rows = `<ul class="upo-days">${dayRows(per, now, live)}</ul>`;
+  return per.days.length > 3 ? `<details class="upo-more"><summary>ดูทุกวัน (${per.days.length} วัน)</summary>${rows}</details>` : rows;
+}
 
 function uposathaPanel() {
   if (typeof UPO === "undefined") return "";
@@ -277,33 +336,34 @@ function uposathaPanel() {
   let hero;
   if (st.current) {
     const L = liveInfo(st), cur = st.current;
-    hero = `<section class="upo-hero live" aria-labelledby="upoHeroT">
+    hero = `<section class="upo-hero live${fxClass()}" aria-labelledby="upoHeroT">
       <div class="center">
-        ${moonSVG(L.p, 132, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label })}
+        <span class="moon-wrap">${moonSVG(L.p, 140, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
         <span class="live-badge"><span class="dot" aria-hidden="true"></span>กำลังถืออุโบสถ</span>
-        <h2 id="upoHeroT">${esc(L.title)}</h2>
+        <h2 id="upoHeroT">${esc(L.day.label)}</h2>
+        <span class="sub">${esc(L.sub)}</span>
         <span class="sub">${esc(cur.phase.name)} ${esc(thWhen(cur.phase.time))}</span>
       </div>
       <div class="meter">
-        <div class="lbls"><span>เหลืออีก <b>${esc(L.left)}</b></span><span>ผ่านไป ${L.pct}%</span></div>
-        <div class="bar" role="progressbar" aria-label="ผ่านไปแล้วของช่วงถืออุโบสถ" aria-valuenow="${L.pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${L.pct}%"></span></div>
+        <div class="lbls"><span>เหลืออีก <b>${cdHTML(cur.end)}</b></span><span>จบ ${esc(thShort(cur.end))}</span></div>
+        ${dayTimeline(cur, st.now)}
       </div>
       <div class="upo-grid"><div><small>เริ่ม</small><b>${esc(thShort(cur.start))}</b></div><div><small>จบ</small><b>${esc(thShort(cur.end))}</b></div></div>
-      <ul class="upo-days">${dayRows(cur, st.now, true)}</ul>
+      ${dayList(cur, st.now, true)}
     </section>`;
   } else {
     const nx = st.next[0], kd = keyDay(nx), p = labelPhase(kd.label);
     hero = `<section class="upo-hero soon" aria-labelledby="upoHeroT">
       <div class="head">
-        <span class="moon-tile" style="width:96px;height:96px;border-radius:20px">${moonSVG(p, 84, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label })}</span>
+        <span class="moon-tile" style="width:96px;height:96px;border-radius:20px">${moonSVG(p, 80, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label, ring: approachRing(nx) })}</span>
         <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
           <span class="eyebrow" id="upoHeroT">ช่วงถืออุโบสถครั้งถัดไป</span>
-          <span class="big">${esc(untilText(nx.start - st.now))}</span>
+          <span class="big">อีก ${cdHTML(nx.start)}</span>
           <span class="sub">${esc(nx.phase.name)} ${esc(thWhen(nx.phase.time))}</span>
         </div>
       </div>
       <div class="upo-grid"><div><small>เริ่ม</small><b>${esc(thShort(nx.start))}</b></div><div><small>จบ</small><b>${esc(thShort(nx.end))}</b></div></div>
-      <ul class="upo-days">${dayRows(nx, st.now, false)}</ul>
+      ${dayList(nx, st.now, false)}
     </section>`;
   }
   const later = (st.current ? st.next : st.next.slice(1)).slice(0, 3).map(p => {
@@ -323,6 +383,110 @@ function uposathaPanel() {
         เวลาข้างขึ้นข้างแรมคำนวณทางดาราศาสตร์ ตามเวลาของเครื่อง</p>
     </details>
     <h2 class="section-label">บทสวดและข้อปฏิบัติ</h2>`;
+}
+
+// ============================================================
+//  นาฬิกาวันอุโบสถ: นับถอยหลังทุกวินาที + ช่วงเปลี่ยนตอนถึงเวลา
+// ============================================================
+// ช่วงเปลี่ยน (ตาม MOTION.md):
+//  เริ่มถือ → "แสงทอง" ที่ดวงจันทร์ · ข้ามวัน (๑๔ → ๑๕) → "ประกาย" ที่แถบวัน · ถือครบ → "ฉัพพรรณรังสี" + อนุโมทนา
+let upoTimer = 0, upoKey = null, upoFx = null, upoRerender = null;
+const FX_WINDOW = 10 * 60000;    // เห็นการเปลี่ยนภายใน 10 นาที (เช่นเพิ่งกลับมาที่แอป) ยังเล่นช่วงเปลี่ยน เกินนั้นแค่อัปเดตเงียบ ๆ
+
+function upoState(now = new Date()) {
+  const st = UPO.status(now);
+  if (st.current) {
+    const i = st.current.days.findIndex(d => d.start <= now && now < d.end);
+    return { key: `L:${+st.current.start}:${i}`, live: true, per: st.current, dayStart: st.current.days[i]?.start };
+  }
+  return { key: `U:${+st.next[0].start}`, live: false, per: st.next[0] };
+}
+function fxClass() {
+  if (!upoFx) return "";
+  return upoFx === "arrive" ? " arrive" : upoFx === "glint" ? " glint" : "";
+}
+function announce(msg) {
+  const a = document.getElementById("announcer");
+  if (a) { a.textContent = ""; setTimeout(() => { a.textContent = msg; }, 50); }
+}
+
+function startUpoClock(rerender) {
+  if (typeof UPO === "undefined") return () => {};
+  upoRerender = rerender;
+  upoKey = upoState().key;
+  tickUpo();
+  upoTimer = setInterval(tickUpo, 1000);
+  return () => { clearInterval(upoTimer); upoTimer = 0; upoRerender = null; };
+}
+
+function tickUpo() {
+  if (document.visibilityState !== "visible") return;
+  const now = new Date(), nowMs = +now;
+  const s = upoState(now);
+  if (s.key !== upoKey) {
+    const prev = upoKey;
+    upoKey = s.key;
+    const wasLive = prev && prev.startsWith("L:");
+    let fx = null, recent = false;
+    if (!wasLive && s.live) { fx = "arrive"; recent = nowMs - s.per.start < FX_WINDOW; }
+    else if (wasLive && s.live) { fx = "glint"; recent = nowMs - s.dayStart < FX_WINDOW; }
+    else if (wasLive && !s.live) {
+      const ended = UPO.status(new Date(nowMs - 60000)).current || UPO.status(new Date(nowMs - FX_WINDOW)).current;
+      fx = "end"; recent = !!ended && nowMs - ended.end < FX_WINDOW;
+      if (recent) showRiteEnd(ended);
+    }
+    upoFx = recent && fx !== "end" ? fx : null;
+    if (upoRerender) upoRerender();
+    upoFx = null;
+    if (recent && fx === "arrive") announce("เริ่มช่วงถืออุโบสถแล้ว");
+    if (recent && fx === "glint") announce("เข้าสู่วันถัดไปของช่วงถืออุโบสถ");
+    return;
+  }
+  document.querySelectorAll("[data-cd]").forEach(el => {
+    const c = cdParts(+el.dataset.cd - nowMs);
+    if (el.textContent !== c.text) el.textContent = c.text;
+    const cls = "cd cd-" + c.mode;
+    if (el.className !== cls) el.className = cls;
+  });
+  if (now.getSeconds() === 0 && now.getMinutes() % 10 === 0)
+    document.querySelectorAll("[data-cd-sr]").forEach(el => { el.textContent = cdParts(+el.dataset.cdSr - nowMs).sr; });
+  document.querySelectorAll(".moon-ring").forEach(el =>
+    el.setAttribute("stroke-dashoffset", 100 - frac(+el.dataset.rs, +el.dataset.re, nowMs) * 100));
+  document.querySelectorAll("[data-fill]").forEach(el => { el.style.width = frac(+el.dataset.s, +el.dataset.e, nowMs) * 100 + "%"; });
+  // ป้าย "ตอนนี้" เลื่อนจุดยึดตามตำแหน่ง (ซ้ายสุดชิดซ้าย ขวาสุดชิดขวา) ไม่ให้ล้นขอบการ์ด
+  document.querySelectorAll("[data-mark]").forEach(el => {
+    const pct = frac(+el.dataset.s, +el.dataset.e, nowMs) * 100;
+    el.style.left = pct + "%";
+    const tag = el.querySelector(".tl-tag");
+    if (tag) tag.style.transform = `translateX(-${pct}%)`;
+  });
+}
+
+// ฉากถือครบ: ดวงจันทร์เป็นแกน → แสงทอง → ฉัพพรรณรังสี → จาง (ปุ่มปิดกดได้ทันที)
+function showRiteEnd(per) {
+  if (document.querySelector(".rite") || document.body.classList.contains("chant-mode")) return;
+  const kd = keyDay(per), p = labelPhase(kd.label);
+  const el = document.createElement("div");
+  el.className = "rite";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-labelledby", "riteT");
+  el.innerHTML = `<section class="cm-done">
+      <div class="bloom" aria-hidden="true">
+        <span class="rays" style="background:${RAYS_BG}"></span>
+        <span class="glow"></span>
+        <span class="core">${moonSVG(p, 150, { glow: isFullOrNew(p), craters: true })}</span>
+      </div>
+      <h2 id="riteT" tabindex="-1">อนุโมทนา</h2>
+      <p>ถืออุโบสถครบแล้ว · ${esc(periodLabel(per))}</p>
+      <div class="actions"><button type="button" class="btn primary block" data-rite="close">ปิด</button></div>
+    </section>`;
+  const close = () => { el.remove(); removeEventListener("keydown", onKey); };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  el.addEventListener("click", e => { if (e.target.closest("[data-rite=close]")) close(); });
+  addEventListener("keydown", onKey);
+  document.body.appendChild(el);
+  el.querySelector("#riteT").focus({ preventScroll: true });
 }
 
 // ============================================================
@@ -416,7 +580,8 @@ function suggestedSession() {
   return (hour >= 4 && hour < 15) ? "morning" : "night";
 }
 
-function renderHome() {
+function renderHome({ keep = false } = {}) {
+  const y = scrollY;
   setChrome({ bar: false });
   const sid = suggestedSession();
   const s = SESSIONS.find(x => x.id === sid);
@@ -451,14 +616,16 @@ function renderHome() {
     ${installCard()}
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;
   bindInstallCard();
-  window.scrollTo(0, 0);
+  window.scrollTo(0, keep ? y : 0);
+  cleanupPage = startUpoClock(() => renderHome({ keep: true }));
 }
 const shortTitle = t => t.replace(/\s*\(.*?\)\s*/g, "").replace(/^คำ|^บท|^คาถา/, "").trim();
 
 // ---------- หน้าสวด ----------
-function renderSession(id) {
+function renderSession(id, { keep = false } = {}) {
   const s = SESSIONS.find(x => x.id === id);
   if (!s) return renderHome();
+  const y = scrollY;
   setChrome({ title: s.title });
 
   const n = s.order.length;
@@ -525,8 +692,9 @@ function renderSession(id) {
     });
   };
   addEventListener("scroll", onScroll, { passive: true });
-  cleanupPage = () => removeEventListener("scroll", onScroll);
-  window.scrollTo(0, 0);
+  const stopClock = id === "uposatha" ? startUpoClock(() => renderSession(id, { keep: true })) : () => {};
+  cleanupPage = () => { removeEventListener("scroll", onScroll); stopClock(); };
+  window.scrollTo(0, keep ? y : 0);
   onScroll();
 }
 const shortChip = t => t.replace(/\s*\(([^)]*)\)/, (m, x) => /จบ/.test(x) ? "" : ` (${x})`).trim();

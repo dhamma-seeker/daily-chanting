@@ -662,3 +662,61 @@ body.chant-mode { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .cm-done .still-note { opacity: 1; }
 }
+
+/* ---------- นับถอยหลัง ---------- */
+.cd { font-variant-numeric: tabular-nums; letter-spacing: .01em; white-space: nowrap; }
+.upo-card .big .cd-final, .upo-hero .big .cd-final { font-size: 1.25em; }
+.meter .lbls .cd-final { font-size: 1.15em; }
+
+/* ---------- แถบแบ่งตามวัน ---------- */
+.timeline { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; padding-top: 22px; }
+.timeline.compact { gap: 3px; padding-top: 4px; }
+.tl-seg { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tl-bar { position: relative; height: 8px; border-radius: 999px; background: var(--night-line); }
+.tl-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: #FACC15; }
+.tl-lbl { font-size: 13px; color: #CBD5E1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-seg.now .tl-lbl { color: #FACC15; font-weight: 700; }
+.tl-now { position: absolute; top: 50%; width: 0; height: 0; }
+.tl-dot {
+  position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 999px;
+  background: #FFFFFF; border: 3px solid #FACC15; box-shadow: 0 0 0 4px rgba(250, 204, 21, .25);
+}
+.tl-tag {
+  position: absolute; bottom: 14px; left: 0;
+  padding: 1px 8px; border-radius: 999px; background: #FACC15; color: #0F172A;
+  font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.timeline.compact .tl-dot { left: -6px; top: -6px; width: 12px; height: 12px; border-width: 2px; }
+.tl-cap { margin-top: 6px; font-size: 14px; color: #CBD5E1; }
+/* โหมดเตรียม (ยังไม่ถึง) อยู่บนพื้นสว่าง */
+.soon-meter { padding: 4px 18px 12px; border-top: 1px solid var(--line-2); }
+.soon-meter .timeline { padding-top: 8px; }
+.soon-meter .tl-bar { background: var(--surface-2); }
+.soon-meter .tl-lbl, .soon-meter .tl-cap { color: var(--muted); }
+.upo-more { padding: 0 18px 8px; border-top: 1px solid var(--line-2); }
+.upo-hero.live .upo-more { border-top-color: var(--night-line); }
+.upo-more summary { min-height: 48px; display: flex; align-items: center; font-size: 15px; font-weight: 500; }
+.upo-more .upo-days { border-top: 0; padding: 0; }
+
+/* ---------- ช่วงเปลี่ยน (MOTION.md) ---------- */
+.moon-wrap { position: relative; display: inline-grid; place-items: center; flex: none; }
+.moon-wrap::after {
+  content: ""; position: absolute; inset: -45%; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, rgba(253, 230, 138, .85) 0%, rgba(250, 204, 21, .35) 38%, rgba(250, 204, 21, 0) 68%);
+}
+/* แสงทอง: เริ่มถืออุโบสถ */
+.arrive .moon-wrap svg { animation: coreIn 1.2s cubic-bezier(.2, .7, .2, 1) both; }
+.arrive .moon-wrap::after { animation: glowOut 1.6s .5s both; }
+.arrive .live-badge, .arrive .big, .arrive h2 { animation: fadeUp .8s .9s both; }
+/* ประกาย: ข้ามวัน */
+.glint .tl-seg.now .tl-bar { animation: glintBar 1.8s ease-out both; }
+@keyframes coreIn { from { transform: scale(.6); opacity: 0; } }
+@keyframes glintBar {
+  0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+  20% { box-shadow: 0 0 0 4px rgba(250, 204, 21, .55), 0 0 18px rgba(250, 204, 21, .6); }
+  100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+}
+/* ฉัพพรรณรังสี: ถือครบ (ใช้ฉากเดียวกับตอนสวดจบ) */
+.rite { position: fixed; inset: 0; z-index: 60; display: flex; }
+.rite .cm-done { flex: 1; }
+.bloom .core { animation: coreIn 1.4s cubic-bezier(.2, .7, .2, 1) both; }
