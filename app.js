@@ -85,6 +85,7 @@ function loadPrefs() {
 }
 let PREFS = loadPrefs();
 let THEME = store.get("theme") || "auto";
+let STILL = store.get("still") === "1";        // ช่วงนิ่งหลังสวดจบ (ปิดไว้เป็นค่าเริ่มต้น)
 
 function savePrefs() { store.set("prefs-v2", JSON.stringify(PREFS)); }
 
@@ -650,6 +651,12 @@ function renderSettingsBody() {
         </div>
       </div>` : `<p class="off-note">ชั้นนี้ซ่อนอยู่ เปิดสวิตช์เพื่อปรับรูปแบบ</p>`}
     </section>
+    <section class="panel card">
+      <div class="prow">
+        <div style="display:flex;flex-direction:column"><span class="lbl b" id="stLbl">ช่วงนิ่งหลังสวดจบ</span><span class="desc">วงแสงขยายเข้าออกช้า ๆ ให้หายใจตาม 3 รอบ ราว 24 วินาที</span></div>
+        <button type="button" class="switch" role="switch" aria-checked="${STILL}" aria-labelledby="stLbl" data-k="still:toggle"></button>
+      </div>
+    </section>
     <section class="panel card" style="padding:14px 16px">
       <div class="pcol" style="border-top:0;padding:0"><span class="lbl" id="thLbl" style="font-weight:600">ธีม</span>
         <div class="seg-ctl" role="radiogroup" aria-labelledby="thLbl">${themes}</div></div>
@@ -677,6 +684,7 @@ function onSettingsClick(e) {
     case "italic": v.italic = !v.italic; break;
     case "underline": v.underline = !v.underline; break;
     case "theme": THEME = val; store.set("theme", val); break;
+    case "still": STILL = !STILL; store.set("still", STILL ? "1" : "0"); break;
     case "reset": PREFS = clone(DEFAULTS); break;
     case "done": goBack(); return;
   }
@@ -715,6 +723,36 @@ function updateWakeChip() {
   const c = document.getElementById("wakeChip");
   if (c) c.classList.toggle("off", !wakeLock);
 }
+
+// ---------- ภาพตอนจบ ----------
+// ดอกบัว: กลีบหมุนรอบโคนดอก (60,92) กลีบหลังวาดก่อน
+const LOTUS_SVG = (() => {
+  const petal = "M60 92 C47 77 45 50 60 26 C75 50 73 77 60 92 Z";
+  const ring = [
+    { r: -62, s: .78, d: .30, back: true }, { r: 62, s: .78, d: .30, back: true },
+    { r: -32, s: .9, d: .15 }, { r: 32, s: .9, d: .15 }, { r: 0, s: 1, d: 0 },
+  ];
+  const g = ring.map(p => `<path class="petal" d="${petal}" fill="url(#${p.back ? "ptB" : "ptF"})" stroke="#EAB308" stroke-opacity=".55" stroke-width=".8"
+    style="--r:${p.r}deg;--s:${p.s};--d:${p.d}s"/>`).join("");
+  return `<svg class="lotus" viewBox="0 0 120 120">
+    <defs>
+      <linearGradient id="ptF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FDE68A"/><stop offset=".55" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+      <linearGradient id="ptB" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#EAB308"/><stop offset="1" stop-color="#FDE68A"/></linearGradient>
+    </defs>
+    ${g}
+    <path d="M30 96 C45 104 75 104 90 96" fill="none" stroke="#FDE68A" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+})();
+// ฉัพพรรณรังสี: นีล ปีต โลหิต โอทาต มัญเชฐ ประภัสสร (โทนอ่อน) เรียงวนเป็นลำแสง 36 ลำ
+const RAYS_BG = (() => {
+  const c = ["#93C5FD", "#FDE68A", "#FCA5A5", "#FFFFFF", "#FDBA74", "#E9D5FF"];
+  const stops = [];
+  for (let i = 0; i < 36; i++) {
+    const a = i * 10;
+    stops.push(`transparent ${a}deg`, `${c[i % 6]} ${a + 2.5}deg`, `${c[i % 6]} ${a + 4.5}deg`, `transparent ${a + 7}deg`);
+  }
+  return `conic-gradient(from -2deg, ${stops.join(", ")}, transparent 360deg)`;
+})();
 
 function buildSteps(s) {
   const steps = [];
@@ -777,17 +815,23 @@ function paintChant() {
 
   if (done) {
     const chants = new Set(steps.map(x => x.ci)).size;
+    const still = STILL ? `<span class="breath"></span>` : "";
     host.innerHTML = `${head}
-      <section class="cm-done">
-        <span class="logo">${ICON.lotus}</span>
-        <h2>จบ${esc(CM.title)}</h2>
-        <p>สวดครบ ${chants} บท ${n} ท่อน</p>
+      <section class="cm-done" aria-labelledby="cmDoneT">
+        <div class="bloom" aria-hidden="true">
+          <span class="rays" style="background:${RAYS_BG}"></span>
+          <span class="glow"></span>${still}
+          ${LOTUS_SVG}
+        </div>
+        <h2 id="cmDoneT" tabindex="-1">สาธุ</h2>
+        <p>จบ${esc(CM.title)} · ครบ ${chants} บท ${n} ท่อน</p>
+        ${STILL ? `<p class="still-note">นิ่งสักครู่ หายใจตามวงแสง</p>` : ""}
         <div class="actions">
           <a class="btn primary block" href="#/">กลับหน้าแรก</a>
           <button type="button" class="btn secondary block" data-cm="restart">สวดอีกครั้ง</button>
         </div>
       </section>`;
-    host.querySelector("[data-cm=restart]").focus();
+    host.querySelector("#cmDoneT").focus({ preventScroll: true });
     return;
   }
 
