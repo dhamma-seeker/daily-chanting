@@ -729,3 +729,117 @@ body.chant-mode { overflow: hidden; }
 .rite { position: fixed; inset: 0; z-index: 60; display: flex; }
 .rite .cm-done { flex: 1; }
 .bloom .core { animation: coreIn 1.4s cubic-bezier(.2, .7, .2, 1) both; }
+
+/* ---------- ระลึก ๕ ประการ · ใจผ่องใส ---------- */
+.an {
+  position: fixed; inset: 0; z-index: 30; display: grid;
+  grid-template-rows: auto 290px minmax(0, 1fr) auto auto;
+  background: radial-gradient(120% 60% at 50% 30%, #1B2B5E 0%, #0F1E46 45%, #0A1430 100%); color: #FFFFFF;
+}
+.an :focus-visible { outline-color: #FDE68A; }
+.an-head { padding: calc(env(safe-area-inset-top) + 8px) 12px 6px; display: flex; flex-direction: column; gap: 10px; }
+.an-head .row { display: flex; align-items: center; gap: 8px; max-width: var(--maxw); width: 100%; margin: 0 auto; }
+.an-head .iconbtn { color: #FFFFFF; }
+.an-head .iconbtn:hover { background: rgba(255, 255, 255, .08); }
+.an-head .ttl { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.an-head h1 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.an-head #anPos { font-size: 14px; color: #CBD5E1; }
+.an-head .wake-chip { background: rgba(255, 255, 255, .1); color: #FDE68A; }
+.an-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: var(--maxw); width: 100%; margin: 0 auto; }
+.an-chip {
+  min-height: 48px; border-radius: 12px; font: inherit; font-size: 15px; font-weight: 500; padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 1px solid rgba(255, 255, 255, .18); background: transparent; color: #E2E8F0;
+}
+.an-chip[aria-selected="true"] { border-color: #FDE68A; background: rgba(253, 230, 138, .14); color: #FDE68A; font-weight: 700; }
+.an-chip .mk { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .2); }
+.an-chip.done .mk { background: #FACC15; }
+
+.an-stage { position: relative; display: grid; place-items: center; overflow: visible; }
+.an-stage > * { position: absolute; left: 50%; top: 50%; }
+.an-orb {
+  width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle at 40% 35%, #FFFFFF 0%, #FFFBEB 22%, #FDE68A 55%, #CA8A04 100%);
+  transition: box-shadow 1.2s ease, filter 1.2s ease;
+}
+.an-haze, .an-orb .speck { position: absolute; opacity: var(--haze, .9); transition: opacity 1.2s ease; }
+.an-haze { inset: 0; border-radius: 50%; background: radial-gradient(circle at 45% 40%, rgba(148, 163, 184, .75), rgba(51, 65, 85, .95)); }
+.an-orb .speck { border-radius: 50%; background: #475569; }
+.speck.s1 { left: 34px; top: 44px; width: 14px; height: 14px; }
+.speck.s2 { left: 92px; top: 80px; width: 20px; height: 20px; }
+.speck.s3 { left: 70px; top: 30px; width: 9px; height: 9px; }
+.speck.s4 { left: 46px; top: 104px; width: 11px; height: 11px; }
+.an-dots { width: 0; height: 0; }
+.an-dot {
+  position: absolute; left: var(--x); top: var(--y); width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%;
+  background: rgba(253, 230, 138, .22); transition: background-color .6s ease, box-shadow .6s ease;
+}
+.an-dot.on { background: #FACC15; box-shadow: 0 0 8px rgba(250, 204, 21, .8); }
+.an-dot.cur { width: 16px; height: 16px; margin: -8px 0 0 -8px; box-shadow: 0 0 14px rgba(250, 204, 21, .9); }
+.an-fx { width: 0; height: 0; }
+.an-flash {
+  position: absolute; width: 156px; height: 156px; left: -78px; top: -78px; border-radius: 50%;
+  border: 2px solid rgba(253, 230, 138, .8); opacity: 0; animation: anRing 1.2s ease-out both;
+}
+.an-gold {
+  position: absolute; width: 260px; height: 260px; left: -130px; top: -130px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, rgba(253, 230, 138, .85) 0%, rgba(250, 204, 21, .35) 38%, rgba(250, 204, 21, 0) 68%);
+  animation: glowOut 1.8s both;
+}
+.an-rays {
+  width: 400px; height: 400px; margin: -200px 0 0 -200px; border-radius: 50%; opacity: 0; filter: blur(1.2px);
+  -webkit-mask: radial-gradient(circle, transparent 18%, #000 28%, rgba(0, 0, 0, .55) 46%, transparent 70%);
+          mask: radial-gradient(circle, transparent 18%, #000 28%, rgba(0, 0, 0, .55) 46%, transparent 70%);
+}
+.an-rays.on { animation: anRays 4.2s ease both; }
+@keyframes anRing { from { transform: scale(.85); opacity: .85; } to { transform: scale(1.45); opacity: 0; } }
+@keyframes anRays {
+  0% { transform: scale(.7); opacity: 0; } 10% { transform: scale(1); opacity: .8; }
+  60% { transform: scale(1.02) rotate(6deg); opacity: .8; } 100% { transform: scale(1.04) rotate(9deg); opacity: .35; }
+}
+
+.an-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 24px 0; text-align: center;
+  overflow-y: auto; max-width: var(--maxw); width: 100%; margin: 0 auto; animation: fadeUp .5s ease both;
+}
+.an-card .eb { font-size: 14px; font-weight: 600; color: #FDE68A; }
+.an-card .pl { margin: 0; font-size: max(22px, var(--pali-fs)); font-weight: 600; line-height: 1.35; color: #E0E7FF; font-family: var(--pali-ff); }
+.an-card .th { margin: 0; font-size: max(17px, var(--thai-fs)); line-height: 1.45; color: #CBD5E1; font-family: var(--thai-ff); }
+.an-card .nt { margin: 4px 0 0; font-size: 15px; color: #FDE68A; }
+.an-next {
+  appearance: none; border: 0; width: 100%; font: inherit; color: #FFFFFF; cursor: pointer;
+  min-height: 128px; padding: 12px 20px 10px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; align-items: center;
+  background: linear-gradient(rgba(10, 20, 48, 0), rgba(255, 255, 255, .06));
+}
+.an-next .go {
+  display: flex; align-items: center; justify-content: center; width: 100%; max-width: var(--maxw); min-height: 60px;
+  border-radius: 16px; background: #FFFFFF; color: #1E3A8A; font-size: 19px; font-weight: 600;
+}
+.an-next .hint { font-size: 13px; color: #CBD5E1; }
+.an-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 6px 16px calc(env(safe-area-inset-bottom) + 14px); max-width: var(--maxw); width: 100%; margin: 0 auto;
+}
+.an-foot .btn.secondary { min-height: 44px; font-size: 15px; background: transparent; color: #FFFFFF; border-color: rgba(255, 255, 255, .3); }
+.an-foot a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; color: #CBD5E1; text-decoration: none; }
+.an-foot a svg.i { width: 16px; height: 16px; }
+
+/* ปุ่มเข้าโหมดระลึก ในบท "ระลึก ๕ ประการ" */
+.an-entry {
+  display: flex; align-items: center; gap: 14px; margin: 4px 0 12px; padding: 14px 16px; border-radius: var(--radius);
+  background: var(--night); border: 1px solid var(--night-line); color: #FFFFFF; text-decoration: none; box-shadow: var(--shadow);
+}
+.an-entry .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.an-entry .meta b { font-size: 18px; font-weight: 600; }
+.an-entry .meta span { font-size: 14px; color: #CBD5E1; }
+.an-mini {
+  width: 44px; height: 44px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 40% 35%, #FFFFFF 0%, #FFFBEB 22%, #FDE68A 55%, #CA8A04 100%);
+  box-shadow: 0 0 16px 4px rgba(250, 204, 21, .35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .an-gold[data-fade] { animation: glowFade 1.8s both; }
+  .an-rays.on[data-fade] { animation: anRaysFade 4.2s both; }
+}
+@keyframes anRaysFade { 0% { opacity: 0; } 10% { opacity: .8; } 100% { opacity: .35; } }

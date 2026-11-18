@@ -641,6 +641,7 @@ function renderSession(id, { keep = false } = {}) {
     const segs = c.segments.map(seg => seg.head ? `<h3 class="seg-head">${esc(seg.head)}</h3>` : segmentHTML(seg)).join("");
     return `<section class="chant" id="c-${i}">
       <div class="chant-head"><span class="of">บทที่ ${i + 1} จาก ${n}</span><h2>${esc(c.title)}</h2>${note}</div>
+      ${cid === "uposatha-anussati" ? `<a class="an-entry" href="#/anussati"><span class="an-mini" aria-hidden="true"></span><span class="meta"><b>ระลึกทีละข้อ</b><span>ใจผ่องใส · ดวงแก้วใสขึ้นทีละคุณ</span></span>${ICON.chev}</a>` : ""}
       ${segs}
     </section>`;
   }).join("");
@@ -1086,6 +1087,169 @@ view.addEventListener("click", e => {
 });
 
 // ============================================================
+//  ระลึก ๕ ประการ · ใจผ่องใส (AN 3.70)
+// ============================================================
+// ดวงแก้วกลาง = ใจ เริ่มขุ่น แล้วใสขึ้นทีละคุณ · จุดแสงรอบดวงแก้ว = จำนวนคุณของข้อนั้นตามพระสูตร
+// แสง (MOTION.md): ทุกคุณ = ประกาย (วงแสงขยาย) · ครบข้อ = แสงทอง · ครบ ๕ ข้อ = ฉัพพรรณรังสี
+// บาลีสะกดตามบท "ระลึก ๕ ประการ ชำระใจ" ใน uposatha.js
+const ANUSSATI = [
+  { label: "พุทธ", name: "ระลึกถึงพระพุทธเจ้า", simile: "เหมือนสระผม", intro: "อิธะ อะริยะสาวะโก ตะถาคะตัง อะนุสสะระติ", q: [
+    ["อะระหัง", "เป็นพระอรหันต์ ไกลจากกิเลส"], ["สัมมาสัมพุทโธ", "ตรัสรู้ชอบได้เอง"], ["วิชชาจะระณะสัมปันโน", "ถึงพร้อมด้วยความรู้และความประพฤติ"],
+    ["สุคะโต", "ไปดีแล้ว"], ["โลกะวิทู", "รู้แจ้งโลก"], ["อะนุตตะโร ปุริสะทัมมะสาระถิ", "ฝึกคนที่ควรฝึกได้ ไม่มีใครยิ่งกว่า"],
+    ["สัตถา เทวะมะนุสสานัง", "เป็นครูของเทวดาและมนุษย์"], ["พุทโธ", "เป็นผู้รู้ ผู้ตื่น ผู้เบิกบาน"], ["ภะคะวา", "เป็นผู้มีโชค ผู้จำแนกธรรม"]] },
+  { label: "ธรรม", name: "ระลึกถึงพระธรรม", simile: "เหมือนอาบน้ำชำระกาย", intro: "อิธะ อะริยะสาวะโก ธัมมัง อะนุสสะระติ", q: [
+    ["สฺวากขาโต ภะคะวะตา ธัมโม", "พระธรรมที่พระผู้มีพระภาคตรัสไว้ดีแล้ว"], ["สันทิฏฐิโก", "เห็นได้ด้วยตนเอง"], ["อะกาลิโก", "ไม่ขึ้นกับกาลเวลา"],
+    ["เอหิปัสสิโก", "ควรเรียกคนอื่นมาดู"], ["โอปะเนยฺยิโก", "ควรน้อมเข้ามาใส่ตัว"], ["ปัจจัตตัง เวทิตัพโพ วิญญูหิ", "ผู้รู้รู้ได้เฉพาะตน"]] },
+  { label: "สงฆ์", name: "ระลึกถึงพระสงฆ์", simile: "เหมือนซักผ้า", intro: "อิธะ อะริยะสาวะโก สังฆัง อะนุสสะระติ", q: [
+    ["สุปปะฏิปันโน", "ปฏิบัติดี"], ["อุชุปปะฏิปันโน", "ปฏิบัติตรง"], ["ญายัปปะฏิปันโน", "ปฏิบัติเพื่อรู้ธรรม"], ["สามีจิปปะฏิปันโน", "ปฏิบัติสมควร"],
+    ["อาหุเนยฺโย", "ควรแก่ของที่นำมาบูชา"], ["ปาหุเนยฺโย", "ควรแก่การต้อนรับ"], ["ทักขิเณยฺโย", "ควรแก่ทักษิณา"], ["อัญชะลิกะระณีโย", "ควรแก่การไหว้"],
+    ["อะนุตตะรัง ปุญญักเขตตัง โลกัสสะ", "เป็นเนื้อนาบุญของโลก ไม่มีที่ใดยิ่งกว่า"]] },
+  { label: "ศีล", name: "ระลึกถึงศีลของตน", simile: "เหมือนเช็ดกระจกที่หมอง", intro: "อิธะ อะริยะสาวะโก อัตตะโน สีลานิ อะนุสสะระติ", q: [
+    ["อะขัณฑานิ", "ไม่ขาด"], ["อัจฉิททานิ", "ไม่ทะลุ"], ["อะสะพะลานิ", "ไม่ด่าง"], ["อะกัมมาสานิ", "ไม่พร้อย"], ["ภุชิสสานิ", "เป็นไท ไม่เป็นทาสตัณหา"],
+    ["วิญญุปปะสัตถานิ", "ผู้รู้สรรเสริญ"], ["อะปะรามัฏฐานิ", "ไม่ยึดติดผิด ๆ"], ["สะมาธิสังวัตตะนิกานิ", "ช่วยให้ใจตั้งมั่น"]] },
+  { label: "เทวดา", name: "ระลึกถึงเทวดา", simile: "เหมือนหลอมทอง", intro: "อิธะ อะริยะสาวะโก เทวะตา อะนุสสะระติ", q: [
+    ["สัทธา", "ศรัทธาแบบที่เทวดามี เราก็มี"], ["สีลัง", "ศีลแบบที่เทวดามี เราก็มี"], ["สุตัง", "การได้ฟังได้เรียนธรรมแบบที่เทวดามี เราก็มี"],
+    ["จาโค", "การให้ การเสียสละแบบที่เทวดามี เราก็มี"], ["ปัญญา", "ปัญญาแบบที่เทวดามี เราก็มี"]] },
+];
+let AN = null;
+
+function renderAnussati() {
+  setChrome({ title: "ระลึก ๕ ประการ", bar: false });
+  document.body.classList.add("chant-mode");
+  AN = { rec: 0, step: -1, done: ANUSSATI.map(() => false), finale: false };
+  view.innerHTML = `<div class="an" id="an">
+    <header class="an-head">
+      <div class="row">
+        <button type="button" class="iconbtn" data-an="exit" aria-label="ออกจากการระลึก">${ICON.x}</button>
+        <div class="ttl"><h1>ระลึก ๕ ประการ</h1><span id="anPos"></span></div>
+        <span class="wake-chip off" id="wakeChip" title="จอจะไม่ดับระหว่างระลึก">${ICON.sun}<span>จอไม่ดับ</span></span>
+      </div>
+      <div class="an-chips" role="tablist" aria-label="เลือกข้อที่จะระลึก" id="anChips"></div>
+    </header>
+    <section class="an-stage" aria-hidden="true">
+      <span class="an-rays" data-fade id="anRays" style="background:${RAYS_BG}"></span>
+      <span class="an-fx" id="anFx"></span>
+      <span class="an-dots" id="anDots"></span>
+      <span class="an-orb" id="anOrb"><span class="speck s1"></span><span class="speck s2"></span><span class="speck s3"></span><span class="speck s4"></span><span class="an-haze" id="anHaze"></span></span>
+    </section>
+    <section class="an-card" id="anCard" aria-live="polite"></section>
+    <button type="button" class="an-next" data-an="next"><span class="go" id="anNextLbl"></span><span class="hint">แตะตรงไหนก็ได้ในส่วนนี้</span></button>
+    <footer class="an-foot">
+      <button type="button" class="btn secondary" data-an="prev" id="anPrev">${ICON.up}<span>ย้อน</span></button>
+      <a href="#/sutta/an3.70/4">${ICON.book}<span>AN 3.70 อ่านพระสูตร</span></a>
+    </footer>
+  </div>`;
+  paintAn(null);
+  requestWake();
+  const onKey = e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const onBtn = e.target.closest?.("button, a"), k = e.key;
+    if (["ArrowDown", "ArrowRight", "PageDown", " ", "Spacebar"].includes(k)) {
+      if (onBtn && k === " ") return;
+      e.preventDefault(); anGo(1);
+    } else if (["ArrowUp", "ArrowLeft", "PageUp"].includes(k)) { e.preventDefault(); anGo(-1); }
+    else if (k === "Escape") goBack();
+  };
+  const onVisAn = () => { if (document.visibilityState === "visible" && !wakeLock) requestWake(); };
+  addEventListener("keydown", onKey);
+  document.addEventListener("visibilitychange", onVisAn);
+  cleanupPage = () => {
+    removeEventListener("keydown", onKey);
+    document.removeEventListener("visibilitychange", onVisAn);
+    releaseWake();
+    document.body.classList.remove("chant-mode");
+    AN = null;
+  };
+}
+
+function anGo(delta) {
+  if (!AN) return;
+  const R = ANUSSATI[AN.rec], N = R.q.length;
+  let fx = null;
+  if (AN.finale) {
+    if (delta > 0) Object.assign(AN, { rec: 0, step: -1, done: ANUSSATI.map(() => false), finale: false });
+    else Object.assign(AN, { finale: false, rec: ANUSSATI.length - 1, step: ANUSSATI[ANUSSATI.length - 1].q.length });
+  } else if (delta > 0) {
+    if (AN.step < N) {
+      AN.step++;
+      fx = "flash";
+      if (AN.step === N) { AN.done[AN.rec] = true; fx = "gold"; }
+    } else {
+      const nxt = AN.done.findIndex((d, i) => !d && i !== AN.rec);
+      if (nxt === -1) { AN.finale = true; fx = "gold"; }
+      else Object.assign(AN, { rec: nxt, step: -1 });
+    }
+  } else {
+    if (AN.step > -1) AN.step--;
+    else if (AN.rec > 0) Object.assign(AN, { rec: AN.rec - 1, step: ANUSSATI[AN.rec - 1].q.length });
+    else return;
+  }
+  paintAn(fx);
+}
+
+function paintAn(fx) {
+  if (!AN || !document.getElementById("an")) return;
+  const R = ANUSSATI[AN.rec], N = R.q.length;
+  const doneCount = AN.done.filter(Boolean).length;
+  const lit = AN.finale ? N : Math.max(0, Math.min(N, AN.step + 1));
+  // ข้อถัดไปเริ่มจากใจที่ขุ่นน้อยลง ตามจำนวนข้อที่ระลึกครบแล้ว
+  const startHaze = Math.max(.35, .9 - .11 * (AN.done[AN.rec] ? doneCount - 1 : doneCount));
+  const p = AN.finale ? 1 : lit / N;
+  const haze = startHaze * (1 - p);
+  const g = Math.round(18 + 70 * p);
+
+  const orb = document.getElementById("anOrb");
+  orb.style.boxShadow = `0 0 ${g}px ${Math.round(g / 3)}px rgba(250,204,21,${(.15 + .55 * p).toFixed(2)})`;
+  orb.style.filter = `saturate(${(.5 + .5 * p).toFixed(2)}) brightness(${(.75 + .25 * p).toFixed(2)})`;
+  orb.style.setProperty("--haze", haze.toFixed(2));
+
+  document.getElementById("anDots").innerHTML = R.q.map((_, i) => {
+    const a = -Math.PI / 2 + (i / N) * Math.PI * 2;
+    const cur = i === lit - 1 && !AN.finale && AN.step < N;
+    return `<span class="an-dot${i < lit ? " on" : ""}${cur ? " cur" : ""}" style="--x:${Math.round(Math.cos(a) * 112)}px;--y:${Math.round(Math.sin(a) * 112)}px"></span>`;
+  }).join("");
+
+  const fxHost = document.getElementById("anFx");
+  if (fx === "flash") fxHost.innerHTML = `<span class="an-flash"></span>`;
+  else if (fx === "gold") fxHost.innerHTML = `<span class="an-gold" data-fade></span>`;
+  document.getElementById("anRays").classList.toggle("on", AN.finale);
+
+  document.getElementById("anChips").innerHTML = ANUSSATI.map((d, i) => {
+    const sel = i === AN.rec && !AN.finale;
+    return `<button type="button" role="tab" aria-selected="${sel}" data-an="rec:${i}" class="an-chip${AN.done[i] ? " done" : ""}">
+      <span class="mk" aria-hidden="true"></span><span>${d.label}</span>${AN.done[i] ? '<span class="sr-only">ระลึกแล้ว</span>' : ""}</button>`;
+  }).join("");
+
+  let eb, pali, thai, note = "", next, pos;
+  if (AN.finale) {
+    eb = "ระลึกครบ ๕ ประการ"; pali = "จิตตัง ปะสีทะติ"; thai = "ใจผ่องใส"; note = "อยู่อุโบสถแบบพระอริยะ · สาธุ"; next = "เริ่มใหม่"; pos = "ครบแล้ว";
+  } else if (AN.step === -1) {
+    eb = `ข้อที่ ${AN.rec + 1} จาก 5`; pali = R.intro; thai = R.name; note = `แตะเพื่อระลึกทีละคุณ (${N} คุณ)`; next = "เริ่มระลึก"; pos = R.name;
+  } else if (AN.step < N) {
+    eb = `คุณที่ ${AN.step + 1} จาก ${N}`; [pali, thai] = R.q[AN.step]; next = AN.step + 1 < N ? "คุณถัดไป" : "ระลึกครบข้อนี้"; pos = R.name;
+  } else {
+    eb = `${R.name} ครบ ${N} คุณ`; pali = "จิตตัง ปะสีทะติ ปาโมชชัง อุปปัชชะติ"; thai = "ใจผ่องใส ความเบิกบานเกิดขึ้น"; note = R.simile;
+    next = doneCount < ANUSSATI.length ? "ข้อถัดไป" : "ใจผ่องใส"; pos = `ระลึกแล้ว ${doneCount} จาก 5 ข้อ`;
+  }
+  document.getElementById("anPos").textContent = pos;
+  document.getElementById("anCard").innerHTML = `<span class="eb">${esc(eb)}</span>
+    <p class="pl" lang="pi">${esc(pali)}</p><p class="th">${esc(thai)}</p>${note ? `<p class="nt">${esc(note)}</p>` : ""}`;
+  document.getElementById("anNextLbl").textContent = next;
+  document.querySelector(".an-next").setAttribute("aria-label", next);
+  document.getElementById("anPrev").disabled = AN.rec === 0 && AN.step === -1 && !AN.finale;
+}
+
+view.addEventListener("click", e => {
+  const b = e.target.closest("[data-an]");
+  if (!b || !AN) return;
+  const [a, v] = b.dataset.an.split(":");
+  if (a === "next") anGo(1);
+  else if (a === "prev") anGo(-1);
+  else if (a === "exit") goBack();
+  else if (a === "rec") { Object.assign(AN, { rec: +v, step: -1, finale: false }); paintAn(null); }
+});
+
+// ============================================================
 //  นำทาง
 // ============================================================
 let navDepth = 0;   // จำนวนหน้าที่เปิดต่อกันในแอป (ใช้ย้อนกลับ)
@@ -1104,6 +1268,7 @@ function route() {
   if (m && typeof SUTTAS !== "undefined" && SUTTAS[m[1]]) renderSutta(m[1], m[2] || null);
   else if (c && SESSIONS.some(s => s.id === c[1])) renderChant(c[1], +(c[2] || 0));
   else if (h === "settings") renderSettings();
+  else if (h === "anussati") renderAnussati();
   else if (h && SESSIONS.some(s => s.id === h)) renderSession(h);
   else renderHome();
   measureTopbar();
