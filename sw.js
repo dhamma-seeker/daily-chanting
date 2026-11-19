@@ -1,6 +1,6 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
 // เลข CACHE เปลี่ยนเมื่อเพิ่ม/ลบไฟล์ใน ASSETS (ไฟล์ที่แก้เฉย ๆ อัปเดตเองอยู่แล้ว)
-const CACHE = "suadmon-v12";
+const CACHE = "suadmon-v13";
 const FONT_CACHE = "suadmon-fonts-v1";   // ฟอนต์จาก Google Fonts แยกแคช ไม่ลบตอนเปลี่ยนรุ่น
 
 const ASSETS = [
@@ -23,12 +23,15 @@ const ASSETS = [
   "./icon-512-maskable.png",
 ];
 
+// รายชื่อไฟล์พระสูตร (lazy-load) สร้างโดย tools/build_suttas.py → self.SUTTA_FILES
+importScripts("suttas/list.js");
+
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then((c) =>
       // เพิ่มทีละไฟล์ ไม่ให้ล้มทั้งชุดถ้าไฟล์ใดหาย
-      Promise.all(ASSETS.map((u) => c.add(u).catch(() => {}))))
+      Promise.all([...ASSETS, ...(self.SUTTA_FILES || [])].map((u) => c.add(u).catch(() => {}))))
   );
 });
 

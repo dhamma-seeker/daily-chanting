@@ -1,0 +1,67 @@
+[
+ {
+  "segment_id": "kp1:0.1",
+  "pali": "Khuddakapāṭha 1",
+  "en": "Basic Passages 1"
+ },
+ {
+  "segment_id": "kp1:0.2",
+  "pali": "Saraṇattaya",
+  "en": "The Three Refuges"
+ },
+ {
+  "segment_id": "kp1:1.1",
+  "pali": "Namo tassa Bhagavato Arahato Sammāsambuddhassa.",
+  "en": "Homage to him, the blessed one, the perfected one, the fully awakened Buddha!"
+ },
+ {
+  "segment_id": "kp1:2.1",
+  "pali": "Buddhaṁ saraṇaṁ gacchāmi,",
+  "en": "I take refuge in the Buddha,"
+ },
+ {
+  "segment_id": "kp1:2.2",
+  "pali": "Dhammaṁ saraṇaṁ gacchāmi,",
+  "en": "I take refuge in the Teaching,"
+ },
+ {
+  "segment_id": "kp1:2.3",
+  "pali": "Saṅghaṁ saraṇaṁ gacchāmi.",
+  "en": "I take refuge in the Sangha."
+ },
+ {
+  "segment_id": "kp1:3.1",
+  "pali": "Dutiyampi buddhaṁ saraṇaṁ gacchāmi,",
+  "en": "For the second time I take refuge in the Buddha,"
+ },
+ {
+  "segment_id": "kp1:3.2",
+  "pali": "Dutiyampi dhammaṁ saraṇaṁ gacchāmi,",
+  "en": "for the second time I take refuge in the Teaching,"
+ },
+ {
+  "segment_id": "kp1:3.3",
+  "pali": "Dutiyampi saṅghaṁ saraṇaṁ gacchāmi.",
+  "en": "for the second time I take refuge in the Sangha."
+ },
+ {
+  "segment_id": "kp1:4.1",
+  "pali": "Tatiyampi buddhaṁ saraṇaṁ gacchāmi,",
+  "en": "For the third time I take refuge in the Buddha,"
+ },
+ {
+  "segment_id": "kp1:4.2",
+  "pali": "Tatiyampi dhammaṁ saraṇaṁ gacchāmi,",
+  "en": "for the third time I take refuge in the Teaching,"
+ },
+ {
+  "segment_id": "kp1:4.3",
+  "pali": "Tatiyampi saṅghaṁ saraṇaṁ gacchāmi.",
+  "en": "for the third time I take refuge in the Sangha."
+ },
+ {
+  "segment_id": "kp1:5.1",
+  "pali": "Saraṇattayaṁ.",
+  "en": null
+ }
+]

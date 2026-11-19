@@ -1,0 +1,27 @@
+// สร้างอัตโนมัติโดย tools/build_suttas.py · รายชื่อไฟล์พระสูตรให้ sw.js แคชไว้ใช้ออฟไลน์
+self.SUTTA_FILES = [
+ "./suttas/an3.37.json",
+ "./suttas/an3.70.json",
+ "./suttas/an8.41.json",
+ "./suttas/an9.18.json",
+ "./suttas/an10.46.json",
+ "./suttas/snp2.14.json",
+ "./suttas/kp1.json",
+ "./suttas/an6.10.json",
+ "./suttas/an11.12.json",
+ "./suttas/sn11.3.json",
+ "./suttas/an8.39.json",
+ "./suttas/an5.57.json",
+ "./suttas/sn56.29.json",
+ "./suttas/sn56.11.json",
+ "./suttas/sn35.1.json",
+ "./suttas/sn35.4.json",
+ "./suttas/sn35.5.json",
+ "./suttas/snp1.8.json",
+ "./suttas/an11.15.json",
+ "./suttas/sn3.8.json",
+ "./suttas/ud5.1.json",
+ "./suttas/kp7.json",
+ "./suttas/an5.39.json",
+ "./suttas/ja159.json"
+];
