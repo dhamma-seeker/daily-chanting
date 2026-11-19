@@ -267,3 +267,40 @@
   .ln-hint { font-size: 13px; }
   .bd-node.long b { font-size: 12px; }
 }
+
+/* ---------- ตรวจใจหลังหายใจ (AN 6.20) ---------- */
+.qp-check { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 8px 0 12px; animation: fadeUp .5s ease both; }
+.qp-check .qp-spark { align-self: center; }
+.qp-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 6px; }
+.qp-answers .btn { min-height: 60px; }
+.qp-ans.yes { background: rgba(253, 230, 138, .1); color: #FFFFFF; border: 1px solid rgba(253, 230, 138, .5); }
+.qp-quote .th.big { font-size: 19px; font-weight: 600; line-height: 1.6; }
+.ln-mid b.gold { color: #FDE68A; }
+
+/* ---------- เตรียมใจก่อนแผ่เมตตา ---------- */
+.mt-prep { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 4px 0 4px; animation: fadeUp .5s ease both; }
+.mt-mind { position: relative; align-self: center; width: 130px; height: 130px; flex: none; display: block; }
+.mt-mind > span { position: absolute; }
+/* ใจยิ่งวางได้ หมอกรอบจุดกลางยิ่งจาง */
+.mt-haze { inset: 0; border-radius: 999px; transition: opacity 1s ease; background: radial-gradient(circle, rgba(148, 163, 184, .55) 0%, rgba(100, 116, 139, .35) 45%, rgba(100, 116, 139, 0) 70%); }
+.mt-items { display: flex; flex-direction: column; gap: 8px; }
+.mt-item {
+  display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 14px; border-radius: 14px; font: inherit; color: #FFFFFF; text-align: left;
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .25); transition: opacity .6s ease, background-color .6s ease, border-color .6s ease;
+}
+.mt-item .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mt-item b { font-size: 17px; font-weight: 600; }
+.mt-item .txt > span { font-size: 14px; color: #CBD5E1; }
+.mt-item .tag { flex: none; font-size: 13px; font-weight: 600; color: #CBD5E1; }
+.mt-item[aria-pressed="true"] { background: rgba(253, 230, 138, .06); border-color: rgba(253, 230, 138, .25); opacity: .6; }
+.mt-item[aria-pressed="true"] .tag { color: #FDE68A; }
+.mt-prep .btn { margin-top: auto; }
+#qpQ:focus { outline: none; }
+@media (max-height: 700px) {
+  .mt-mind { width: 64px; height: 64px; }
+  .mt-prep { gap: 8px; }
+  .mt-prep .ln-mid { font-size: 15px; line-height: 1.5; }
+  .mt-item { min-height: 52px; padding: 6px 12px; }
+  .mt-item b { font-size: 16px; }
+  .mt-item .txt > span { font-size: 13px; }
+}

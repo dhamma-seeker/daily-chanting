@@ -134,18 +134,45 @@ function renderBreath() {
     const sec = body.firstElementChild, ph = body.querySelector("#qpPhase");
     stopRing = bindBreathRing(body.querySelector("#qpHold"), {
       onPhase: p => { sec.dataset.phase = p; ph.textContent = p === "in" ? "หายใจเข้า…" : p === "out" ? "หายใจออก…" : ""; },
-      onDone: paintDone,
+      onDone: paintCheck,
     });
   };
-  const paintDone = () => {
-    body.innerHTML = `<section class="qp-done">
+  // ตรวจใจตาม AN 6.20: "อกุศลที่ยังละไม่ได้ ซึ่งจะเป็นอันตรายถ้าเราตายคืนนี้/วันนี้ ยังมีอยู่ไหม"
+  // พระสูตรมีสองแบบ: ค่ำ (rattiṁ) และเช้า (divā) · ใช้ช่วงเดียวกับ "แนะนำตอนนี้" (เช้า 04:00–14:59)
+  // คำตอบใช้แค่เลือกคำสอนที่จะแสดง ไม่เก็บไว้ที่ไหน
+  const paintCheck = () => {
+    const hr = new Date().getHours(), night = !(hr >= 4 && hr < 15);
+    body.innerHTML = `<section class="qp-check">
         <span class="qp-spark" aria-hidden="true"></span>
+        <span class="qp-chip">ตรวจใจ · AN 6.20</span>
+        <p class="ln-mid">ความตายมาได้หลายทาง ไม่รู้ว่าเมื่อไร</p>
+        <p class="ln-big" id="qpQ" tabindex="-1">อกุศลที่เรายังละไม่ได้<br>ซึ่งจะเป็นอันตราย ถ้าเราตาย${night ? "คืนนี้" : "วันนี้"}<br>ยังมีอยู่ไหม</p>
+        <p class="ln-pi" lang="pi-Latn">‘atthi nu kho me pāpakā akusalā dhammā appahīnā, ye me assu ${night ? "rattiṁ" : "divā"} kālaṁ karontassa antarāyāyā’ti</p>
+        <p class="qp-ai">ดูในใจตามจริง คำตอบไม่ถูกบันทึกไว้ที่ไหน</p>
+        <div class="qp-answers" role="group" aria-labelledby="qpQ">
+          <button type="button" class="btn qp-ans yes" data-ans="yes">ยังมี</button>
+          <button type="button" class="btn qp-secondary" data-ans="no">ไม่เห็นมี</button>
+        </div>
+      </section>`;
+    body.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => paintDone(b.dataset.ans === "yes"));
+    // โฟกัสที่คำถาม ไม่ใช่ปุ่มคำตอบ: ไม่ให้ดูเหมือนแอปเลือกคำตอบไว้ให้
+    body.querySelector("#qpQ").focus({ preventScroll: true });
+  };
+  const paintDone = yes => {
+    const answer = yes
+      ? `<p class="th big">“ให้เร่งละสิ่งนั้น ด้วยความพอใจ ความเพียร ความอุตสาหะ สติ และสัมปชัญญะอย่างยิ่ง เหมือนคนที่ผ้าหรือศีรษะติดไฟ ย่อมเร่งดับทันที”</p>
+         <p class="pi" lang="pi-Latn">Seyyathāpi, bhikkhave, ādittacelo vā ādittasīso vā …</p>
+         <div class="refs">${qpRef(TPM("an6.20#an6.20:3.2"), "AN 6.20:3.2–3.3")}</div>`
+      : `<p class="th big">“ให้อยู่ด้วยปีติและความเบิกบานนั้น ฝึกในกุศลธรรมทั้งวันทั้งคืน”</p>
+         <p class="pi" lang="pi-Latn">teneva pītipāmojjena vihātabbaṁ ahorattānusikkhinā kusalesu dhammesu</p>
+         <div class="refs">${qpRef(TPM("an6.20#an6.20:4.2"), "AN 6.20:4.2")}</div>`;
+    body.innerHTML = `<section class="qp-done">
         <article class="qp-quote">
-          <p class="pi" lang="pi-Latn">‘aho vatāhaṁ tadantaraṁ jīveyyaṁ yadantaraṁ assasitvā vā passasāmi passasitvā vā assasāmi, bhagavato sāsanaṁ manasi kareyyaṁ, bahu vata me kataṁ assā’ti.</p>
+          <span class="qp-chip">พระพุทธเจ้าตรัสว่า</span>
+          ${answer}
           <hr>
-          <p class="th">“โอหนอ ขอเราพึงมีชีวิตอยู่เพียงชั่วหายใจเข้าแล้วหายใจออก หรือหายใจออกแล้วหายใจเข้า พึงใส่ใจคำสอนของพระผู้มีพระภาคเจ้า กิจที่เราทำแล้วก็จะมากหนอ”</p>
-          <p class="note">ผู้ที่เจริญมรณสติอย่างนี้ พระสูตรเรียกว่า <b>ผู้ไม่ประมาท</b> (appamattā)</p>
-          <div class="refs">${qpRef(TPM("an6.19#an6.19:7.5"), "AN 6.19:7.5")}${qpRef(TPM("an6.19#an6.19:15.1"), "15.1")}</div>
+          <p class="note">มรณสติที่เจริญอย่างนี้ “หยั่งลงสู่อมตะ มีอมตะเป็นที่สุด” และผู้ที่ระลึกได้แม้ชั่วลมหายใจเดียว พระสูตรเรียกว่า <b>ผู้ไม่ประมาท</b></p>
+          <div class="refs">${qpRef(TPM("an6.20#an6.20:8.1"), "AN 6.20:8.1")}${qpRef(TPM("an6.19#an6.19:15.1"), "AN 6.19:15.1")}</div>
           ${AI_NOTE}
         </article>
         <div class="qp-actions">
@@ -246,7 +273,7 @@ function renderBreathLearn({ first = false } = {}) {
     () => `<section class="ln-card ln-c4">
         <p class="ln-eyebrow rise">ในลมหายใจนั้น</p>
         <p class="ln-big rise2">ใส่ใจคำสอนของพระพุทธเจ้า<br>ราวกับชีวิตมีเพียงเท่านี้</p>
-        <p class="ln-mid rise3">พระสูตรไม่ได้ระบุว่าคำสอนข้อไหน ข้อนี้เป็นของผู้ฝึกเอง แอปจะแสดงบรรทัดจากพระสูตรให้ตอนจบรอบ</p>
+        <p class="ln-mid rise3">พระสูตรถัดไป (${qpRef(TPM("an6.20#an6.20:2.8"), "AN 6.20")}) บอกว่าให้ดูอะไร: <b class="gold">อกุศลที่เรายังละไม่ได้ ยังมีอยู่ไหม</b> ถ้ามีให้เร่งละ ถ้าไม่มีให้อยู่ด้วยปีติ แอปจะถามข้อนี้หลังหายใจครบหนึ่งรอบ</p>
         <p class="ln-teacher rise3">แอปให้ได้แค่ตัวบท ถ้าสงสัย ควรถามครูบาอาจารย์ (ลำดับการฟังธรรมใน ${qpRef(TPM("mn70#mn70:23.2"), "MN 70")} เริ่มที่การเข้าไปหาครู)</p>
         <p class="qp-ai rise3">คำแปลไทยแปลจากบาลีโดย AI · <a href="${TPM("an6.19")}" target="_blank" rel="noopener">อ่านพระสูตรเต็ม</a></p>
       </section>`,
@@ -306,6 +333,39 @@ function renderMetta() {
     body.querySelector("#mtText").innerHTML = `<span class="t">${esc(st.title)}</span><span class="pi" lang="pi-Latn">${esc(st.pi)}</span><span class="th">${esc(st.th)}</span>`;
     body.querySelector("#mtHint").textContent = s === 0 ? "แตะตรงไหนก็ได้ เพื่อแผ่ไปทิศแรก · ไม่ต้องรีบ" : s === n - 1 ? "แตะเมื่อพร้อม" : "อยู่กับทิศนี้สักครู่ แล้วแตะเพื่อไปต่อ";
   };
+  // เตรียมใจก่อนแผ่ (AN 10.219:2.1: vigatābhijjho vigatabyāpādo asammūḷho sampajāno paṭissato · SN 46.54: ละนิวรณ์ก่อน)
+  // คำอธิบายใต้แต่ละข้อเป็นของแอป ไม่ได้มาจากพระสูตร
+  const PREP = [
+    { id: "abhijjha", th: "ความอยากได้", hint: "อยากได้ อยากมี อยากให้เป็นอย่างใจ" },
+    { id: "byapada", th: "ความขุ่นเคือง", hint: "ไม่พอใจใครหรืออะไรอยู่" },
+    { id: "moha", th: "ความหลง เผลอ", hint: "ใจลอย ฟุ้ง ไม่รู้ตัว" },
+  ];
+  const paintPrep = () => {
+    const rel = new Set();
+    body.innerHTML = `<section class="mt-prep">
+        <span class="qp-chip">เตรียมใจก่อนแผ่ · AN 10.219</span>
+        <span class="mt-mind" aria-hidden="true"><span class="mt-haze" id="mtHaze"></span><span class="mt-self"></span></span>
+        <p class="ln-mid">ผู้แผ่เมตตาในพระสูตร ปราศจากความอยากได้ ปราศจากความพยาบาท ไม่หลง รู้ตัว มีสติ · ดูใจตอนนี้ทีละข้อ แล้วแตะเพื่อวางลง</p>
+        <div class="mt-items">${PREP.map(x => `<button type="button" class="mt-item" data-id="${x.id}" aria-pressed="false">
+            <span class="txt"><b>${esc(x.th)}</b><span>${esc(x.hint)}</span></span><span class="tag">แตะเพื่อวางลง</span></button>`).join("")}</div>
+        <p class="ln-pi" lang="pi-Latn">vigatābhijjho vigatabyāpādo asammūḷho sampajāno paṭissato</p>
+        <div class="refs">${qpRef(TPM("an10.219#an10.219:2.1"), "AN 10.219:2.1")}${qpRef(TPM("sn46.54#sn46.54:8.2"), "SN 46.54")}</div>
+        <button type="button" class="btn qp-primary" id="mtBegin" disabled>วางให้ครบก่อน (0/${PREP.length})</button>
+      </section>`;
+    const begin = body.querySelector("#mtBegin"), haze = body.querySelector("#mtHaze");
+    body.querySelectorAll(".mt-item").forEach(b => b.onclick = () => {
+      if (rel.has(b.dataset.id)) return;
+      rel.add(b.dataset.id);
+      b.setAttribute("aria-pressed", "true");
+      b.querySelector(".tag").textContent = "วางแล้ว";
+      haze.style.opacity = String(1 - rel.size / PREP.length);
+      const ready = rel.size === PREP.length;
+      begin.disabled = !ready;
+      begin.textContent = ready ? "รู้ตัว มีสติ · เริ่มแผ่" : `วางให้ครบก่อน (${rel.size}/${PREP.length})`;
+      if (ready) begin.focus({ preventScroll: true });
+    });
+    begin.onclick = () => { s = 0; paintStage(); body.querySelector("#mtStage").focus({ preventScroll: true }); };
+  };
   const paintDone = () => {
     body.innerHTML = `<section class="qp-done">
         <article class="qp-quote">
@@ -321,11 +381,11 @@ function renderMetta() {
           <button type="button" class="btn qp-secondary" data-qp="exit2">พอแล้ว</button>
         </div>
       </section>`;
-    body.querySelector("#qpAgain").onclick = () => { s = 0; paintStage(); body.querySelector("#mtStage").focus(); };
+    body.querySelector("#qpAgain").onclick = () => { paintPrep(); body.querySelector(".mt-item").focus(); };
     body.querySelector("[data-qp=exit2]").onclick = goBack;
     body.querySelector("#qpAgain").focus({ preventScroll: true });
   };
-  paintStage();
+  paintPrep();
 }
 
 // ============================================================
