@@ -915,9 +915,19 @@ body.chant-mode { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .nl-opt { transition: none; } }
 
 /* ---------- บทสวดเสริม (add-on) ---------- */
-.chant-options { margin: 4px 0 12px; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 12px; }
-.chant-options h3 { margin: 0; font-size: 17px; font-weight: 600; color: var(--gold-ink); }
-.opt-sub { margin: -6px 0 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+/* ย่อเป็นแถวเดียวโดยปริยาย: เป็นค่าที่ปรับนาน ๆ ครั้ง ไม่ควรดันบทสวดลงไปทุกคืน */
+.chant-options { margin: 4px 0 12px; padding: 0 16px; }
+.chant-options summary {
+  display: flex; align-items: center; gap: 8px; min-height: 52px; cursor: pointer; list-style: none;
+}
+.chant-options summary::-webkit-details-marker { display: none; }
+.chant-options summary .t { font-size: 17px; font-weight: 600; color: var(--gold-ink); }
+.chant-options summary .n { flex: 1; font-size: 14px; color: var(--muted); }
+.chant-options summary svg.i { width: 20px; height: 20px; color: var(--muted); transition: transform .2s ease; }
+.chant-options[open] summary svg.i { transform: rotate(180deg); }
+.chant-options[open] { padding-bottom: 12px; }
+.chant-options[open] > :not(summary) + :not(summary) { margin-top: 10px; }
+.opt-sub { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
 .opt-row {
   display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px;
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px;

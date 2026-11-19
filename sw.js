@@ -24,7 +24,8 @@ const ASSETS = [
 ];
 
 // รายชื่อไฟล์พระสูตร (lazy-load) สร้างโดย tools/build_suttas.py → self.SUTTA_FILES
-importScripts("suttas/list.js");
+// ถ้า list.js โหลดไม่ได้ ยังติดตั้ง SW ได้ (แค่ไม่ได้แคชพระสูตรล่วงหน้า) ไม่ให้ทั้งแอปค้างที่รุ่นเก่า
+try { importScripts("suttas/list.js"); } catch (e) { self.SUTTA_FILES = []; }
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();

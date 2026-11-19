@@ -393,24 +393,27 @@ function nightlyPanelHTML(cid) {
 
 // ---------- บทสวดเสริม (add-on ที่ผู้ใช้เปิด/ปิดได้ตามความชอบ) ----------
 // ข้อมูลใน night.js: OPTIONS, optionEnabled, optionSet · เก็บใน localStorage "chants-v1"
+let optOpen = false;   // แผงบทสวดเสริมกางอยู่ไหม (คงไว้ตอนวาดหน้าใหม่หลังเปิด/ปิดบท)
+// note ของบทขึ้นต้นด้วยที่มาอยู่แล้ว และมีคำว่า "บทสวดเสริม" ซ้ำกับหัวแผง ตัดออกเฉพาะตอนแสดงในแผงนี้
+const optNote = n => String(n || "").replace(/\s*·\s*บทสวดเสริม\s*/g, " · ").replace(/(\s*·\s*)+$/, "").trim();
 function optionPanelHTML(sid) {
   if (typeof OPTIONS === "undefined") return "";
   const opts = OPTIONS[sid] || [];
   if (!opts.length) return "";
+  const nOn = opts.filter(id => optionEnabled(sid, id)).length;
   const rows = opts.map(id => {
     const c = CHANTS[id];
     const on = optionEnabled(sid, id);
-    const ref = c && c.note ? (c.note.match(/^[A-Z][A-Za-z]*\s[\d.:–-]+/) || [""])[0] : "";
     return `<div class="opt-row">
-      <span class="meta"><b>${esc(shortTitle(c ? c.title : id))}</b><span>${esc(ref)} · ${esc(c ? c.note : "")}</span></span>
+      <span class="meta"><b>${esc(shortTitle(c ? c.title : id))}</b><span>${esc(optNote(c && c.note))}</span></span>
       <button type="button" role="switch" aria-checked="${on}" class="switch" data-opt="${id}" aria-label="เปิด/ปิด ${esc(c ? c.title : id)}"></button>
     </div>`;
   }).join("");
-  return `<section class="chant-options card" aria-labelledby="optT">
-    <h3 id="optT">บทสวดเสริม</h3>
+  return `<details class="chant-options card" id="optPanel"${optOpen ? " open" : ""}>
+    <summary><span class="t">บทสวดเสริม</span><span class="n">เปิดอยู่ ${nOn} จาก ${opts.length}</span>${ICON.down}</summary>
     <p class="opt-sub">เลือกเพิ่มได้ตามความชอบ · ถ้าปิดไว้จะไม่แสดงในสารบัญ</p>
     ${rows}
-  </section>`;
+  </details>`;
 }
 
 function uposathaPanel() {
@@ -813,6 +816,7 @@ function renderSession(id, { keep = false } = {}) {
     }));
 
   // บทสวดเสริม: เปิด/ปิดแล้ววาดหน้าใหม่ (คงตำแหน่งเลื่อนไว้)
+  document.getElementById("optPanel")?.addEventListener("toggle", e => { optOpen = e.target.open; });
   view.querySelectorAll("[data-opt]").forEach(b =>
     b.addEventListener("click", () => {
       optionSet(id, b.dataset.opt, !optionEnabled(id, b.dataset.opt));
@@ -900,12 +904,7 @@ function paintSutta(id, st, data, para) {
     </section>`;
   }).join("");
   view.innerHTML = `
-    <div class="sutta-head">
-      <h2>${esc(st.title)}</h2>
-      <p>${esc(st.sub)}</p>
-      <p class="src">บาลีฉบับ SuttaCentral (ฐานข้อมูล tripitaka-mcp) · คำแปลภาษาชาวบ้าน ·
-        <a href="https://tripitaka-mcp.com/read/${esc(id)}" target="_blank" rel="noopener">ดูต้นฉบับออนไลน์</a></p>
-    </div>
+    ${suttaHead(id, st)}
     ${body}
     <div class="end-mark" aria-hidden="true">๛</div>`;
   const t = para && document.getElementById("p-" + para);
@@ -1129,7 +1128,9 @@ function renderChant(sid, idx) {
   if (!s) return renderHome();
   setChrome({ title: s.title, bar: false });
   document.body.classList.add("chant-mode");
-  if (!CM || CM.sid !== sid) CM = { sid, steps: buildSteps(s), i: 0, part: 0, chunks: [], size: "" };
+  // ลำดับบทเปลี่ยนได้ระหว่างที่ CM ยังค้างอยู่ (เปิด/ปิดบทสวดเสริม, เปลี่ยนพระสูตรประจำคืน แล้วกลับมาด้วยปุ่มย้อน)
+  const orderKey = s.order.join("|");
+  if (!CM || CM.sid !== sid || CM.orderKey !== orderKey) CM = { sid, orderKey, steps: buildSteps(s), i: 0, part: 0, chunks: [], size: "" };
   CM.title = s.title;
   CM.i = Math.max(0, Math.min(CM.steps.length, isNaN(idx) ? 0 : idx));
   CM.part = 0;
