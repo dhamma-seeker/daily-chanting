@@ -6,6 +6,7 @@ self.SUTTA_FILES = [
  "./suttas/an9.18.json",
  "./suttas/an10.46.json",
  "./suttas/snp2.14.json",
+ "./suttas/mn100.json",
  "./suttas/kp1.json",
  "./suttas/an6.10.json",
  "./suttas/an11.12.json",
@@ -17,11 +18,19 @@ self.SUTTA_FILES = [
  "./suttas/sn35.1.json",
  "./suttas/sn35.4.json",
  "./suttas/sn35.5.json",
+ "./suttas/an3.65.json",
  "./suttas/snp1.8.json",
  "./suttas/an11.15.json",
+ "./suttas/an10.176.json",
+ "./suttas/mn41.json",
  "./suttas/sn3.8.json",
  "./suttas/ud5.1.json",
  "./suttas/kp7.json",
+ "./suttas/an10.177.json",
  "./suttas/an5.39.json",
- "./suttas/ja159.json"
+ "./suttas/dn16.json",
+ "./suttas/ja159.json",
+ "./suttas/mn53.json",
+ "./suttas/dn31.json",
+ "./suttas/mn56.json"
 ];

@@ -51,6 +51,10 @@ for sid in IDS:
         loc = seg.split(":")[1].split(".")
         if loc[0] == "0":
             continue
+        if loc[-1] == "0":          # หัวข้อย่อยของ DN (เช่น dn16:1.3.0 = "1. Vassakārabrāhmaṇa")
+            continue
+        if "(…)" in (r["pali"] or ""):   # ตัวย่อ peyyāla ของ DN
+            continue
         para = ".".join(loc[:depth])
         text = th.EXPAND.get(seg, r["pali"] or "")
         for line in text.split("\n"):
