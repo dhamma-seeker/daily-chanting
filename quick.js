@@ -1,5 +1,5 @@
 // ============================================================
-//  มีเวลาสักครู่ — ฝึกชั่วขณะตามพระสูตร (#/quick, #/breath, #/breath/learn, #/metta, #/bahira)
+//  ฝึกสักครู่ — ฝึกชั่วขณะตามพระสูตร (#/quick, #/breath, #/breath/learn, #/metta, #/bahira)
 //  โหลดก่อน app.js: ฟังก์ชันในไฟล์นี้ใช้ของจาก app.js (view, setChrome, ICON, esc, store,
 //  requestWake/releaseWake, cleanupPage, goBack) ตอนถูกเรียกเท่านั้น ไม่ใช้ตอนโหลดไฟล์
 //  คำแปลไทยของบาลีในไฟล์นี้แปลจากบาลีโดย AI (บอกผู้ใช้ไว้ในหน้าจอ) ตรวจกับ tripitaka-mcp แล้ว
@@ -24,7 +24,7 @@ const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matche
 
 // ---------- หน้าเลือก ----------
 function renderQuick() {
-  setChrome({ title: "มีเวลาสักครู่" });
+  setChrome({ title: "ฝึกสักครู่" });
   const t = QP_TIMES.find(x => x.id === qpTime) || QP_TIMES[0];
   const tabs = QP_TIMES.map(x => `<button type="button" role="radio" aria-checked="${x.id === t.id}" data-qp-time="${x.id}">
       <span class="t">${esc(x.name)}</span><span class="s">${esc(x.sub)}</span></button>`).join("");

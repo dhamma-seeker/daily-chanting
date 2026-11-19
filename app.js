@@ -715,7 +715,7 @@ function renderHome({ keep = false } = {}) {
     </a>
     <a class="qp-entry" href="#/quick">
       <span class="qp-glyph" aria-hidden="true">${ICON.lotus}</span>
-      <span class="meta"><b>มีเวลาสักครู่</b><span>ฝึกชั่วลมหายใจเดียวตามพระสูตร · ตอนรอรถหรือว่าง ๆ</span></span>
+      <span class="meta"><b>ฝึกสักครู่</b><span>ไม่กี่วินาทีก็ฝึกได้ ตามพระสูตร</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
