@@ -914,6 +914,18 @@ body.chant-mode { overflow: hidden; }
 .nl-note { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { .nl-opt { transition: none; } }
 
+/* ---------- บทสวดเสริม (add-on) ---------- */
+.chant-options { margin: 4px 0 12px; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 12px; }
+.chant-options h3 { margin: 0; font-size: 17px; font-weight: 600; color: var(--gold-ink); }
+.opt-sub { margin: -6px 0 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.opt-row {
+  display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.opt-row .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.opt-row .meta b { font-size: 17px; font-weight: 600; line-height: 1.35; }
+.opt-row .meta span { font-size: 14px; color: var(--muted); line-height: 1.4; }
+
 /* ---------- เน้นคำที่ต่างกันในท่อนที่คล้ายกัน (เช่น รอบ ๓ อาการ ๑๒ ใน SN 56.11) ----------
    ระดับ 1 = ชื่ออริยสัจ (พื้นอ่อน) · ระดับ 2 = คำที่บอกรอบ (พื้นทองอ่อน ตัวทองเข้ม หนา ขีดล่างทอง) */
 .seg-tag {

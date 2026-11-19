@@ -3,7 +3,7 @@ import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from pali2thai import word_pairs
-from night_src import CHANTS, NIGHTLY, ORDER
+from night_src import CHANTS, NIGHTLY, NIGHT_ORDER, MORNING_ORDER, OPTIONS
 
 
 def mark_quote(w):
@@ -48,7 +48,7 @@ def seg(t):
     return out
 
 
-for cid in ORDER + NIGHTLY:
+for cid in NIGHT_ORDER + MORNING_ORDER + NIGHTLY + [o for os in OPTIONS.values() for o in os]:
     assert cid == "@nightly" or cid in CHANTS, cid
 out = {cid: {"title": c["title"], "note": c.get("note", ""),
              "segments": [seg(t) for t in c["segments"]]} for cid, c in CHANTS.items()}
@@ -58,7 +58,9 @@ js = ("// ============================================================\n"
       "// ============================================================\n\n"
       f"Object.assign(CHANTS, {json.dumps(out, ensure_ascii=False, indent=2)});\n\n"
       f"const NIGHTLY = {json.dumps(NIGHTLY, ensure_ascii=False)};\n"
-      f"const NIGHT_ORDER = {json.dumps(ORDER, ensure_ascii=False)};\n\n"
+      f"const NIGHT_ORDER = {json.dumps(NIGHT_ORDER, ensure_ascii=False)};\n"
+      f"const MORNING_ORDER = {json.dumps(MORNING_ORDER, ensure_ascii=False)};\n"
+      f"const OPTIONS = {json.dumps(OPTIONS, ensure_ascii=False)};\n\n"
       "// ---------- พระสูตรประจำคืน ----------\n"
       "// โหมด rotate: เวียนคืนละบทตามปฏิทิน (คืนหนึ่งนับจาก 06:00 ถึง 06:00 วันรุ่งขึ้น)\n"
       "//              ผู้ใช้เลือกบทอื่นแทนได้เฉพาะคืนนั้น คืนต่อไปกลับไปตามรอบ\n"
@@ -86,13 +88,40 @@ js = ("// ============================================================\n"
       "  for (let k = 0; k < NIGHTLY.length; k++) if (nightlyRotation(n + k) === id) return k;\n"
       "  return -1;\n"
       "}\n"
-      "function nightlySet(change) { nightlySave(Object.assign(nightlyState(), change)); }\n"
-      "{\n"
-      "  const s = SESSIONS.find(x => x.id === \"night\");\n"
-      "  Object.defineProperty(s, \"order\", {\n"
-      "    get: () => NIGHT_ORDER.flatMap(x => x !== \"@nightly\" ? [x] : nightlyMode() === \"all\" ? NIGHTLY : [nightlyPick()]),\n"
-      "    enumerable: true, configurable: true,\n"
+      "function nightlySet(change) { nightlySave(Object.assign(nightlyState(), change)); }\n\n"
+      "// ---------- บทสวดเสริม (add-on) ----------\n"
+      "// OPTIONS[sessionId] = บทที่ผู้ใช้เปิด/ปิดได้ตามความชอบ ค่าเริ่มต้นปิด (opt-in)\n"
+      "// เก็บใน localStorage \"chants-v1\" = { <sessionId>: { <cid>: true|false } }\n"
+      "const OPTIONS_KEY = \"chants-v1\";\n"
+      "function optionState() {\n"
+      "  try { const s = JSON.parse(localStorage.getItem(OPTIONS_KEY)); return s && typeof s === \"object\" ? s : {}; }\n"
+      "  catch { return {}; }\n"
+      "}\n"
+      "function optionEnabled(sid, id) {\n"
+      "  const s = optionState()[sid];\n"
+      "  return s && id in s ? !!s[id] : false;\n"
+      "}\n"
+      "function optionSet(sid, id, on) {\n"
+      "  const all = optionState();\n"
+      "  (all[sid] = all[sid] || {})[id] = !!on;\n"
+      "  try { localStorage.setItem(OPTIONS_KEY, JSON.stringify(all)); } catch {}\n"
+      "}\n"
+      "// ลำดับจริงของ session: ลำดับเต็ม + แก้ @nightly ตามโหมดเวียน + ตัด add-on ที่ปิดไว้\n"
+      "function sessionOrder(sid) {\n"
+      "  const full = sid === \"night\" ? NIGHT_ORDER : MORNING_ORDER;\n"
+      "  return full.flatMap(x => {\n"
+      "    if (x === \"@nightly\") return nightlyMode() === \"all\" ? NIGHTLY : [nightlyPick()];\n"
+      "    if ((OPTIONS[sid] || []).includes(x) && !optionEnabled(sid, x)) return [];\n"
+      "    return [x];\n"
       "  });\n"
+      "}\n"
+      "{\n"
+      "  const mn = SESSIONS.find(x => x.id === \"morning\");\n"
+      "  Object.defineProperty(mn, \"order\", { get: () => sessionOrder(\"morning\"), enumerable: true, configurable: true });\n"
+      "}\n"
+      "{\n"
+      "  const nt = SESSIONS.find(x => x.id === \"night\");\n"
+      "  Object.defineProperty(nt, \"order\", { get: () => sessionOrder(\"night\"), enumerable: true, configurable: true });\n"
       "}\n")
 open(os.path.join(HERE, "..", "night.js"), "w").write(js)
 print("ok", sum(len(c["segments"]) for c in out.values()), "segments,", len(out), "chants")

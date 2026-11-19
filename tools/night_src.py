@@ -104,6 +104,17 @@ CHANTS = {
         ],
     },
     # ------------------------------------------------------------------
+    "night-caga": {
+        "title": "จาคานุสสติ (ระลึกถึงการให้)",
+        "note": "AN 6.10 ระลึกถึงความเผื่อแผ่ของตน เป็นอนุสติข้อหนึ่งใน ๖ (พุทธ ธรรม สงฆ์ ศีล จาคะ เทวดา) · ธรรมของฆราวาส",
+        "segments": [
+            ("guide", "พระพุทธเจ้าตรัสกับเจ้ามหานามะ (ฆราวาส) ว่า อริยสาวกควรระลึกถึงการให้ของตนเนือง ๆ ว่า", "AN 6.10:6.1"),
+            ("AN 6.10:6.2–6.3",
+             "‘lābhā vata me, suladdhaṁ vata me.\nYohaṁ maccheramalapariyuṭṭhitāya pajāya vigatamalamaccherena cetasā agāraṁ ajjhāvasāmi muttacāgo payatapāṇi vosaggarato yācayogo dānasaṁvibhāgarato’ti.",
+             "เป็นลาภของเราแล้วหนอ เราได้ดีแล้วหนอ ที่เราอยู่ครองเรือน ท่ามกลางหมู่ชนที่ถูกมลทินคือความตระหนี่ครอบงำ แต่มีใจปราศจากมลทินคือความตระหนี่ เป็นผู้บริจาคเสมอ มือพร้อมจะให้ ยินดีในการสละ พร้อมให้แก่ผู้ขอ ยินดีในการแบ่งปันทาน"),
+        ],
+    },
+    # ------------------------------------------------------------------
     "night-pajja": {
         "title": "พิจารณา ๕ ประการ",
         "note": "AN 5.57 อภิณหปัจจเวกขณ์ · ตรัสว่าหญิง ชาย คฤหัสถ์ นักบวช ควรพิจารณาเนือง ๆ",
@@ -411,6 +422,108 @@ CHANTS = {
         ],
     },
     # ------------------------------------------------------------------
+    "night-mangala": {
+        "title": "มงคลสูตร (มงคล ๓๘)",
+        "note": "Snp 2.4 เทวดาทูลถามมงคลอันสูงสุด พระพุทธเจ้าตรัสตอบ ๓๘ ประการ · บทสวดเสริม สวดเช้าหรือค่ำก็ได้",
+        "segments": [
+            ("guide", "เทวดาองค์หนึ่งเปล่งรัศมีสว่างทั่วเชตวัน เข้าเฝ้าพระพุทธเจ้าแล้วทูลถามว่า มนุษย์และเทวดาจำนวนมากคิดหามงคลเพื่อความสวัสดี ขอพระองค์จงตรัสมงคลอันสูงสุด พระองค์จึงตรัสตอบเป็นมงคล ๓๘ ประการ", "Snp 2.4:1.3–2.4"),
+            ("Snp 2.4:3.1–3.4",
+             "Asevanā ca bālānaṁ,\npaṇḍitānañca sevanā;\nPūjā ca pūjaneyyānaṁ,\netaṁ maṅgalamuttamaṁ.",
+             "การไม่คบคนพาล การคบบัณฑิต และการบูชาผู้ควรบูชา นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:4.1–4.4",
+             "Patirūpadesavāso ca,\npubbe ca katapuññatā;\nAttasammāpaṇidhi ca,\netaṁ maṅgalamuttamaṁ.",
+             "การอยู่ในถิ่นที่เหมาะสม ความเป็นผู้ได้ทำความดีไว้ในปางก่อน และการตั้งตนไว้ชอบ นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:5.1–5.4",
+             "Bāhusaccañca sippañca,\nvinayo ca susikkhito;\nSubhāsitā ca yā vācā,\netaṁ maṅgalamuttamaṁ.",
+             "ความเป็นผู้ได้ยินได้ฟังมาก มีศิลปะ มีวินัยที่ศึกษาดีแล้ว และการพูดแต่คำสุภาพดีงาม นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:6.1–6.4",
+             "Mātāpitu upaṭṭhānaṁ,\nputtadārassa saṅgaho;\nAnākulā ca kammantā,\netaṁ maṅgalamuttamaṁ.",
+             "การบำรุงมารดาบิดา การสงเคราะห์บุตรภรรยา และการทำงานที่ไม่วุ่นวายคั่งค้าง นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:7.1–7.4",
+             "Dānañca dhammacariyā ca,\nñātakānañca saṅgaho;\nAnavajjāni kammāni,\netaṁ maṅgalamuttamaṁ.",
+             "การให้ทาน การประพฤติธรรม การสงเคราะห์ญาติ และการงานที่ไม่มีโทษ นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:8.1–8.4",
+             "Āratī viratī pāpā,\nmajjapānā ca saṁyamo;\nAppamādo ca dhammesu,\netaṁ maṅgalamuttamaṁ.",
+             "การงดเว้นจากบาป การสำรวมจากการดื่มน้ำเมา และความไม่ประมาทในธรรมทั้งหลาย นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:9.1–9.4",
+             "Gāravo ca nivāto ca,\nsantuṭṭhi ca kataññutā;\nKālena dhammassavanaṁ,\netaṁ maṅgalamuttamaṁ.",
+             "ความเคารพ ความอ่อนน้อม ความสันโดษ ความกตัญญู และการฟังธรรมตามกาล นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:10.1–10.4",
+             "Khantī ca sovacassatā,\nsamaṇānañca dassanaṁ;\nKālena dhammasākacchā,\netaṁ maṅgalamuttamaṁ.",
+             "ความอดทน ความเป็นผู้ว่าง่าย การได้พบเห็นสมณะ และการสนทนาธรรมตามกาล นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:11.1–11.4",
+             "Tapo ca brahmacariyañca,\nariyasaccāna dassanaṁ;\nNibbānasacchikiriyā ca,\netaṁ maṅgalamuttamaṁ.",
+             "ความเพียรเผากิเลส การประพฤติพรหมจรรย์ การเห็นอริยสัจ และการทำนิพพานให้แจ้ง นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:12.1–12.4",
+             "Phuṭṭhassa lokadhammehi,\ncittaṁ yassa na kampati;\nAsokaṁ virajaṁ khemaṁ,\netaṁ maṅgalamuttamaṁ.",
+             "จิตของผู้ใดถูกโลกธรรมกระทบแล้วไม่หวั่นไหว ไม่เศร้าโศก ปราศจากธุลี เกษมปลอดภัย นี้เป็นมงคลอันสูงสุด"),
+            ("Snp 2.4:13.1–13.4",
+             "Etādisāni katvāna,\nsabbattha maparājitā;\nSabbattha sotthiṁ gacchanti,\ntaṁ tesaṁ maṅgalamuttaman”ti.",
+             "ผู้ทำมงคลเช่นนี้แล้ว ไม่พ่ายแพ้ในที่ทั้งปวง ย่อมไปในที่ทั้งปวงอย่างปลอดภัย นั่นเป็นมงคลอันสูงสุดของเขา"),
+        ],
+    },
+    # ------------------------------------------------------------------
+    "night-ratana-sutta": {
+        "title": "รัตนสูตร (รัตนปริตร)",
+        "note": "Snp 2.1 พระพุทธเจ้าตรัสถึงคุณพระรัตนตรัยให้เทวดาฟัง เพื่อปัดเป่าภัยในเมืองเวสาลี · บทสวดเสริม",
+        "segments": [
+            ("Snp 2.1:1.1–1.4",
+             "Yānīdha bhūtāni samāgatāni,\nBhummāni vā yāni va antalikkhe;\nSabbeva bhūtā sumanā bhavantu,\nAthopi sakkacca suṇantu bhāsitaṁ.",
+             "เหล่าภูตผีและเทวดาทั้งหลายที่มาประชุมกัน ณ ที่นี้ ทั้งที่อยู่บนพื้นดินและที่อยู่ในอากาศ ขอจงมีใจยินดีกันทุกตน และจงตั้งใจฟังคำที่เรากล่าวนี้ให้ดี"),
+            ("Snp 2.1:2.1–2.4",
+             "Tasmā hi bhūtā nisāmetha sabbe,\nMettaṁ karotha mānusiyā pajāya;\nDivā ca ratto ca haranti ye baliṁ,\nTasmā hi ne rakkhatha appamattā.",
+             "เพราะฉะนั้น เหล่าภูตผีทั้งหลายจงฟังทั้งหมด จงแผ่เมตตาแก่หมู่มนุษย์ทั้งหลาย ผู้ที่นำเครื่องบวงสรวงมาบูชาแก่ท่านทั้งกลางวันและกลางคืน จงรักษามนุษย์เหล่านั้นไว้ อย่าได้ประมาท"),
+            ("Snp 2.1:3.1–3.5",
+             "Yaṁ kiñci vittaṁ idha vā huraṁ vā,\nSaggesu vā yaṁ ratanaṁ paṇītaṁ;\nNa no samaṁ atthi tathāgatena,\nIdampi buddhe ratanaṁ paṇītaṁ;\nEtena saccena suvatthi hotu.",
+             "ทรัพย์อย่างใดอย่างหนึ่งในโลกนี้หรือโลกหน้า หรือรัตนะอันประณีตในสวรรค์ สิ่งนั้นไม่มีอะไรเสมอด้วยพระตถาคต รัตนะอันประณีตนี้อยู่ในพระพุทธเจ้า ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:4.1–4.5",
+             "Khayaṁ virāgaṁ amataṁ paṇītaṁ,\nYadajjhagā sakyamunī samāhito;\nNa tena dhammena samatthi kiñci,\nIdampi dhamme ratanaṁ paṇītaṁ;\nEtena saccena suvatthi hotu.",
+             "ความสิ้นไป ปราศจากราคะ อมตะอันประณีต ที่พระศากยมุนีผู้มีใจตั้งมั่นได้บรรลุ ธรรมใด ๆ ก็ไม่เสมอด้วยธรรมนั้น รัตนะอันประณีตนี้อยู่ในพระธรรม ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:5.1–5.5",
+             "Yaṁ buddhaseṭṭho parivaṇṇayī suciṁ,\nSamādhimānantarikaññamāhu;\nSamādhinā tena samo na vijjati,\nIdampi dhamme ratanaṁ paṇītaṁ;\nEtena saccena suvatthi hotu.",
+             "ความตั้งใจมั่น (สมาธิ) อันบริสุทธิ์ ที่พระพุทธเจ้าผู้ประเสริฐทรงสรรเสริญ เรียกกันว่าเป็นสมาธิอันไม่มีระหว่างคั่น สมาธิใดก็ไม่เสมอด้วยสมาธินั้น รัตนะอันประณีตนี้อยู่ในพระธรรม ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:6.1–6.6",
+             "Ye puggalā aṭṭha sataṁ pasatthā,\nCattāri etāni yugāni honti;\nTe dakkhiṇeyyā sugatassa sāvakā,\nEtesu dinnāni mahapphalāni;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "บุคคล ๘ ท่านที่สัตบุรุษสรรเสริญ ประกอบกันเป็น ๔ คู่ ท่านเหล่านั้นเป็นสาวกของพระสุคต ควรแก่ทักษิณา ทานที่ถวายแก่ท่านมีผลมาก รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:7.1–7.6",
+             "Ye suppayuttā manasā daḷhena,\nNikkāmino gotamasāsanamhi;\nTe pattipattā amataṁ vigayha,\nLaddhā mudhā nibbutiṁ bhuñjamānā;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "ผู้ใดประกอบดีแล้วด้วยใจที่มั่นคง หมดความกำหนัดในคำสอนของพระโคดม ได้บรรลุอมตะ หยั่งลงสู่พระนิพพาน ได้แล้วเสวยความดับโดยไม่ต้องซื้อ รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:8.1–8.6",
+             "Yathindakhīlo pathavissito siyā,\nCatubbhi vātehi asampakampiyo;\nTathūpamaṁ sappurisaṁ vadāmi,\nYo ariyasaccāni avecca passati;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "เสาเขื่อนที่ฝังแน่นในแผ่นดิน ลมทั้งสี่ทิศพัดให้ไม่หวั่นไหว ฉันใด เรากล่าวว่าสัตบุรุษผู้เห็นอริยสัจแจ่มแจ้งก็ฉันนั้น รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:9.1–9.6",
+             "Ye ariyasaccāni vibhāvayanti,\nGambhīrapaññena sudesitāni;\nKiñcāpi te honti bhusaṁ pamattā,\nNa te bhavaṁ aṭṭhamamādiyanti;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "ผู้ใดรู้แจ้งอริยสัจที่พระผู้มีปัญญาลึกซึ้งตรัสไว้ดีแล้ว ถึงผู้นั้นจะประมาทอยู่มาก ก็จะไม่เกิดอีกเป็นครั้งที่ ๘ รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:10.1–10.4",
+             "Sahāvassa dassanasampadāya,\nTayassu dhammā jahitā bhavanti;\nSakkāyadiṭṭhī vicikicchitañca,\nSīlabbataṁ vāpi yadatthi kiñci.",
+             "พร้อมกับความถึงพร้อมด้วยการเห็น (โสดาปัตติมรรค) ธรรม ๓ อย่างก็ถูกละได้ คือ สักกายทิฏฐิ (ความเห็นว่าเป็นตัวตน) ความลังเลสงสัย และสีลัพพตปรามาส (ความยึดศีลพรตอย่างงมงาย) ที่มีอยู่"),
+            ("Snp 2.1:11.1–11.4",
+             "Catūhapāyehi ca vippamutto,\nChaccābhiṭhānāni abhabba kātuṁ;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "พ้นจากอบายทั้ง ๔ แล้ว ไม่อาจทำอกุศลกรรม ๖ อย่างได้ รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:12.1–12.6",
+             "Kiñcāpi so kamma karoti pāpakaṁ,\nKāyena vācā uda cetasā vā;\nAbhabba so tassa paṭicchadāya,\nAbhabbatā diṭṭhapadassa vuttā;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "ถึงเขาจะทำกรรมชั่วทางกาย วาจา ใจ ก็ไม่อาจปิดบังกรรมนั้นได้ เพราะพระผู้เห็นบทแล้ว (พระโสดาบัน) ไม่อาจปิดบังได้ รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:13.1–13.6",
+             "Vanappagumbe yatha phussitagge,\nGimhānamāse paṭhamasmiṁ gimhe;\nTathūpamaṁ dhammavaraṁ adesayi,\nNibbānagāmiṁ paramaṁ hitāya;\nIdampi buddhe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "พุ่มไม้ในป่าที่มียอดผลิบานในเดือนแรกแห่งฤดูร้อน ฉันใด พระองค์ทรงแสดงธรรมอันประเสริฐที่ไปสู่นิพพาน เพื่อประโยชน์สูงสุด ฉันนั้น รัตนะอันประณีตนี้อยู่ในพระพุทธเจ้า ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:14.1–14.4",
+             "Varo varaññū varado varāharo,\nAnuttaro dhammavaraṁ adesayi;\nIdampi buddhe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "พระผู้ประเสริฐ รู้สิ่งที่ประเสริฐ ให้สิ่งที่ประเสริฐ นำสิ่งที่ประเสริฐมา พระผู้ไม่มีใครยิ่งกว่า ทรงแสดงธรรมอันประเสริฐ รัตนะอันประณีตนี้อยู่ในพระพุทธเจ้า ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:15.1–15.6",
+             "Khīṇaṁ purāṇaṁ nava natthi sambhavaṁ,\nVirattacittāyatike bhavasmiṁ;\nTe khīṇabījā avirūḷhichandā,\nNibbanti dhīrā yathāyaṁ padīpo;\nIdampi saṅghe ratanaṁ paṇītaṁ,\nEtena saccena suvatthi hotu.",
+             "กรรมเก่าสิ้นแล้ว กรรมใหม่ไม่มีที่จะเกิด ใจปราศจากความยินดีในภพ หมดพันธุ์ (ที่จะเกิดอีก) ไม่งอกงามความพอใจ ผู้มีปัญญาย่อมดับเหมือนประทีปที่ดับไป รัตนะอันประณีตนี้อยู่ในพระสงฆ์ ด้วยความสัตย์นี้ ขอความสวัสดีจงมี"),
+            ("Snp 2.1:16.1–16.4",
+             "Yānīdha bhūtāni samāgatāni,\nBhummāni vā yāni va antalikkhe;\nTathāgataṁ devamanussapūjitaṁ,\nBuddhaṁ namassāma suvatthi hotu.",
+             "เหล่าภูตผีทั้งหลายที่มาประชุมกัน ณ ที่นี้ ทั้งบนพื้นดินและในอากาศ ขอนอบน้อมพระตถาคต ผู้ที่เทวดาและมนุษย์บูชา ขอความสวัสดีจงมี"),
+            ("Snp 2.1:17.1–17.4",
+             "Yānīdha bhūtāni samāgatāni,\nBhummāni vā yāni va antalikkhe;\nTathāgataṁ devamanussapūjitaṁ,\nDhammaṁ namassāma suvatthi hotu.",
+             "เหล่าภูตผีทั้งหลายที่มาประชุมกัน ณ ที่นี้ ทั้งบนพื้นดินและในอากาศ ขอนอบน้อมพระธรรมของพระตถาคต ผู้ที่เทวดาและมนุษย์บูชา ขอความสวัสดีจงมี"),
+            ("Snp 2.1:18.1–18.4",
+             "Yānīdha bhūtāni samāgatāni,\nBhummāni vā yāni va antalikkhe;\nTathāgataṁ devamanussapūjitaṁ,\nSaṅghaṁ namassāma suvatthi hotūti.",
+             "เหล่าภูตผีทั้งหลายที่มาประชุมกัน ณ ที่นี้ ทั้งบนพื้นดินและในอากาศ ขอนอบน้อมพระสงฆ์ของพระตถาคต ผู้ที่เทวดาและมนุษย์บูชา ขอความสวัสดีจงมี"),
+        ],
+    },
+    # ------------------------------------------------------------------
     "night-sihaseyya": {
         "title": "ก่อนหลับ",
         "note": "เสขปฏิปทาสูตร (MN 53) พระอานนท์แสดงแก่เจ้ามหานามะและเจ้าศากยะ · อ่าน ไม่ต้องสวด",
@@ -453,13 +566,22 @@ CHANTS = {
 
 # บทที่ "@nightly" ใน ORDER จะเลือกจาก NIGHTLY เวียนวันละบท (เปลี่ยนตอน ๐๖:๐๐ น.)
 NIGHTLY = ["night-dhammacakka", "night-bahira", "night-kalama"]
-ORDER = [
+
+# โครงสร้าง 3 ชั้นของแต่ละ session (ตามที่เจ้าของกำหนด):
+#   *_ORDER = ลำดับเต็ม (flat) โดย "@nightly" คือจุดหมุนพระสูตรประจำคืน
+#   OPTIONS = บท "add-on" ที่ผู้ใช้เปิด/ปิดได้ตามความชอบ (อยู่นอกเกณฑ์หลัก)
+# ค่าเริ่มต้นของ add-on = ปิด (opt-in) → แอปยึดเกณฑ์ "นิกาย 4 + ขุททกชั้นต้น" เป็นหลัก
+# โมรปริตร (mora-1, mora-2) เป็นชาดก (Ja 159) คัมภีร์ชั้นหลัง จึงเป็น add-on
+NIGHT_ORDER = [
     "namo",
     "night-sarana",
     "night-ratana",
     "night-sila",
+    "night-caga",
     "night-pajja",
     "@nightly",
+    "night-mangala",
+    "night-ratana-sutta",
     "night-karaniya",
     "phae-metta",
     "night-metta-ton",
@@ -467,3 +589,8 @@ ORDER = [
     "mora-2",
     "night-sihaseyya",
 ]
+MORNING_ORDER = ["namo", "night-sarana", "night-sila", "night-pajja", "mora-1"]
+OPTIONS = {
+    "morning": ["mora-1"],
+    "night": ["mora-2", "night-mangala", "night-ratana-sutta"],
+}

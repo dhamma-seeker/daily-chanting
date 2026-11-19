@@ -24,7 +24,8 @@ const TODO = "— ยังไม่ได้ใส่บทสวด (รอข
 // บทสวดทั้งหมดตอนนี้สร้างอัตโนมัติ (night.js, uposatha.js) ถ้าจะเพิ่มบทที่แก้ด้วยมือ ให้ใส่ที่นี่
 const CHANTS = {};
 
-// "namo", "mora-1" อยู่ใน night.js · ลำดับบทสวดก่อนนอนจริงกำหนดใน tools/night_src.py (ORDER)
+// ลำดับบทจริง + บทเสริม (add-on) กำหนดใน tools/night_src.py (NIGHT_ORDER / MORNING_ORDER / OPTIONS)
+// ค่า order ด้านล่างเป็น fallback เท่านั้น · night.js override ด้วย getter ที่กรอง add-on ที่ปิดไว้ และแก้ "@nightly"
 const SESSIONS = [
   {
     id: "morning",

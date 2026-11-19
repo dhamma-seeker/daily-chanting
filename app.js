@@ -150,15 +150,21 @@ function segmentHTML(seg, extraClass = "") {
 }
 
 // "AN 3.70:4.4–4.5 · 5.2 · AN 8.41:2.1" -> ลิงก์เปิดพระสูตรเต็มในแอป ตรงย่อหน้านั้น
+// รองรับ "MN 100:2.3–2.5", "Khp 1:2.1", "Ja 159:3.1", "DN 16:1.31.2" · ส่วนต่อท้ายหลัง · ที่ไม่มีชื่อคัมภีร์ใช้สูตรเดิม
+// เลขย่อหน้าตัดตาม depth ของสูตร (ปกติ ๑ ระดับ, DN 16 ๒ ระดับ)
+const REF_ID = { AN: "an", SN: "sn", MN: "mn", DN: "dn", Snp: "snp", Khp: "kp", Ja: "ja", Ud: "ud", Dhp: "dhp" };
 function refLink(ref) {
   let cur = null;
   const parts = ref.split("·").map(p => p.trim()).filter(Boolean).map(p => {
-    const m = p.match(/^(AN|SN|MN|DN|Snp)\s*(\d+\.\d+)(?::(\d+))?/);
-    let para = null;
-    if (m) { cur = (m[1] + m[2]).toLowerCase(); para = m[3] || null; }
-    else { const n = p.match(/^(\d+)/); para = n ? n[1] : null; }
-    if (cur && typeof SUTTAS !== "undefined" && SUTTAS[cur])
+    const m = p.match(/^(AN|SN|MN|DN|Snp|Khp|Ja|Ud|Dhp)\s*(\d+(?:\.\d+)?)(?::([\d.]+))?/);
+    let loc = null;
+    if (m) { cur = REF_ID[m[1]] + m[2]; loc = m[3] || null; }
+    else { const n = p.match(/^(\d+(?:\.\d+)*)/); loc = n ? n[1] : null; }
+    const st = cur && typeof SUTTAS !== "undefined" && SUTTAS[cur];
+    if (st) {
+      const para = loc ? loc.replace(/\.$/, "").split(".").slice(0, st.depth || 1).join(".") : null;
       return `<a class="ref-link" href="#/sutta/${cur}${para ? "/" + para : ""}">${ICON.book}<span>${esc(p)}</span></a>`;
+    }
     return `<span class="ref-plain">${esc(p)}</span>`;
   });
   return `<div class="ref">${parts.join(" ")}</div>`;
@@ -383,6 +389,28 @@ function nightlyPanelHTML(cid) {
   }
   return `<section class="nightly card" aria-labelledby="nlT"><h3 id="nlT">พระสูตรประจำคืน</h3>
     <div class="seg-ctl" style="--n:2" role="radiogroup" aria-labelledby="nlT">${modes}</div>${body}</section>`;
+}
+
+// ---------- บทสวดเสริม (add-on ที่ผู้ใช้เปิด/ปิดได้ตามความชอบ) ----------
+// ข้อมูลใน night.js: OPTIONS, optionEnabled, optionSet · เก็บใน localStorage "chants-v1"
+function optionPanelHTML(sid) {
+  if (typeof OPTIONS === "undefined") return "";
+  const opts = OPTIONS[sid] || [];
+  if (!opts.length) return "";
+  const rows = opts.map(id => {
+    const c = CHANTS[id];
+    const on = optionEnabled(sid, id);
+    const ref = c && c.note ? (c.note.match(/^[A-Z][A-Za-z]*\s[\d.:–-]+/) || [""])[0] : "";
+    return `<div class="opt-row">
+      <span class="meta"><b>${esc(shortTitle(c ? c.title : id))}</b><span>${esc(ref)} · ${esc(c ? c.note : "")}</span></span>
+      <button type="button" role="switch" aria-checked="${on}" class="switch" data-opt="${id}" aria-label="เปิด/ปิด ${esc(c ? c.title : id)}"></button>
+    </div>`;
+  }).join("");
+  return `<section class="chant-options card" aria-labelledby="optT">
+    <h3 id="optT">บทสวดเสริม</h3>
+    <p class="opt-sub">เลือกเพิ่มได้ตามความชอบ · ถ้าปิดไว้จะไม่แสดงในสารบัญ</p>
+    ${rows}
+  </section>`;
 }
 
 function uposathaPanel() {
@@ -754,6 +782,7 @@ function renderSession(id, { keep = false } = {}) {
 
   view.innerHTML = `
     ${s.id === "uposatha" ? uposathaPanel() : ""}
+    ${optionPanelHTML(s.id)}
     <nav class="toc-chips" aria-label="สารบัญ">
       <div class="scroller">${chips}</div>
       <div class="read-progress" aria-hidden="true"><span id="readProg"></span></div>
@@ -781,6 +810,13 @@ function renderSession(id, { keep = false } = {}) {
         if (top < tb + 60 || top > innerHeight - 120) panel.scrollIntoView({ block: "start", behavior: "auto" });
         view.querySelector(`[data-nl="${key}"]`)?.focus();
       }
+    }));
+
+  // บทสวดเสริม: เปิด/ปิดแล้ววาดหน้าใหม่ (คงตำแหน่งเลื่อนไว้)
+  view.querySelectorAll("[data-opt]").forEach(b =>
+    b.addEventListener("click", () => {
+      optionSet(id, b.dataset.opt, !optionEnabled(id, b.dataset.opt));
+      renderSession(id, { keep: true });
     }));
 
   view.querySelectorAll("[data-jump]").forEach(a =>
@@ -823,10 +859,38 @@ const shortChip = t => t.replace(/\s*\(([^)]*)\)/, (m, x) => /จบ/.test(x) ? 
 const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
 // ---------- หน้าพระสูตรเต็ม ----------
+// เนื้อหาพระสูตรแยกไฟล์ suttas/<id>.json (แอปเปิดเร็ว ไม่ต้องโหลดทุกสูตรตั้งแต่ต้น · sw.js แคชไว้ใช้ออฟไลน์)
+const SUTTA_DATA = {};
+function loadSutta(id) {
+  if (!SUTTA_DATA[id]) SUTTA_DATA[id] = fetch(`suttas/${id}.json`).then(r => {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }).catch(e => { delete SUTTA_DATA[id]; throw e; });
+  return SUTTA_DATA[id];
+}
+function suttaHead(id, st) {
+  return `<div class="sutta-head">
+      <h2>${esc(st.title)}</h2>
+      <p>${esc(st.sub)}</p>
+      <p class="src">บาลีฉบับ SuttaCentral (ฐานข้อมูล tripitaka-mcp) · คำแปลภาษาชาวบ้าน ·
+        <a href="https://tripitaka-mcp.com/read/${esc(id)}" target="_blank" rel="noopener">ดูต้นฉบับออนไลน์</a></p>
+    </div>`;
+}
 function renderSutta(id, para) {
   const st = SUTTAS[id];
   setChrome({ title: st.title });
-  const body = st.paras.map(p => {
+  view.innerHTML = `${suttaHead(id, st)}<p class="sutta-loading" role="status">กำลังเปิดพระสูตร…</p>`;
+  const here = location.hash;
+  loadSutta(id).then(data => {
+    if (location.hash !== here) return;                 // ผู้ใช้ไปหน้าอื่นแล้ว
+    paintSutta(id, st, data, para);
+  }).catch(() => {
+    const el = view.querySelector(".sutta-loading");
+    if (el && location.hash === here) el.textContent = "เปิดพระสูตรนี้ไม่ได้ ลองต่อเน็ตแล้วเปิดอีกครั้ง (เปิดครั้งแรกแล้วจะใช้ออฟไลน์ได้)";
+  });
+}
+function paintSutta(id, st, data, para) {
+  const body = data.paras.map(p => {
     const exp = p.lines.some(l => l.expanded)
       ? `<div class="exp-note">ต้นฉบับย่อส่วนนี้ไว้ (…pe…) แอปเติมให้เต็มแล้ว</div>` : "";
     return `<section class="sutta-para${p.n === para ? " target" : ""}" id="p-${esc(p.n)}">
@@ -1585,7 +1649,7 @@ gearBtn.addEventListener("click", () => { location.hash = "#/settings"; });
 function route() {
   const h = location.hash.replace(/^#\/?/, "");
   if (typeof routeQuick === "function" && routeQuick(h)) return measureTopbar();   // quick.js
-  const m = h.match(/^sutta\/([a-z0-9.]+)(?:\/(\d+))?$/);
+  const m = h.match(/^sutta\/([a-z0-9.]+)(?:\/(\d+(?:\.\d+)*))?$/);
   const c = h.match(/^chant\/([a-z]+)(?:\/(\d+))?$/);
   if (m && typeof SUTTAS !== "undefined" && SUTTAS[m[1]]) renderSutta(m[1], m[2] || null);
   else if (c && SESSIONS.some(s => s.id === c[1])) renderChant(c[1], +(c[2] || 0));
