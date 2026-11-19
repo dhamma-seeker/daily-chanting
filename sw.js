@@ -1,17 +1,19 @@
 // Service worker — แคชไฟล์ไว้ใช้ออฟไลน์
 // เลข CACHE เปลี่ยนเมื่อเพิ่ม/ลบไฟล์ใน ASSETS (ไฟล์ที่แก้เฉย ๆ อัปเดตเองอยู่แล้ว)
-const CACHE = "suadmon-v11";
+const CACHE = "suadmon-v12";
 const FONT_CACHE = "suadmon-fonts-v1";   // ฟอนต์จาก Google Fonts แยกแคช ไม่ลบตอนเปลี่ยนรุ่น
 
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
+  "./quick.css",
   "./data.js",
   "./night.js",
   "./uposatha.js",
   "./suttas.js",
   "./uposatha-cal.js",
+  "./quick.js",
   "./app.js",
   "./manifest.webmanifest",
   "./icon.svg",

@@ -1,0 +1,269 @@
+/* ============================================================
+   มีเวลาสักครู่ — ฝึกชั่วขณะตามพระสูตร (quick.js)
+   พื้นหน้าฝึกเป็น --night เสมอ (ตาม MOTION.md) · แสงทองทุกแสงจางลง ไม่ค้าง
+   ============================================================ */
+
+/* ---------- หน้าเลือก ---------- */
+.qp-page { display: flex; flex-direction: column; gap: 16px; }
+.qp-lead { margin: 4px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted); }
+.qp-times { --n: 3; }
+.qp-times button { flex-direction: column; gap: 0; min-height: 60px; }
+.qp-times .t { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.qp-times .s { font-size: 13px; color: var(--muted); font-weight: 400; }
+.qp-row .meta .qp-tag {
+  align-self: flex-start; margin-top: 4px; padding: 2px 10px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary); font-size: 13px; font-weight: 500;
+}
+.qp-glyph {
+  width: 48px; height: 48px; border-radius: 14px; flex: none; display: grid; place-items: center;
+  background: var(--night); color: #FDE68A; font-size: 20px; font-weight: 700;
+}
+.qp-tip { margin: 4px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--gold-soft); color: var(--gold-ink); font-size: 15px; line-height: 1.55; }
+
+/* ทางเข้าบนหน้าแรก */
+.qp-entry {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px;
+  border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
+  color: var(--ink); text-decoration: none;
+}
+.qp-entry .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.qp-entry b { font-size: 18px; font-weight: 600; line-height: 1.35; }
+.qp-entry .meta > span { font-size: 15px; color: var(--muted); }
+.qp-entry .chev { color: var(--muted); }
+
+/* ---------- โครงหน้าฝึก ---------- */
+.qp {
+  position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: auto minmax(0, 1fr);
+  background: radial-gradient(120% 70% at 50% 38%, #1B2B5E 0%, #0F1E46 45%, #0A1430 100%); color: #FFFFFF;
+}
+.qp :focus-visible { outline-color: #FDE68A; }
+.qp a { color: #FDE68A; }
+.qp-head {
+  display: flex; align-items: center; gap: 4px; padding: calc(env(safe-area-inset-top) + 4px) 8px 0;
+  max-width: var(--maxw); width: 100%; margin: 0 auto; box-sizing: border-box;
+}
+.qp-head h1 { flex: 1; margin: 0; text-align: center; font-size: 15px; font-weight: 600; color: #CBD5E1; }
+.qp-head .iconbtn { color: #CBD5E1; text-decoration: none; }
+.qp-head .iconbtn svg.i { width: 24px; height: 24px; }
+.qp-body { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 0 22px calc(env(safe-area-inset-bottom) + 20px); }
+.qp-body > * { max-width: 520px; width: 100%; margin-left: auto; margin-right: auto; }
+
+.qp-ref {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; margin: 2px 6px 2px 0;
+  border-radius: 999px; background: rgba(253, 230, 138, .12); color: #FDE68A !important; font-size: 14px; font-weight: 500; text-decoration: none;
+}
+.qp-ref svg.i { width: 16px; height: 16px; }
+.qp-ai { margin: 0; font-size: 12px; color: #94A3B8; }
+.qp-chip { align-self: flex-start; padding: 3px 12px; border-radius: 999px; background: rgba(253, 230, 138, .12); color: #FDE68A; font-size: 14px; font-weight: 600; }
+.qp .btn { min-height: 56px; }
+.qp-primary { background: #FFFFFF; color: #0F1E46; }
+.qp-primary:disabled { background: rgba(255, 255, 255, .12); color: #94A3B8; }
+.qp-secondary { background: transparent; color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .35); }
+.qp-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- วงแสงกดค้าง (หายใจ) ---------- */
+.qp-hold {
+  position: relative; width: min(300px, 76vw); aspect-ratio: 1; flex: none; border: 0; border-radius: 999px;
+  background: transparent; padding: 0; display: grid; place-items: center; align-self: center;
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+}
+.qp-hold.small { width: min(220px, 60vw); }
+.qp-hold > span { grid-area: 1 / 1; }
+.qp-ring {
+  width: 100%; height: 100%; border-radius: 999px; border: 2px solid rgba(253, 230, 138, .75);
+  background: radial-gradient(circle, rgba(253, 230, 138, .22) 0%, rgba(253, 230, 138, .08) 55%, rgba(253, 230, 138, 0) 72%);
+  transform: scale(.42); opacity: .6; transition: transform 1s ease, opacity 1s ease;
+}
+.qp-glow {
+  width: 130%; height: 130%; border-radius: 999px; pointer-events: none;
+  background: radial-gradient(circle, rgba(253, 230, 138, .35) 0%, rgba(253, 230, 138, 0) 65%);
+  transform: scale(.5); opacity: .25; transition: transform 4.5s ease, opacity 4.5s ease;
+}
+.qp-core { width: 14px; height: 14px; border-radius: 999px; background: #FDE68A; box-shadow: 0 0 18px rgba(253, 230, 138, .8); }
+/* หายใจเข้า: ขยายช้าลงเรื่อย ๆ จนเกือบเต็มราว 7 วินาที (ถ้าปล่อยก่อน ก็หยุดที่ขนาดนั้นแล้วหดกลับ) */
+.qp-hold[data-phase="in"] .qp-ring { transform: scale(1); opacity: 1; transition: transform 7s cubic-bezier(.15, .6, .3, 1), opacity .4s ease; }
+.qp-hold[data-phase="in"] .qp-glow { transform: scale(1); opacity: 1; transition: transform 7s cubic-bezier(.15, .6, .3, 1), opacity 2s ease; }
+.qp-hold[data-phase="out"] .qp-ring { transform: scale(.42); opacity: .75; transition: transform 4.5s cubic-bezier(.4, 0, .6, 1), opacity 4.5s ease; }
+.qp-hold.small[data-phase="out"] .qp-ring { transition-duration: 3.5s; }
+.qp-phase { margin: 0; min-height: 30px; text-align: center; font-size: 22px; font-weight: 600; color: #FDE68A; }
+
+.qp-breath { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 8px 0 24px; }
+.qp-breath .qp-fade { margin: 0; text-align: center; transition: opacity .8s ease; }
+.qp-intro { font-size: 18px; line-height: 1.6; color: #E2E8F0; }
+.qp-hint { font-size: 14px; line-height: 1.6; color: #94A3B8; }
+/* ระหว่างหายใจ ข้อความรอบ ๆ จางหายไป ให้ตาอยู่กับวงแสงหรือหลับตาได้ */
+.qp-breath:not([data-phase="idle"]) .qp-fade { opacity: 0; }
+
+/* ---------- ตอนจบรอบ ---------- */
+.qp-done { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 12px 0; animation: fadeUp .5s ease both; }
+.qp-spark { align-self: center; width: 12px; height: 12px; border-radius: 999px; background: #FDE68A; animation: qpSpark 2s ease both; }
+@keyframes qpSpark { 0% { box-shadow: 0 0 0 0 rgba(253, 230, 138, .7); } 40% { box-shadow: 0 0 28px 10px rgba(253, 230, 138, .5); } 100% { box-shadow: 0 0 10px 2px rgba(253, 230, 138, .3); } }
+.qp-quote {
+  display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 18px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(253, 230, 138, .25);
+}
+.qp-quote .pi { margin: 0; font-family: "Noto Sans", sans-serif; font-style: italic; font-size: 15px; line-height: 1.6; color: #E2E8F0; }
+.qp-quote hr { margin: 0; border: 0; height: 1px; background: rgba(253, 230, 138, .2); }
+.qp-quote .th { margin: 0; font-size: 17px; line-height: 1.65; }
+.qp-quote .note { margin: 0; font-size: 15px; line-height: 1.6; color: #CBD5E1; }
+.qp-quote .note b { color: #FDE68A; font-weight: 600; }
+.qp-count { margin: 0; text-align: center; font-size: 15px; color: #CBD5E1; }
+
+/* ---------- ฟังก่อน (แตะ/ปัด) ---------- */
+.qp-learn { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.qp-dots { display: flex; justify-content: center; gap: 6px; padding: 6px 0 10px; }
+.qp-dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(203, 213, 225, .3); transition: width .3s ease, background-color .3s ease; }
+.qp-dots span.on { width: 16px; background: #FDE68A; }
+.qp-dots span.past { background: #FDE68A; }
+.qp-stage { flex: 1; display: flex; flex-direction: column; touch-action: pan-y; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.qp-foot { display: flex; gap: 10px; padding-top: 12px; }
+.qp-foot .btn { flex: 1; min-height: 52px; }
+.qp-back {
+  width: 52px; height: 52px; flex: none; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25);
+  background: transparent; color: #FFFFFF; display: grid; place-items: center;
+}
+.qp-back svg.i { transform: rotate(180deg); }
+.qp-back:disabled { opacity: .35; }
+
+.ln-card { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; animation: lnIn .45s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes lnIn { from { opacity: 0; transform: translateX(28px); } }
+.ln-c1, .ln-c3 { align-items: center; text-align: center; }
+.ln-eyebrow { margin: 0; font-size: 15px; font-weight: 600; color: #FDE68A; }
+.ln-big { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.6; }
+.ln-mid { margin: 0; font-size: 17px; line-height: 1.6; color: #E2E8F0; }
+.ln-pi { margin: 0; font-family: "Noto Sans", sans-serif; font-style: italic; font-size: 14px; line-height: 1.6; color: #94A3B8; }
+.ln-teacher { margin: 0; padding: 12px 14px; border-radius: 12px; background: rgba(253, 230, 138, .1); border: 1px solid rgba(253, 230, 138, .25); font-size: 15px; line-height: 1.6; color: #FEF3C7; }
+.ln-orb {
+  width: 120px; height: 120px; border-radius: 999px; animation: lnGlow 4s ease-in-out 3;
+  background: radial-gradient(circle, rgba(253, 230, 138, .9) 0%, rgba(253, 230, 138, .35) 30%, rgba(253, 230, 138, 0) 70%);
+}
+@keyframes lnGlow { 0%, 100% { opacity: .55; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+.rise { animation: fadeUp .7s ease both; }
+.rise2 { animation: fadeUp .7s .5s ease both; }
+.rise3 { animation: fadeUp .7s 1s ease both; }
+
+.ln-c2 { justify-content: flex-start; gap: 14px; padding-top: 6px; }
+.ln-rungs { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.ln-rung { display: flex; flex-direction: column; gap: 6px; opacity: 0; transform: translateY(8px); transition: opacity .5s ease, transform .5s ease; }
+.ln-rung.shown { opacity: 1; transform: none; }
+.ln-rung.lax { opacity: .45; }
+.ln-rung .lbl { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 16px; line-height: 1.4; }
+.ln-rung .lbl b { font-size: 13px; font-weight: 600; color: #94A3B8; opacity: 0; transition: opacity .5s ease; }
+.ln-rung.ok .lbl b, .ln-rung.lax .lbl b { opacity: 1; }
+.ln-rung.ok .lbl b { color: #FDE68A; }
+.ln-rung .track { display: block; height: 8px; border-radius: 999px; background: rgba(203, 213, 225, .12); }
+.ln-rung .bar { display: block; height: 8px; border-radius: 999px; width: 0; background: #94A3B8; transition: width 1s cubic-bezier(.2, .7, .3, 1), background-color .6s ease, box-shadow .6s ease; }
+.ln-rung.shown .bar { width: var(--w); min-width: 8px; }
+.ln-rung.ok .bar { background: #FDE68A; box-shadow: 0 0 14px rgba(253, 230, 138, .7); }
+.ln-verdict { margin: 0; padding: 12px 14px; border-radius: 12px; background: rgba(253, 230, 138, .08); font-size: 16px; line-height: 1.6; opacity: 0; transition: opacity .6s ease .3s; }
+.ln-verdict.shown { opacity: 1; }
+.ln-verdict em { font-style: normal; font-weight: 700; color: #FDE68A; }
+.ln-hint { margin: auto 0 0; text-align: center; font-size: 14px; color: #94A3B8; }
+
+/* ---------- เมตตาแผ่ ๔ ทิศ ---------- */
+.qp-metta {
+  flex: 1; border: 0; background: transparent; color: inherit; font: inherit; padding: 8px 0 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; -webkit-tap-highlight-color: transparent;
+}
+.mt-field { position: relative; width: min(320px, 80vw); aspect-ratio: 1; flex: none; display: block; margin-top: 8px; }
+.mt-field > span { position: absolute; }
+.mt-quad {
+  inset: 0; border-radius: 999px; opacity: 0; transform: scale(.7); transition: opacity .9s ease, transform .9s ease;
+  -webkit-mask: radial-gradient(circle, transparent 7%, #000 9%, #000 55%, transparent 70%);
+          mask: radial-gradient(circle, transparent 7%, #000 9%, #000 55%, transparent 70%);
+}
+.mt-quad.q0 { background: conic-gradient(from -45deg, rgba(253, 230, 138, .55) 0deg 90deg, transparent 90deg); }
+.mt-quad.q1 { background: conic-gradient(from 45deg, rgba(253, 230, 138, .55) 0deg 90deg, transparent 90deg); }
+.mt-quad.q2 { background: conic-gradient(from 135deg, rgba(253, 230, 138, .55) 0deg 90deg, transparent 90deg); }
+.mt-quad.q3 { background: conic-gradient(from 225deg, rgba(253, 230, 138, .55) 0deg 90deg, transparent 90deg); }
+.qp-metta[data-lit="1"] .q0, .qp-metta[data-lit="2"] :is(.q0, .q1), .qp-metta[data-lit="3"] :is(.q0, .q1, .q2), .qp-metta[data-lit="4"] .mt-quad { opacity: 1; transform: none; }
+.mt-ring { inset: 12%; border-radius: 999px; border: 1px dashed rgba(203, 213, 225, .25); }
+.mt-self { left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 999px; background: #FDE68A; box-shadow: 0 0 22px 4px rgba(253, 230, 138, .6); }
+.mt-lbl { font-size: 12px; font-weight: 600; color: rgba(203, 213, 225, .45); transition: color .6s ease; }
+.mt-lbl.l0 { left: 50%; top: 4px; transform: translateX(-50%); }
+.mt-lbl.l1 { right: 0; top: 50%; transform: translateY(-50%); }
+.mt-lbl.l2 { left: 50%; bottom: 4px; transform: translateX(-50%); }
+.mt-lbl.l3 { left: 0; top: 50%; transform: translateY(-50%); }
+.qp-metta[data-lit="1"] .l0, .qp-metta[data-lit="2"] :is(.l0, .l1), .qp-metta[data-lit="3"] :is(.l0, .l1, .l2), .qp-metta[data-lit="4"] .mt-lbl { color: #FDE68A; }
+.mt-wave { inset: 0; border-radius: 999px; border: 1px solid rgba(253, 230, 138, .5); opacity: 0; transform: scale(.6); transition: transform 1.6s ease, opacity 1.6s ease; }
+.mt-wave.w2 { transition-delay: .25s; }
+.mt-glow { inset: -10%; border-radius: 999px; opacity: 0; transition: opacity 1.4s ease, transform 1.4s ease; background: radial-gradient(circle, rgba(253, 230, 138, .28) 0%, rgba(253, 230, 138, .12) 45%, rgba(253, 230, 138, 0) 70%); }
+.qp-metta.wide .w1 { opacity: .5; transform: scale(1.12); }
+.qp-metta.wide .w2 { opacity: .5; transform: scale(1.3); }
+.qp-metta.wide .mt-glow { opacity: 1; }
+/* ไม่มีประมาณ: คลื่นจางหายไปจนสุด (แสงทุกแสงต้องจาง) */
+.qp-metta.boundless .mt-wave { opacity: .12; }
+.qp-metta.boundless .mt-glow { transform: scale(1.25); }
+.mt-text { display: flex; flex-direction: column; gap: 10px; min-height: 150px; animation: fadeUp .5s ease both; }
+.mt-text .t { font-size: 14px; font-weight: 600; color: #FDE68A; }
+.mt-text .pi { font-family: "Noto Sans", sans-serif; font-style: italic; font-size: 17px; line-height: 1.55; color: #E2E8F0; }
+.mt-text .th { font-size: 18px; line-height: 1.6; }
+.mt-hint { margin-top: auto; font-size: 14px; color: #94A3B8; }
+
+/* ---------- พาหิรทุกขสูตร ---------- */
+.bd-intro { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: 8px 0; animation: fadeUp .5s ease both; }
+.bd-key { margin: 0; font-size: 20px; font-weight: 600; line-height: 1.6; color: #FDE68A; }
+.bd-how { margin: 4px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(255, 255, 255, .06); font-size: 16px; line-height: 1.6; color: #E2E8F0; }
+
+.bd-practice { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 4px; --R: 120px; }
+.bd-ring { position: relative; width: 330px; max-width: 100%; aspect-ratio: 1; flex: none; }
+.bd-self {
+  position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 999px; background: #FDE68A;
+  opacity: var(--self, 1); box-shadow: 0 0 22px rgba(253, 230, 138, .7); transition: opacity 1s ease;
+}
+/* เส้นที่ผูกสิ่งนั้นกับ "เรา": พิจารณาครบแล้วเส้นขาด */
+.bd-line {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--R) - 38px); height: 2px; margin-top: -1px; border-radius: 2px;
+  transform-origin: 0 50%; transform: rotate(var(--a)); background: linear-gradient(90deg, rgba(253, 230, 138, .7), rgba(253, 230, 138, .25));
+  transition: transform 1s ease, opacity 1s ease;
+}
+.bd-line.loosen { transform: rotate(var(--a)) scaleX(.5); opacity: .35; }
+.bd-line.done { transform: rotate(var(--a)) scaleX(.15); opacity: 0; }
+.bd-node {
+  position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; padding: 0; border-radius: 999px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font: inherit; color: #FFFFFF;
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(253, 230, 138, .4);
+  transform: rotate(var(--a)) translateX(var(--R)) rotate(calc(-1 * var(--a)));
+  transition: transform 1.2s cubic-bezier(.2, .7, .3, 1), opacity 1.2s ease, background-color .4s ease, border-color .4s ease;
+}
+.bd-node b { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.bd-node i { font-family: "Noto Sans", sans-serif; font-size: 11px; opacity: .8; }
+.bd-node.cur { background: rgba(253, 230, 138, .22); border: 2px solid #FDE68A; animation: bdPulse 2.4s ease-in-out infinite; }
+.bd-node.dim { opacity: .4; }
+.bd-node.done {
+  transform: rotate(var(--a)) translateX(calc(var(--R) + 22px)) rotate(calc(-1 * var(--a)));
+  background: rgba(255, 255, 255, .03); border: 1px dashed rgba(203, 213, 225, .35); opacity: .45;
+}
+@keyframes bdPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(253, 230, 138, .55); } 50% { box-shadow: 0 0 0 10px rgba(253, 230, 138, 0); } }
+.bd-panel { flex: 1; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.bd-ask { text-align: center; display: flex; flex-direction: column; gap: 8px; animation: fadeUp .5s ease both; }
+.bd-ask .t { margin: 0; font-size: 20px; font-weight: 600; }
+.bd-ask .s { margin: 0; font-size: 15px; line-height: 1.6; color: #CBD5E1; }
+.bd-panel .btn { margin-top: auto; }
+.bd-chain {
+  flex: 1; border: 0; background: transparent; color: inherit; font: inherit; padding: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; -webkit-tap-highlight-color: transparent;
+}
+.bd-chain .pos { font-size: 14px; font-weight: 600; color: #FDE68A; }
+.bd-chain .th { font-size: 22px; font-weight: 600; line-height: 1.55; animation: fadeUp .5s ease both; }
+.bd-chain .pi { font-family: "Noto Sans", sans-serif; font-style: italic; font-size: 14px; line-height: 1.6; color: #94A3B8; animation: fadeUp .6s .3s ease both; }
+.bd-chain .hint { margin-top: auto; font-size: 14px; color: #94A3B8; }
+@media (max-height: 700px) {
+  .bd-practice { --R: 100px; }
+  .bd-ring { width: 280px; }
+  .bd-node { width: 66px; height: 66px; margin: -33px 0 0 -33px; }
+}
+.qp-glyph svg.i { width: 26px; height: 26px; }
+.bd-node.long b { font-size: 13px; }
+/* จอเตี้ยแบบ iPhone SE: บีบระยะในขั้น "ภิกษุ ๖ รูป" ให้ปุ่มด้านล่างยังอยู่ในจอ */
+@media (max-height: 700px) {
+  .ln-c2 { gap: 8px; padding-top: 0; }
+  .ln-c2 .ln-mid { font-size: 15px; line-height: 1.5; }
+  .ln-rungs { gap: 6px; margin-top: 0; }
+  .ln-rung .lbl { font-size: 14px; }
+  .ln-rung .track, .ln-rung .bar { height: 6px; }
+  .ln-verdict { font-size: 14px; padding: 8px 12px; line-height: 1.5; }
+  .ln-verdict .qp-ref { min-height: 28px; }
+  .ln-hint { font-size: 13px; }
+  .bd-node.long b { font-size: 12px; }
+}

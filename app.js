@@ -713,6 +713,11 @@ function renderHome({ keep = false } = {}) {
       </span>
       <span class="go">${ICON.play}<span>เริ่มสวด</span></span>
     </a>
+    <a class="qp-entry" href="#/quick">
+      <span class="qp-glyph" aria-hidden="true">${ICON.lotus}</span>
+      <span class="meta"><b>มีเวลาสักครู่</b><span>ฝึกชั่วลมหายใจเดียวตามพระสูตร · ตอนรอรถหรือว่าง ๆ</span></span>
+      <span class="chev">${ICON.chev}</span>
+    </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
     <nav class="list" aria-label="บทสวด">${rows}</nav>
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;
@@ -1579,6 +1584,7 @@ gearBtn.addEventListener("click", () => { location.hash = "#/settings"; });
 
 function route() {
   const h = location.hash.replace(/^#\/?/, "");
+  if (typeof routeQuick === "function" && routeQuick(h)) return measureTopbar();   // quick.js
   const m = h.match(/^sutta\/([a-z0-9.]+)(?:\/(\d+))?$/);
   const c = h.match(/^chant\/([a-z]+)(?:\/(\d+))?$/);
   if (m && typeof SUTTAS !== "undefined" && SUTTAS[m[1]]) renderSutta(m[1], m[2] || null);
