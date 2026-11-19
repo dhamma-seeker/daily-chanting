@@ -469,7 +469,7 @@ function uposathaPanel() {
         แต่ละวันนับจากค่ำ ๑๘:๐๐ ถึงค่ำวันรุ่งขึ้น ๑๘:๐๐ เพราะพระสูตรว่า "คืนนี้และวันนี้" (อิมัญจะ รัตติง อิมัญจะ ทิวะสัง) ·
         เวลาข้างขึ้นข้างแรมคำนวณทางดาราศาสตร์ ตามเวลาของเครื่อง</p>
     </details>
-    <h2 class="section-label">บทสวดและข้อปฏิบัติ</h2>`;
+    <h2 class="section-label">บทสวดและข้อปฏิบัติ · ${(SESSIONS.find(x => x.id === "uposatha")?.order || []).length} บท</h2>`;
 }
 
 // ============================================================
@@ -720,8 +720,9 @@ function renderHome({ keep = false } = {}) {
   const span = s.order.length > 1 ? `${s.order.length} บท · ${shortTitle(first.title)} ถึง ${shortTitle(last.title)}` : `${s.order.length} บท`;
 
   const rows = SESSIONS.map(x => {
-    const sub = x.id === "uposatha" ? `${x.order.length} บท · ข้อปฏิบัติและพระสูตร`
-      : `${x.order.length} บท`;
+    const o = x.order, fc = CHANTS[o[0]], lc = CHANTS[o[o.length - 1]];
+    const sub = x.id === "uposatha" ? `${o.length} บท · ข้อปฏิบัติและพระสูตร`
+      : o.length > 1 && fc && lc ? `${o.length} บท · ${shortTitle(fc.title)} ถึง ${shortTitle(lc.title)}` : `${o.length} บท`;
     return `<a class="row-card" href="#/${x.id}">
       <span class="tile${x.id === "uposatha" ? " gold" : ""}">${ICON[SESSION_ICON[x.id]] || ICON.book}</span>
       <span class="meta"><b>${esc(x.title)}</b><span>${esc(sub)}</span></span>
@@ -750,7 +751,7 @@ function renderHome({ keep = false } = {}) {
       <span class="chev">${ICON.chev}</span>
     </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
-    <nav class="list" aria-label="บทสวด">${rows}</nav>
+    <nav class="list grouped" aria-label="บทสวด">${rows}</nav>
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;
   window.scrollTo(0, keep ? y : 0);
   cleanupPage = startUpoClock(() => renderHome({ keep: true }));
@@ -758,6 +759,7 @@ function renderHome({ keep = false } = {}) {
 const shortTitle = t => t.replace(/\s*\(.*?\)\s*/g, "").replace(/^คำ|^บท|^คาถา/, "").trim();
 
 // ---------- หน้าสวด ----------
+let tocExpanded = false;   // สารบัญหน้าวันอุโบสถกางครบแล้วไหม (คงไว้ตอนวาดใหม่ทุกนาทีจากนาฬิกาอุโบสถ)
 function renderSession(id, { keep = false } = {}) {
   const s = SESSIONS.find(x => x.id === id);
   if (!s) return renderHome();
@@ -783,10 +785,20 @@ function renderSession(id, { keep = false } = {}) {
     </section>`;
   }).join("");
 
+  // หน้าวันอุโบสถ: สารบัญเป็นรายการแนวตั้ง ๕ บทแรก + "อีก N บท" (ดีไซน์ Uposatha บน canvas)
+  // ชิปสารบัญยังอยู่ แต่ลอยลงมาใต้แถบบนเฉพาะตอนเลื่อนผ่านรายการไปแล้ว ไม่ให้ซ้ำกันตอนอยู่บนสุด
+  const isUpo = s.id === "uposatha", TOC_SHOW = 5;
+  const tocList = !isUpo ? "" : `<ol class="toc-list card" id="tocList">${s.order.map((cid, i) => {
+      const c = CHANTS[cid];
+      return `<li${i >= TOC_SHOW && !tocExpanded ? " hidden" : ""}><a href="#c-${i}" data-jump="${i}"><span class="n">${i + 1}</span><span class="t">${esc(c ? c.title : cid)}</span>${ICON.chev}</a></li>`;
+    }).join("")}${n > TOC_SHOW && !tocExpanded ? `<li class="toc-more"><button type="button" id="tocMore" aria-expanded="false">
+      <span>อีก ${n - TOC_SHOW} บท · ถึง ${esc(shortTitle(CHANTS[s.order[n - 1]]?.title || ""))}</span>${ICON.down}</button></li>` : ""}</ol>`;
+
   view.innerHTML = `
-    ${s.id === "uposatha" ? uposathaPanel() : ""}
+    ${isUpo ? uposathaPanel() : ""}
+    ${tocList}
     ${optionPanelHTML(s.id)}
-    <nav class="toc-chips" aria-label="สารบัญ">
+    <nav class="toc-chips${isUpo ? " floating" : ""}" aria-label="สารบัญ">
       <div class="scroller">${chips}</div>
       <div class="read-progress" aria-hidden="true"><span id="readProg"></span></div>
     </nav>
@@ -834,6 +846,7 @@ function renderSession(id, { keep = false } = {}) {
   const sections = [...view.querySelectorAll(".chant")];
   const chipEls = [...view.querySelectorAll(".chip")];
   const prog = document.getElementById("readProg");
+  const tocEl = view.querySelector("#tocList"), floatNav = view.querySelector(".toc-chips.floating");
   let curIdx = -1, raf = 0;
   const onScroll = () => {
     if (raf) return;
@@ -849,11 +862,19 @@ function renderSession(id, { keep = false } = {}) {
         const chip = chipEls[idx], sc = chip?.parentElement;
         if (chip && sc) sc.scrollTo({ left: sc.scrollLeft + chip.getBoundingClientRect().left - sc.getBoundingClientRect().left - (sc.clientWidth - chip.offsetWidth) / 2, behavior: smooth() });
       }
+      if (tocEl && floatNav) floatNav.classList.toggle("show", tocEl.getBoundingClientRect().bottom < line - 90);
       const max = document.documentElement.scrollHeight - innerHeight;
       if (prog) prog.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + "%";
     });
   };
   addEventListener("scroll", onScroll, { passive: true });
+  view.querySelector("#tocMore")?.addEventListener("click", () => {
+    tocExpanded = true;
+    view.querySelectorAll("#tocList li[hidden]").forEach(li => li.hidden = false);
+    const more = view.querySelector(".toc-more");
+    more?.previousElementSibling?.querySelector("a")?.focus();
+    more?.remove();
+  });
   const stopClock = id === "uposatha" ? startUpoClock(() => renderSession(id, { keep: true })) : () => {};
   cleanupPage = () => { removeEventListener("scroll", onScroll); stopClock(); };
   window.scrollTo(0, keep ? y : 0);
