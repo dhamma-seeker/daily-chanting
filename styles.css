@@ -837,6 +837,8 @@ body.chant-mode { overflow: hidden; }
 .an-chip.done .mk { background: #FACC15; }
 
 .an-stage { position: relative; display: grid; place-items: center; overflow: visible; }
+/* เวทีเป็นภาพประกอบล้วน รังสี/แสงกว้างกว่าเวทีและทับแถบเลือกข้อ ห้ามรับการแตะ ไม่งั้นแตะแถบเลือกข้อไม่ติด */
+.an-stage, .an-stage * { pointer-events: none; }
 .an-stage > * { position: absolute; left: 50%; top: 50%; }
 .an-orb {
   width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; overflow: hidden;
@@ -904,6 +906,29 @@ body.chant-mode { overflow: hidden; }
 .an-foot .btn.secondary { min-height: 44px; font-size: 15px; background: transparent; color: #FFFFFF; border-color: rgba(255, 255, 255, .3); }
 .an-foot a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; color: #CBD5E1; text-decoration: none; }
 .an-foot a svg.i { width: 16px; height: 16px; }
+/* จอเตี้ย (iPhone SE ฯลฯ): ย่อเวทีดวงแก้วทั้งชุดด้วย scale และลดพื้นที่ปุ่ม ให้การ์ดบาลี/คำแปลมีที่พอ ไม่ถูกตัด */
+.an-stage { transform: scale(var(--an-s, 1)); }
+@media (max-height: 760px) {
+  .an { --an-s: .82; grid-template-rows: auto 240px minmax(0, 1fr) auto auto; }
+  .an-next { min-height: 104px; }
+}
+@media (max-height: 690px) {
+  .an { --an-s: .74; grid-template-rows: auto 214px minmax(0, 1fr) auto auto; }
+  .an-head { gap: 8px; padding-bottom: 2px; }
+  .an-chip { min-height: 44px; }
+  .an-card { gap: 4px; }
+  .an-next { min-height: 84px; padding: 6px 20px 6px; gap: 4px; }
+  .an-next .go { min-height: 52px; font-size: 18px; }
+  .an-foot { padding-top: 2px; padding-bottom: calc(env(safe-area-inset-bottom) + 8px); }
+}
+@media (max-height: 600px) {
+  .an { --an-s: .56; grid-template-rows: auto 162px minmax(0, 1fr) auto auto; }
+  .an-card .pl { font-size: 20px; }
+  .an-card .th { font-size: 16px; line-height: 1.4; }
+  .an-next { min-height: 70px; }
+  .an-next .go { min-height: 48px; }
+  .an-next .hint { display: none; }
+}
 
 /* ปุ่มเข้าโหมดระลึก ในบท "ระลึก ๕ ประการ" */
 .an-entry {
