@@ -185,18 +185,6 @@ body.has-fab .wrap { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); 
 .brand h1 { margin: 0; font-size: 21px; font-weight: 700; line-height: 1.3; }
 .brand p { margin: 0; font-size: 15px; color: var(--muted); }
 
-.suggest {
-  margin-top: 16px; padding: 20px; border-radius: var(--radius);
-  background: #1E3A8A; color: #FFFFFF; box-shadow: var(--shadow-lg);
-  display: flex; flex-direction: column; gap: 14px;
-}
-.suggest .eyebrow { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #DBE4FF; }
-.suggest .eyebrow svg.i { width: 20px; height: 20px; }
-.suggest h2 { margin: 0; font-size: 28px; font-weight: 700; line-height: 1.3; }
-.suggest p { margin: 2px 0 0; font-size: 17px; color: #DBE4FF; }
-.suggest .btn { background: #FFFFFF; color: #1E3A8A; min-height: 56px; font-size: 19px; }
-.suggest .btn svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
-
 .list { display: flex; flex-direction: column; gap: 10px; }
 .row-card {
   display: flex; align-items: center; gap: 14px; width: 100%;
@@ -246,14 +234,22 @@ body.has-fab .wrap { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); 
 .upo-card .chev { color: var(--muted); }
 
 .upo-live {
-  display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 16px; padding: 16px;
+  display: flex; flex-direction: column; gap: 16px; width: 100%; margin-top: 16px; padding: 20px;
   border-radius: var(--radius); background: var(--night); border: 1px solid var(--night-line);
   color: #FFFFFF; text-decoration: none; text-align: left; font: inherit; appearance: none;
   box-shadow: 0 2px 4px rgba(15, 23, 42, .1), 0 10px 28px rgba(15, 30, 70, .28);
 }
-.upo-live .top { display: flex; align-items: center; gap: 14px; }
+.upo-live .top { display: flex; align-items: center; gap: 16px; }
 .upo-live .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.upo-live .big { font-size: 21px; font-weight: 700; line-height: 1.35; }
+.upo-live .big { font-size: 24px; font-weight: 700; line-height: 1.35; }
+.upo-next .eyebrow { font-size: 15px; font-weight: 600; color: #FDE68A; }
+.upo-next .big { font-size: 30px; line-height: 1.25; }
+.upo-next .big .cd-final { font-size: 1.1em; }
+.upo-live.upo-next .cta { background: #FFFFFF; color: var(--night); }
+.upo-when { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-radius: 12px; overflow: hidden; background: var(--night-line); }
+.upo-when > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; background: #16275A; }
+.upo-when span { font-size: 14px; color: #CBD5E1; }
+.upo-when b { font-size: 16px; font-weight: 600; }
 .upo-live .sub { font-size: 15px; color: #CBD5E1; }
 .upo-live .cta {
   display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px;
@@ -429,16 +425,55 @@ body.hide-pali.hide-roman .sutta-para .pali + .thai { border-top: 0; padding-top
 .exp-note { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
 
 /* ---------- Install card ---------- */
-.install-card { margin-top: 16px; padding: 16px; border-radius: var(--radius); background: var(--surface); border: 1px dashed var(--faint); font-size: 17px; line-height: 1.55; }
-.install-card .h { display: flex; gap: 12px; align-items: flex-start; }
-.install-card .h svg.i { color: var(--primary); margin-top: 2px; }
-.install-card h3 { margin: 0; font-size: 18px; font-weight: 600; }
-.install-card p { margin: 6px 0 10px; color: var(--ink-2); }
-.install-card .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.install-card .actions .btn.primary { flex: 1; }
-.install-alt { font-size: 15px; color: var(--muted); }
-.install-steps { margin: 6px 0 10px; padding-left: 1.4em; color: var(--ink-2); }
-.install-steps li { margin: 6px 0; }
+/* แนะนำตอนนี้: แถวกะทัดรัดใต้การ์ดวันอุโบสถ */
+.suggest-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 12px 12px 16px;
+  border-radius: var(--radius); background: var(--surface); border: 2px solid var(--primary); box-shadow: var(--shadow);
+  color: var(--ink); text-decoration: none;
+}
+.suggest-row .meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.suggest-row .eyebrow { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: var(--muted); }
+.suggest-row .eyebrow svg.i { width: 16px; height: 16px; }
+.suggest-row b { font-size: 19px; font-weight: 700; line-height: 1.35; }
+.suggest-row .sub { font-size: 15px; color: var(--muted); }
+.suggest-row .go {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px;
+  border-radius: 12px; background: var(--primary); color: var(--on-primary); font-size: 17px; font-weight: 600;
+}
+.suggest-row .go svg { width: 16px; height: 16px; fill: currentColor; stroke: none; }
+
+/* แถบติดตั้ง (smart banner) */
+.install-bar { margin: 0 0 12px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.ib-row { display: flex; align-items: center; gap: 4px; padding: 6px 4px 6px 10px; }
+.ib-toggle {
+  flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; gap: 10px;
+  appearance: none; border: 0; background: transparent; color: var(--ink); font: inherit; text-align: left; padding: 0;
+}
+.ib-toggle img { width: 40px; height: 40px; flex: none; }
+.ib-toggle .t { display: flex; flex-direction: column; min-width: 0; }
+.ib-toggle b { font-size: 16px; font-weight: 600; line-height: 1.35; }
+.ib-toggle .t > span { display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); line-height: 1.35; white-space: nowrap; overflow: hidden; }
+.ib-toggle b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ib-toggle .t svg.i { width: 14px; height: 14px; flex: none; transition: transform .2s ease; }
+.ib-toggle[aria-expanded="true"] .t svg.i { transform: rotate(180deg); }
+.ib-go {
+  flex: none; appearance: none; border: 0; min-height: 44px; min-width: 72px; padding: 0 16px; border-radius: 999px;
+  background: var(--primary); color: var(--on-primary); font: inherit; font-size: 15px; font-weight: 600;
+}
+.ib-x { width: 44px; height: 44px; }
+.ib-x svg.i { width: 20px; height: 20px; }
+.ib-panel { display: flex; flex-direction: column; gap: 12px; padding: 4px 14px 16px; }
+.ib-panel[hidden] { display: none; }
+.ib-tabs button { font-size: 14px; }
+.ib-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.ib-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 16px; line-height: 1.55; color: var(--ink); }
+.ib-steps .n {
+  width: 26px; height: 26px; border-radius: 999px; flex: none; margin-top: 1px;
+  display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-size: 14px; font-weight: 700;
+}
+.ib-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--gold-soft); color: var(--gold-ink); font-size: 15px; line-height: 1.5; }
+.remote-note { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 0 0 12px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.remote-note svg.i { width: 18px; height: 18px; flex: none; margin-top: 2px; }
 
 /* ---------- Settings ---------- */
 .set-preview {
@@ -526,22 +561,24 @@ body.hide-pali.hide-roman .sutta-para .pali + .thai { border-top: 0; padding-top
 .off-note { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); font-size: 15px; color: var(--muted); }
 .reset-btn { appearance: none; border: 0; background: transparent; color: var(--primary); font: inherit; font-size: 16px; font-weight: 600; min-height: 48px; padding: 0 8px; border-radius: 12px; }
 
-/* ---------- Chant mode ---------- */
+/* ---------- Chant mode (teleprompter) ----------
+   ทุกท่อนเรียงเป็น list เดียว ท่อนปัจจุบันตรึงใต้หัวจอ ท่อนถัดไปจางลงตามระยะ
+   ท่อนที่สูงเกินพื้นที่ถูกตัดเป็นหน้าย่อยใน app.js (layoutChant) */
 body.chant-mode .topbar { display: none; }
 body.chant-mode { overflow: hidden; }
 .cm {
   position: fixed; inset: 0; z-index: 30; display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   background: var(--bg);
 }
 .cm-head {
-  padding: calc(env(safe-area-inset-top) + 8px) 12px 12px;
+  padding: calc(env(safe-area-inset-top) + 2px) 8px 0;
   background: var(--surface); border-bottom: 1px solid var(--line);
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column; gap: 2px;
 }
-.cm-head .row { display: flex; align-items: center; gap: 8px; max-width: var(--maxw); width: 100%; margin: 0 auto; }
-.cm-head .ttl { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-.cm-head h1 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.cm-head .row { display: flex; align-items: center; gap: 4px; max-width: var(--maxw); width: 100%; margin: 0 auto; }
+.cm-head .ttl { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; column-gap: 8px; }
+.cm-head h1 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; }
 .cm-head .pos { font-size: 14px; color: var(--muted); }
 .wake-chip {
   display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; flex: none;
@@ -549,36 +586,48 @@ body.chant-mode { overflow: hidden; }
 }
 .wake-chip svg.i { width: 16px; height: 16px; }
 .wake-chip.off { visibility: hidden; }
-.cm-bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; max-width: var(--maxw); width: 100%; margin: 0 auto; }
-.cm-bar > span { display: block; height: 100%; background: var(--gold); border-radius: 999px; transition: width .25s ease; }
-.cm-body { overflow-y: auto; padding: 16px 16px 8px; }
-.cm-body .inner { max-width: var(--maxw); margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-.cm-prev { margin: 0; padding: 0 4px; font-size: 17px; line-height: 1.4; color: var(--faint); white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.cm-chant { padding: 0 4px; font-size: 14px; font-weight: 600; color: var(--gold-ink); }
-.cm-cur { margin: 0; border: 2px solid var(--primary); border-radius: 18px; box-shadow: var(--shadow-lg); animation: cmIn .25s ease; }
-@keyframes cmIn { from { opacity: 0; transform: translateY(8px); } }
-.cm-next {
-  appearance: none; border: 0; width: 100%; font: inherit; text-align: left; color: var(--ink);
-  min-height: 168px; padding: 14px 20px 12px;
-  background: linear-gradient(var(--bg), color-mix(in srgb, var(--primary) 7%, var(--bg)));
-  display: flex; flex-direction: column; justify-content: flex-end; gap: 10px;
+.cm-bar { height: 4px; margin: 0 -8px; background: var(--line); overflow: hidden; }
+.cm-bar > span { display: block; height: 100%; background: var(--gold); transition: width .25s ease; }
+
+.cm-stage {
+  position: relative; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px;
+  -webkit-tap-highlight-color: transparent; cursor: pointer;
+  /* ขอบล่างจางให้รู้ว่ายังมีท่อนต่อ */
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 40px), transparent);
+          mask-image: linear-gradient(#000 calc(100% - 40px), transparent);
 }
-.cm-next .inner { max-width: var(--maxw); width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-.cm-next .lbl { font-size: 14px; font-weight: 600; color: var(--muted); }
-.cm-next .pv { font-size: 18px; line-height: 1.45; color: var(--muted); white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.cm-next .go {
-  display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px;
-  border-radius: 16px; background: var(--primary); color: var(--on-primary); font-size: 20px; font-weight: 600;
+.cm-list { position: relative; max-width: var(--maxw); margin: 0 auto; padding-top: 12px; display: flex; flex-direction: column; gap: 14px; }
+.cm-page { opacity: var(--o, .3); transition: opacity .2s ease; }
+.cm-measure { position: absolute; left: 0; right: 0; top: 0; visibility: hidden; pointer-events: none; }
+.cm-thai-only { margin: 0; padding: 0; border: 0; }
+.cm-page .segment { margin: 0; box-shadow: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.cm-page.is-cur .segment { border: 2px solid var(--primary); border-radius: 18px; padding: 17px; box-shadow: var(--shadow-lg); }
+.cm-chant { display: none; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px 6px; font-size: 14px; font-weight: 600; color: var(--gold-ink); }
+.cm-page.is-cur .cm-chant, .cm-page.first .cm-chant { display: flex; }
+.cm-part { flex: none; padding: 2px 10px; border-radius: 999px; background: var(--gold-soft); font-size: 13px; }
+.cm-more { display: none; align-items: center; gap: 6px; padding: 8px 4px 0; font-size: 14px; color: var(--muted); }
+.cm-more svg.i { width: 16px; height: 16px; }
+.cm-page.is-cur .cm-more { display: flex; }
+
+.cm-back {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 31;
+  bottom: calc(env(safe-area-inset-bottom) + 84px);
+  appearance: none; border: 0; min-height: 44px; padding: 0 18px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(15, 23, 42, .25);
 }
-.cm-next .hint { text-align: center; font-size: 14px; color: var(--muted); }
+.cm-back[hidden] { display: none; }
+.cm-back svg.i { width: 18px; height: 18px; }
+
 .cm-foot {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px calc(env(safe-area-inset-bottom) + 14px);
-  background: color-mix(in srgb, var(--primary) 7%, var(--bg));
+  padding: 8px 12px calc(env(safe-area-inset-bottom) + 8px);
+  background: var(--surface); border-top: 1px solid var(--line);
 }
-.cm-foot .inner { max-width: var(--maxw); width: 100%; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
-.cm-foot .remote { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 13px; color: var(--muted); text-align: right; }
-.cm-foot .remote svg.i { width: 18px; height: 18px; }
+.cm-foot .inner { max-width: var(--maxw); width: 100%; margin: 0 auto; display: flex; align-items: center; gap: 8px; }
+.cm-foot .btn { min-height: 48px; padding: 0 16px; font-size: 16px; gap: 6px; }
+.cm-foot .btn svg.i { width: 20px; height: 20px; }
+.cm-foot .btn:disabled { opacity: .4; }
+.cm-foot .hint { flex: 1; min-width: 0; text-align: center; font-size: 13px; line-height: 1.35; color: var(--muted); }
 /* ---------- จบการสวด: บัวบาน → แสงทอง → ฉัพพรรณรังสี → (ช่วงนิ่ง) ----------
    ไทม์ไลน์: กลีบบัว 0–1.6s · แสงทอง 0.9–2.5s · รังสีขึ้นฉับพลันที่ 2.2s นิ่งราว 1.7s แล้วจางถึง ~5.6s
    ช่วงนิ่ง (ถ้าเปิด) เริ่ม 5.6s หายใจ 3 รอบ รอบละ 8s

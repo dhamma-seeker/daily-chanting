@@ -291,7 +291,7 @@ function uposathaHomeCard() {
     const L = liveInfo(st), cur = st.current;
     return `<a class="upo-live${fxClass()}" href="#/uposatha">
       <div class="top">
-        <span class="moon-wrap" data-fade>${moonSVG(L.p, 76, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
+        <span class="moon-wrap" data-fade>${moonSVG(L.p, 88, { glow: isFullOrNew(L.p), craters: true, alt: "ดวงจันทร์ " + L.day.label, ring: { s: cur.start, e: cur.end } })}</span>
         <div class="meta">
           <span class="live-badge"><span class="dot" aria-hidden="true"></span>กำลังถืออุโบสถ</span>
           <span class="big">${esc(L.title)}</span>
@@ -307,17 +307,17 @@ function uposathaHomeCard() {
   }
   const nx = st.next[0];
   const kd = keyDay(nx), p = labelPhase(kd.label);
-  return `<a class="upo-card" href="#/uposatha">
-    <span class="moon-col">
-      <span class="moon-tile" style="width:64px;height:64px">${moonSVG(p, 52, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label, ring: approachRing(nx) })}</span>
-      <span class="moon-name">${esc(nx.phase.name.replace("จันทร์", "").replace(/^ครึ่งดวง.*/, "ครึ่งดวง") || nx.phase.name)}</span>
-    </span>
-    <span class="meta">
-      <span class="eyebrow">วันอุโบสถครั้งถัดไป</span>
-      <span class="big">อีก ${cdHTML(nx.start)}</span>
-      <span class="sub">เริ่ม ${esc(thWhen(nx.start))} · ${esc(periodLabel(nx))}</span>
-    </span>
-    <span class="chev">${ICON.chev}</span>
+  return `<a class="upo-live upo-next" href="#/uposatha">
+    <div class="top">
+      <span class="moon-wrap">${moonSVG(p, 88, { glow: isFullOrNew(p), craters: true, alt: "ดวงจันทร์ " + kd.label, ring: approachRing(nx) })}</span>
+      <div class="meta">
+        <span class="eyebrow">วันอุโบสถครั้งถัดไป</span>
+        <span class="big">อีก ${cdHTML(nx.start)}</span>
+        <span class="sub">${esc(nx.phase.name)} · ${esc(periodLabel(nx))}</span>
+      </div>
+    </div>
+    <div class="upo-when"><div><span>เริ่ม</span><b>${esc(thShort(nx.start))}</b></div><div><span>จบ</span><b>${esc(thShort(nx.end))}</b></div></div>
+    <span class="cta">ดูข้อปฏิบัติวันอุโบสถ ${ICON.chev}</span>
   </a>`;
 }
 // วงแสงก่อนเริ่ม: แสดงเฉพาะ 24 ชม. สุดท้าย เต็มวงตอนถึงเวลาเริ่ม
@@ -561,58 +561,102 @@ function chromeIntentURL() {
   return `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=https;package=com.android.chrome;end`;
 }
 
-function installCard() {
-  if (isStandalone()) return "";
-  try { if (sessionStorage.getItem("install-later")) return ""; } catch {}
-  let body;
-  if (inAppBrowser) {
-    body = `<p>ตอนนี้เปิดอยู่ในแอปแชต ซึ่งติดตั้งไม่ได้ กดปุ่มนี้เพื่อเปิดใน Chrome ก่อนครับ</p>
-      <div class="actions"><a class="btn primary" href="${isAndroid ? chromeIntentURL() : esc(location.href)}">เปิดใน Chrome</a>
-      <button class="btn secondary" id="installLater">ไว้ทีหลัง</button></div>
-      <p class="install-alt">ถ้ากดแล้วไม่เปิด: แตะปุ่ม ⋮ มุมขวาบน แล้วเลือก “เปิดในเบราว์เซอร์”</p>`;
-  } else if (installEvt) {
-    body = `<p>มีไอคอนบนหน้าจอ แตะเปิดได้ทุกวัน ไม่ต้องจำเว็บ</p>
-      <div class="actions"><button class="btn primary" id="installBtn">ติดตั้ง</button>
-      <button class="btn secondary" id="installLater">ไว้ทีหลัง</button></div>`;
-  } else if (isIOS) {
-    body = `<ol class="install-steps">
-      <li>แตะปุ่มแชร์ <b>⬆︎</b> ที่แถบด้านล่าง</li>
-      <li>เลื่อนลง แตะ <b>“เพิ่มไปยังหน้าจอโฮม”</b></li>
-      <li>แตะ <b>“เพิ่ม”</b> มุมขวาบน</li></ol>
-      <div class="actions"><button class="btn secondary" id="installLater">ไว้ทีหลัง</button></div>`;
-  } else if (isSamsung) {
-    body = `<ol class="install-steps">
-      <li>แตะปุ่ม <b>☰</b> ที่มุมขวาล่าง</li>
-      <li>แตะ <b>“เพิ่มหน้าไปยัง”</b> แล้วเลือก <b>“หน้าจอหลัก”</b></li>
-      <li>แตะ <b>“เพิ่ม”</b></li></ol>
-      <div class="actions"><button class="btn secondary" id="installLater">ไว้ทีหลัง</button></div>`;
-  } else if (isAndroid) {
-    body = `<ol class="install-steps">
-      <li>แตะปุ่ม <b>⋮</b> ที่มุมขวาบน</li>
-      <li>แตะ <b>“ติดตั้งแอป”</b> หรือ <b>“เพิ่มลงในหน้าจอหลัก”</b></li>
-      <li>แตะ <b>“ติดตั้ง”</b></li></ol>
-      <div class="actions"><button class="btn secondary" id="installLater">ไว้ทีหลัง</button></div>`;
-  } else return "";
-  return `<section class="install-card" aria-labelledby="installT">
-    <div class="h">${ICON.download}<div style="flex:1;min-width:0"><h3 id="installT">ติดตั้งแอปลงมือถือ</h3>${body}</div></div>
+// แถบติดตั้งแบบ smart banner: แถวเดียวบนสุดของหน้าแรก แตะแล้วกางวิธีติดตั้งตามเครื่อง
+let installOpen = false;
+let installTab = null;
+const INSTALL_SNOOZE = 14 * 864e5;                 // กดปิดแล้วซ่อน 14 วัน
+const safariMajor = () => (/CriOS|FxiOS|EdgiOS/.test(UA) ? 0 : +((UA.match(/Version\/(\d+)/) || [])[1] || 0));
+
+function installMode() {
+  if (isStandalone()) return null;
+  if (inAppBrowser) return "inapp";
+  if (installEvt && !isAndroid && !isIOS) return "desktop";
+  if (isIOS || isAndroid) return "mobile";
+  return null;
+}
+const IOS_CHROME_NOTE = "ถ้าใช้ Chrome: ปุ่มแชร์อยู่ที่ช่องที่อยู่เว็บด้านบน แล้วทำต่อแบบเดียวกัน";
+function installTabs() {
+  const android = installEvt
+    ? { steps: ["แตะปุ่ม <b>“ติดตั้ง”</b> ด้านบน", "แตะ <b>“ติดตั้ง”</b> อีกครั้งในหน้าต่างที่ขึ้นมา"],
+        note: "ถ้าไม่มีหน้าต่างขึ้นมา: แตะเมนู <b>⋮</b> มุมขวาบน แล้วเลือก <b>“ติดตั้งแอป”</b>" }
+    : isSamsung
+      ? { steps: ["แตะปุ่ม <b>☰</b> ที่มุมขวาล่าง", "แตะ <b>“เพิ่มหน้าไปยัง”</b> แล้วเลือก <b>“หน้าจอหลัก”</b>", "แตะ <b>“เพิ่ม”</b>"] }
+      : { steps: ["แตะปุ่ม <b>⋮</b> ที่มุมขวาบน", "แตะ <b>“ติดตั้งแอป”</b> หรือ <b>“เพิ่มลงในหน้าจอหลัก”</b>", "แตะ <b>“ติดตั้ง”</b>"] };
+  return {
+    ios26: { tab: "iOS 26", steps: [
+      "แตะปุ่ม <b>•••</b> ทางขวาของช่องที่อยู่เว็บ (ด้านล่างจอ)",
+      "แตะ <b>“แชร์”</b>",
+      "เลื่อนลง แตะ <b>“เพิ่มไปยังหน้าจอโฮม”</b>",
+      "เปิดสวิตช์ <b>“เปิดเป็นเว็บแอป”</b> (Open as Web App) ไว้ แล้วแตะ <b>“เพิ่ม”</b>"], note: IOS_CHROME_NOTE },
+    ios: { tab: "iOS เก่า", steps: [
+      "แตะปุ่มแชร์ (สี่เหลี่ยมมีลูกศรชี้ขึ้น) ที่แถบด้านล่าง",
+      "เลื่อนลง แตะ <b>“เพิ่มไปยังหน้าจอโฮม”</b>",
+      "แตะ <b>“เพิ่ม”</b> มุมขวาบน"], note: IOS_CHROME_NOTE },
+    android: { tab: "Android", ...android },
+  };
+}
+function installBar() {
+  const mode = installMode();
+  if (!mode) return "";
+  const until = +store.get("install-snooze") || 0;
+  if (Date.now() < until) return "";
+  const open = installOpen;
+  let panel;
+  if (mode === "inapp") {
+    panel = `<p class="ib-note">ตอนนี้เปิดอยู่ในแอปแชต ซึ่งติดตั้งไม่ได้ ต้องเปิดใน Safari หรือ Chrome ก่อน</p>
+      ${isAndroid ? `<a class="btn primary block" href="${chromeIntentURL()}">เปิดใน Chrome</a>` : ""}
+      <p class="ib-note">ถ้ากดแล้วไม่เปิด: แตะเมนูมุมจอ แล้วเลือก <b>“เปิดในเบราว์เซอร์”</b></p>`;
+  } else if (mode === "desktop") {
+    panel = `<ol class="ib-steps"><li><span class="n">1</span><span>แตะปุ่ม <b>“ติดตั้ง”</b> ด้านบน</span></li>
+      <li><span class="n">2</span><span>กด <b>“ติดตั้ง”</b> อีกครั้งในหน้าต่างที่ขึ้นมา</span></li></ol>`;
+  } else {
+    const tabs = installTabs();
+    const def = isIOS ? (safariMajor() >= 26 || safariMajor() === 0 ? "ios26" : "ios") : "android";
+    const key = tabs[installTab] ? installTab : def;
+    const t = tabs[key];
+    const tabBtns = Object.entries(tabs).map(([k, v]) =>
+      `<button type="button" role="tab" aria-selected="${k === key}" data-ib-tab="${k}">${esc(v.tab)}${k === def ? `<span class="sr-only"> (เครื่องนี้)</span>` : ""}</button>`).join("");
+    panel = `<div class="seg-ctl ib-tabs" role="tablist" aria-label="เลือกเครื่อง">${tabBtns}</div>
+      <ol class="ib-steps">${t.steps.map((x, n) => `<li><span class="n">${n + 1}</span><span>${x}</span></li>`).join("")}</ol>
+      ${t.note ? `<p class="ib-note">${t.note}</p>` : ""}`;
+  }
+  return `<section class="install-bar" id="installBar" aria-label="ติดตั้งแอป">
+    <div class="ib-row">
+      <button type="button" class="ib-toggle" data-ib="toggle" aria-expanded="${open}" aria-controls="ibPanel">
+        <img src="icon.svg?v=2" alt="" width="40" height="40">
+        <span class="t"><b>ติดตั้ง ${APP_TITLE}</b><span>${open ? "ย่อวิธีติดตั้ง" : "แตะเพื่อดูวิธีติดตั้ง"}${ICON.down}</span></span>
+      </button>
+      <button type="button" class="ib-go" data-ib="go">${mode === "inapp" && isAndroid ? "เปิด" : "ติดตั้ง"}</button>
+      <button type="button" class="iconbtn ib-x" data-ib="close" aria-label="ปิด ไว้ทีหลัง">${ICON.x}</button>
+    </div>
+    <div class="ib-panel" id="ibPanel"${open ? "" : " hidden"}>${panel}</div>
   </section>`;
 }
-
-function bindInstallCard() {
-  const btn = document.getElementById("installBtn");
-  if (btn) btn.onclick = async () => {
-    if (!installEvt) return;
-    installEvt.prompt();
-    await installEvt.userChoice.catch(() => {});
-    installEvt = null;
-    renderHome();
-  };
-  const later = document.getElementById("installLater");
-  if (later) later.onclick = () => {
-    try { sessionStorage.setItem("install-later", "1"); } catch {}
-    later.closest(".install-card").remove();
-  };
+function repaintInstallBar() {
+  const el = document.getElementById("installBar");
+  if (!el) return;
+  const html = installBar();
+  if (html) el.outerHTML = html; else el.remove();
 }
+view.addEventListener("click", async e => {
+  const b = e.target.closest("[data-ib], [data-ib-tab]");
+  if (!b || !b.closest("#installBar")) return;
+  if (b.dataset.ibTab) { installTab = b.dataset.ibTab; repaintInstallBar(); document.querySelector(`[data-ib-tab="${installTab}"]`)?.focus(); return; }
+  const a = b.dataset.ib;
+  if (a === "toggle") { installOpen = !installOpen; repaintInstallBar(); document.querySelector("[data-ib=toggle]")?.focus(); }
+  else if (a === "close") { store.set("install-snooze", String(Date.now() + INSTALL_SNOOZE)); document.getElementById("installBar")?.remove(); }
+  else if (a === "go") {
+    // Android/เดสก์ท็อป: เรียกหน้าต่างติดตั้งของระบบได้เลย · iOS ไม่มี API ให้ติดตั้งเอง จึงกางขั้นตอนแทน
+    if (installEvt) {
+      installEvt.prompt();
+      await installEvt.userChoice.catch(() => {});
+      installEvt = null;
+      renderHome({ keep: true });
+    } else if (installMode() === "inapp" && isAndroid) {
+      location.href = chromeIntentURL();
+    } else { installOpen = true; repaintInstallBar(); }
+  }
+});
 
 // ============================================================
 //  หน้าจอ
@@ -645,10 +689,9 @@ function renderHome({ keep = false } = {}) {
   const span = s.order.length > 1 ? `${s.order.length} บท · ${shortTitle(first.title)} ถึง ${shortTitle(last.title)}` : `${s.order.length} บท`;
 
   const rows = SESSIONS.map(x => {
-    const on = x.id === sid;
     const sub = x.id === "uposatha" ? `${x.order.length} บท · ข้อปฏิบัติและพระสูตร`
-      : `${x.order.length} บท${on ? " · แนะนำตอนนี้" : ""}`;
-    return `<a class="row-card${on ? " is-suggested" : ""}" href="#/${x.id}">
+      : `${x.order.length} บท`;
+    return `<a class="row-card" href="#/${x.id}">
       <span class="tile${x.id === "uposatha" ? " gold" : ""}">${ICON[SESSION_ICON[x.id]] || ICON.book}</span>
       <span class="meta"><b>${esc(x.title)}</b><span>${esc(sub)}</span></span>
       <span class="chev">${ICON.chev}</span>
@@ -656,22 +699,23 @@ function renderHome({ keep = false } = {}) {
   }).join("");
 
   view.innerHTML = `
+    ${installBar()}
     <header class="brand">
       <img class="logo" src="icon.svg?v=2" alt="" width="48" height="48">
       <div class="txt"><h1>${APP_TITLE}</h1><p>เป็นฆราวาส ตามพระสูตร</p></div>
       <a class="iconbtn aa" href="#/settings" aria-label="ตั้งค่าการอ่าน">Aa</a>
     </header>
-    <section class="suggest" aria-labelledby="sugT">
-      <span class="eyebrow">${ICON[sid === "morning" ? "sun" : "moon"]}<span>แนะนำตอนนี้ · ${sid === "morning" ? "ช่วงเช้า" : "ค่ำแล้ว"}</span></span>
-      <div><h2 id="sugT">${esc(s.title)}</h2><p>${esc(span)}</p></div>
-      <a class="btn block" href="#/${s.id}">${ICON.play}<span>เริ่มสวด</span></a>
-    </section>
     ${uposathaHomeCard()}
+    <a class="suggest-row" href="#/${s.id}">
+      <span class="meta">
+        <span class="eyebrow">${ICON[sid === "morning" ? "sun" : "moon"]}<span>แนะนำตอนนี้ · ${sid === "morning" ? "ช่วงเช้า" : "ค่ำแล้ว"}</span></span>
+        <b>${esc(s.title)}</b><span class="sub">${esc(span)}</span>
+      </span>
+      <span class="go">${ICON.play}<span>เริ่มสวด</span></span>
+    </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
     <nav class="list" aria-label="บทสวด">${rows}</nav>
-    ${installCard()}
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;
-  bindInstallCard();
   window.scrollTo(0, keep ? y : 0);
   cleanupPage = startUpoClock(() => renderHome({ keep: true }));
 }
@@ -897,6 +941,7 @@ function renderSettingsBody() {
         <div style="display:flex;flex-direction:column"><span class="lbl b" id="stLbl">ช่วงนิ่งหลังสวดจบ</span><span class="desc">วงแสงขยายเข้าออกช้า ๆ ให้หายใจตาม 3 รอบ ราว 24 วินาที</span></div>
         <button type="button" class="switch" role="switch" aria-checked="${STILL}" aria-labelledby="stLbl" data-k="still:toggle"></button>
       </div>
+      <p class="remote-note">${ICON.bt}<span>โหมดสวดทีละท่อนใช้รีโมทบลูทูธหรือคีย์บอร์ดได้: ↓ → Space = ถัดไป · ↑ ← = ย้อน · Esc = ออก</span></p>
     </section>
     <section class="panel card" style="padding:14px 16px">
       <div class="pcol" style="border-top:0;padding:0"><span class="lbl" id="thLbl" style="font-weight:600">ธีม</span>
@@ -1009,30 +1054,26 @@ function buildSteps(s) {
   });
   return steps;
 }
-const firstLines = (seg, n) => {
-  const txt = seg.pali ? (seg.w ? seg.w.map(l => l.map(w => w[0]).join(" ")).join("\n") : seg.pali) : seg.thai;
-  return String(txt).split("\n").slice(0, n).join("\n");
-};
-const lastLine = seg => {
-  const txt = seg.pali ? (seg.w ? seg.w.map(l => l.map(w => w[0]).join(" ")).join("\n") : seg.pali) : seg.thai;
-  return String(txt).split("\n").filter(Boolean).slice(-1)[0] || "";
-};
 
 function renderChant(sid, idx) {
   const s = SESSIONS.find(x => x.id === sid);
   if (!s) return renderHome();
   setChrome({ title: s.title, bar: false });
   document.body.classList.add("chant-mode");
-  if (!CM || CM.sid !== sid) CM = { sid, steps: buildSteps(s), i: 0 };
+  if (!CM || CM.sid !== sid) CM = { sid, steps: buildSteps(s), i: 0, part: 0, chunks: [], size: "" };
   CM.title = s.title;
   CM.i = Math.max(0, Math.min(CM.steps.length, isNaN(idx) ? 0 : idx));
+  CM.part = 0;
   view.innerHTML = `<div class="cm" id="cm"></div>`;
   paintChant();
   requestWake();
   addEventListener("keydown", chantKeys);
   document.addEventListener("visibilitychange", onVis);
+  // ฟอนต์เว็บโหลดเสร็จทีหลัง ความสูงของท่อนเปลี่ยน ต้องวัดใหม่
+  document.fonts?.ready.then(() => { if (CM) { CM.size = ""; layoutChant(); } });
   cleanupPage = () => {
     clearStill();
+    cmDetach();
     removeEventListener("keydown", chantKeys);
     document.removeEventListener("visibilitychange", onVis);
     releaseWake();
@@ -1058,19 +1099,136 @@ function runStill(el) {
   at(32600, () => el.classList.remove("on"));
 }
 
+// ---------- teleprompter: ทุกท่อนเรียงเป็น list เดียว ----------
+// ท่อนปัจจุบันถูกเลื่อนไปตรึงใต้หัวจอ (โผล่บรรทัดท้ายของท่อนก่อน CM_PEEK px) ท่อนถัดไปเรียงลงมาจางตามระยะ
+// ท่อนที่สูงเกินพื้นที่ ตัดเป็นหน้าย่อยที่รอยต่อบรรทัด: กฎหลักคือเห็นท่อนปัจจุบันครบโดยไม่ต้องเลื่อนเอง
+const CM_PEEK = 36;
+const CM_FOOT_GAP = 44;      // เผื่อขอบล่างที่จางลง ไม่ให้การ์ดท่อนปัจจุบันจมในส่วนจาง
+const CM_FADE = [.62, .48, .38, .3, .26];
+let cmRO = null, cmIO = null, cmAuto = 0;
+
+// บาลีของท่อนแบนเป็นลำดับคำ (จำบรรทัดเดิมไว้) เพื่อตัดหน้าได้ทั้งตรงท้ายบรรทัด และกลางบรรทัดที่ยาวมาก
+function paliWords(seg) {
+  if (seg._pw) return seg._pw;
+  let out = [];
+  if (seg.w) out = seg.w.flatMap((line, li) => line.map(w => ({ li, w })));
+  else if (seg.pali) out = String(seg.pali).split("\n").flatMap((line, li) => line.split(/\s+/).filter(Boolean).map(w => ({ li, w })));
+  Object.defineProperty(seg, "_pw", { value: out });
+  return out;
+}
+const segWordCount = seg => paliWords(seg).length;
+const partsOf = i => (CM && CM.chunks[i] && CM.chunks[i].length) || 1;
+const cmLabel = st => `บทที่ ${st.ci + 1} · ${st.chant}${st.head ? " · " + st.head : ""}`;
+
+// หน้าย่อย 1 หน้า = คำบาลี [a, b) + คำแปลช่วงตัวอักษร [t0, t1)
+// ตัดคำแปลได้เฉพาะตรงช่องว่าง/ขึ้นบรรทัดใหม่ และเลื่อนช่วงเน้นคำ (tm) ตามไปด้วย
+function chunkSeg(seg, c) {
+  const out = { ...seg };
+  const words = paliWords(seg).slice(c.a, c.b), lines = [];
+  for (const { li, w } of words) {
+    if (!lines.length || lines[lines.length - 1].li !== li) lines.push({ li, ws: [] });
+    lines[lines.length - 1].ws.push(w);
+  }
+  if (seg.w) out.w = lines.map(l => l.ws);
+  else if (seg.pali) out.pali = lines.map(l => l.ws.join(" ")).join("\n");
+  const T = String(seg.thai || "");
+  let t0 = c.t0;
+  while (t0 < c.t1 && /\s/.test(T[t0])) t0++;
+  out.thai = T.slice(t0, c.t1).replace(/\s+$/, "");
+  if (seg.tm) out.tm = seg.tm.filter(([x, y]) => y > t0 && x < c.t1)
+    .map(([x, y, k]) => [Math.max(x, t0) - t0, Math.min(y, t0 + out.thai.length) - t0, k]);
+  if (!out.thai) { delete out.thai; delete out.tm; }
+  if (!c.last) delete out.ref;
+  if (!c.first) delete out.tag;
+  return out;
+}
+function chunkHTML(seg, c) {
+  if (!c) return segmentHTML(seg);
+  const s = chunkSeg(seg, c);
+  if (!seg.pali) return segmentHTML({ ...s, thai: s.thai || "" });
+  if (c.b > c.a) return segmentHTML(s);
+  return `<div class="segment">${s.thai ? `<div class="thai cm-thai-only">${thaiHTML(s)}</div>` : ""}${s.ref ? refLink(s.ref) : ""}</div>`;
+}
+function cmPageInner(st, c, p, k) {
+  return `<span class="cm-chant"><span>${esc(cmLabel(st))}</span>${k > 1 ? `<span class="cm-part">หน้า ${p + 1}/${k}</span>` : ""}</span>
+    ${chunkHTML(st.seg, c)}
+    ${p < k - 1 ? `<span class="cm-more">${ICON.down}<span>ท่อนนี้ยาว แตะเพื่อดูหน้าถัดไป</span></span>` : ""}`;
+}
+function cmPagesHTML() {
+  let prevCi = -1;
+  return CM.steps.map((st, si) => {
+    const ch = CM.chunks[si], k = ch ? ch.length : 1;
+    let html = "";
+    for (let p = 0; p < k; p++) {
+      const first = st.ci !== prevCi && p === 0;
+      html += `<section class="cm-page${first ? " first" : ""}" data-i="${si}" data-p="${p}" inert>${cmPageInner(st, ch && ch[p], p, k)}</section>`;
+    }
+    prevCi = st.ci;
+    return html;
+  }).join("");
+}
+// หาจุดตัดที่ไกลที่สุดใน cand ที่ยังพอดีพื้นที่ (ความสูงเพิ่มตามจุดตัดเสมอ จึงค้นแบบ binary search ได้)
+function farthestFit(cand, fits) {
+  let lo = 0, hi = cand.length - 1, best = -1;
+  while (lo <= hi) {
+    const m = (lo + hi) >> 1;
+    if (fits(cand[m])) { best = m; lo = m + 1; } else hi = m - 1;
+  }
+  return best < 0 ? null : cand[best];
+}
+// จัดหน้าย่อยแบบโลภ: บาลีก่อน (ตัดท้ายบรรทัดก่อน ถ้าบรรทัดเดียวก็ล้นจึงตัดกลางบรรทัด) แล้วต่อคำแปลยาวที่สุดที่ยังพอดี
+function packStep(st, avail, measurer) {
+  const seg = st.seg, W = paliWords(seg), N = W.length, T = String(seg.thai || "");
+  const lineEnds = [], wordEnds = [], tCuts = [];
+  for (let i = 1; i <= N; i++) { wordEnds.push(i); if (i === N || W[i].li !== W[i - 1].li) lineEnds.push(i); }
+  for (let i = 1; i < T.length; i++) if (/\s/.test(T[i]) && !/\s/.test(T[i - 1])) tCuts.push(i);
+  tCuts.push(T.length);
+  const h = c => {
+    measurer.innerHTML = cmPageInner(st, { ...c, first: c.a === 0 && c.t0 === 0, last: c.t1 >= T.length && c.b >= N }, 0, 2);
+    return measurer.offsetHeight;
+  };
+  const chunks = [];
+  let a = 0, t = 0;
+  while ((a < N || t < T.length) && chunks.length < 80) {
+    const c = { a, b: a, t0: t, t1: t };
+    if (a < N) {
+      const fit = b => h({ ...c, b }) <= avail;
+      c.b = farthestFit(lineEnds.filter(x => x > a), fit) ?? farthestFit(wordEnds.filter(x => x > a), fit) ?? a + 1;
+    }
+    // คำแปลทั้งก้อนไม่พอดีหน้านี้: ลองส่งบรรทัดท้าย ๆ ไปหน้าถัดไปพร้อมคำแปลทั้งหมด จะได้ไม่ตัดคำแปลกลางประโยค
+    if (c.b === N && t < T.length && c.b > a && h({ ...c, t1: T.length }) > avail) {
+      const ends = lineEnds.filter(x => x > a && x < N);
+      let lo = 0, hi = ends.length - 1, x = null;
+      while (lo <= hi) {
+        const m = (lo + hi) >> 1;
+        if (h({ a: ends[m], b: N, t0: t, t1: T.length }) <= avail) { x = ends[m]; hi = m - 1; } else lo = m + 1;
+      }
+      if (x !== null) { c.b = x; chunks.push(c); a = x; continue; }
+    }
+    if (c.b === N && t < T.length) {
+      const t1 = farthestFit(tCuts.filter(x => x > t), x => h({ ...c, t1: x }) <= avail);
+      c.t1 = t1 ?? (c.b === a ? tCuts.find(x => x > t) : t);
+    }
+    chunks.push(c);
+    a = c.b; t = c.t1;
+  }
+  chunks.forEach((c, i) => { c.first = i === 0; c.last = i === chunks.length - 1; });
+  return chunks;
+}
+
 function paintChant() {
   clearStill();
+  cmDetach();
   const host = document.getElementById("cm");
   if (!host || !CM) return;
   const { steps, i } = CM, n = steps.length, done = i >= n;
-  const pos = Math.min(i + 1, n);
   const head = `<header class="cm-head">
       <div class="row">
         <button type="button" class="iconbtn" data-cm="exit" aria-label="ออกจากโหมดสวด">${ICON.x}</button>
-        <div class="ttl"><h1>${esc(CM.title)}</h1><span class="pos" aria-live="polite">${done ? "จบแล้ว" : `ท่อน ${pos} จาก ${n}`}</span></div>
+        <div class="ttl"><h1>${esc(CM.title)}</h1><span class="pos" id="cmPos" aria-live="polite"></span></div>
         <span class="wake-chip${wakeLock ? "" : " off"}" id="wakeChip" title="จอจะไม่ดับระหว่างสวด">${ICON.sun}<span>จอไม่ดับ</span></span>
       </div>
-      <div class="cm-bar" role="progressbar" aria-label="ความคืบหน้า" aria-valuenow="${Math.round(pos / n * 100)}" aria-valuemin="0" aria-valuemax="100"><span style="width:${done ? 100 : (i / n) * 100}%"></span></div>
+      <div class="cm-bar" id="cmBar" role="progressbar" aria-label="ความคืบหน้า" aria-valuemin="0" aria-valuemax="100"><span></span></div>
     </header>`;
 
   if (done) {
@@ -1091,43 +1249,128 @@ function paintChant() {
           <button type="button" class="btn secondary block" data-cm="restart">สวดอีกครั้ง</button>
         </div>
       </section>`;
+    cmHeadSync();
     host.querySelector("#cmDoneT").focus({ preventScroll: true });
     if (STILL) runStill(host.querySelector("#stillNote"));
     return;
   }
 
-  const cur = steps[i], prev = steps[i - 1], nx = steps[i + 1];
-  const chantLbl = `บทที่ ${cur.ci + 1} · ${cur.chant}${cur.head ? " · " + cur.head : ""}`;
   host.innerHTML = `${head}
-    <div class="cm-body" id="cmBody"><div class="inner">
-      ${prev ? `<p class="cm-prev" aria-hidden="true">${esc(lastLine(prev.seg))}</p>` : ""}
-      <span class="cm-chant">${esc(chantLbl)}</span>
-      ${segmentHTML(cur.seg, "cm-cur")}
-    </div></div>
-    <button type="button" class="cm-next" data-cm="next" aria-label="${nx ? "ไปท่อนถัดไป" : "จบการสวด"}">
-      <span class="inner">
-        ${nx ? `<span class="lbl">ท่อนถัดไป${nx.ci !== cur.ci ? " · " + esc(nx.chant) : ""}</span><span class="pv" lang="pi">${esc(firstLines(nx.seg, 2))}</span>`
-             : `<span class="lbl">ท่อนสุดท้ายแล้ว</span>`}
-        <span class="go"><span>${nx ? "ท่อนถัดไป" : "จบการสวด"}</span>${ICON.down}</span>
-        <span class="hint">แตะตรงไหนก็ได้ในส่วนนี้</span>
-      </span>
-    </button>
+    <div class="cm-stage" id="cmStage"><div class="cm-list" id="cmList"></div></div>
+    <button type="button" class="cm-back" id="cmBack" data-cm="back" hidden>${ICON.up}<span>กลับไปท่อนปัจจุบัน</span></button>
     <footer class="cm-foot"><div class="inner">
-      <button type="button" class="btn secondary" data-cm="prev" ${i === 0 ? "disabled" : ""} aria-label="ย้อนท่อนก่อนหน้า">${ICON.up}<span>ย้อน</span></button>
-      <span class="remote">${ICON.bt}<span>รีโมทบลูทูธ: ลูกศร / Space</span></span>
+      <button type="button" class="btn secondary" data-cm="prev" id="cmPrev" aria-label="ย้อนท่อนก่อนหน้า">${ICON.up}<span>ย้อน</span></button>
+      <span class="hint">แตะที่บทสวดเพื่อไปต่อ</span>
+      <button type="button" class="btn primary" data-cm="next" id="cmNext"><span>ถัดไป</span>${ICON.down}</button>
     </div></footer>`;
-  document.getElementById("cmBody").scrollTop = 0;
+
+  const stage = host.querySelector("#cmStage");
+  // แตะตรงไหนของบทสวดก็ไปต่อ (ปุ่ม "ถัดไป" ด้านล่างและคีย์บอร์ดทำแบบเดียวกัน สำหรับคนที่ไม่ใช้การแตะ)
+  stage.addEventListener("click", e => {
+    if (e.target.closest("a, button, summary, input, label")) return;
+    if (String(getSelection?.() || "")) return;
+    chantGo(1);
+  });
+  // ท่อนปัจจุบันหลุดจากจอเพราะผู้ใช้เลื่อนดูเอง → แสดงปุ่ม "กลับไปท่อนปัจจุบัน" (ไม่ดึงจอกลับเอง)
+  cmIO = new IntersectionObserver(([en]) => {
+    if (!en || Date.now() < cmAuto) return;
+    document.getElementById("cmBack").hidden = en.intersectionRatio >= .5;
+  }, { root: stage, threshold: [0, .5, 1] });
+  cmRO = new ResizeObserver(() => layoutChant());
+  cmRO.observe(stage);
+  layoutChant();
+}
+function cmDetach() {
+  cmRO?.disconnect(); cmIO?.disconnect();
+  cmRO = cmIO = null;
+}
+
+// วัดความสูงจริงของแต่ละท่อน แล้วตัดท่อนที่ล้นเป็นหน้าย่อย (ทำใหม่เมื่อขนาดจอหรือฟอนต์เปลี่ยน)
+function layoutChant() {
+  const stage = document.getElementById("cmStage"), list = document.getElementById("cmList");
+  if (!stage || !list || !CM) return;
+  const size = `${stage.clientWidth}x${stage.clientHeight}`;
+  if (size === CM.size && list.childElementCount) return;
+  const keepPart = CM.part;
+  CM.size = size;
+  CM.chunks = [];
+  const avail = stage.clientHeight - CM_PEEK - CM_FOOT_GAP;
+  list.style.paddingBottom = `${stage.clientHeight}px`;
+  list.innerHTML = cmPagesHTML();
+  const measurer = document.createElement("section");
+  measurer.className = "cm-page is-cur cm-measure";
+  measurer.setAttribute("aria-hidden", "true");
+  list.appendChild(measurer);
+  measurer.innerHTML = list.firstElementChild ? list.firstElementChild.innerHTML : "";
+  for (const el of [...list.children]) {
+    if (el === measurer) continue;
+    const si = +el.dataset.i;
+    measurer.innerHTML = el.innerHTML;
+    if (measurer.offsetHeight > avail) CM.chunks[si] = packStep(CM.steps[si], avail, measurer);
+  }
+  measurer.remove();
+  if (CM.chunks.length) list.innerHTML = cmPagesHTML();
+  CM.part = Math.min(keepPart, partsOf(CM.i) - 1);
+  syncChant(false);
+}
+
+function cmHeadSync() {
+  const { steps, i } = CM, n = steps.length, done = i >= n;
+  const pos = Math.min(i + 1, n);
+  const pct = done ? 100 : Math.round((i / n) * 100);
+  const posEl = document.getElementById("cmPos"), bar = document.getElementById("cmBar");
+  if (posEl) posEl.textContent = done ? "จบแล้ว" : `ท่อน ${pos} จาก ${n}`;
+  if (bar) { bar.setAttribute("aria-valuenow", Math.round(pos / n * 100)); bar.firstElementChild.style.width = pct + "%"; }
+}
+
+// ย้ายไฮไลต์ไปท่อนปัจจุบัน แล้วเลื่อนให้อยู่ตำแหน่งเดิมใต้หัวจอ
+function syncChant(smooth = true) {
+  const stage = document.getElementById("cmStage"), list = document.getElementById("cmList");
+  if (!stage || !list || !CM) return;
+  const pages = [...list.children];
+  const ci = pages.findIndex(el => +el.dataset.i === CM.i && +el.dataset.p === CM.part);
+  if (ci < 0) return;
+  pages.forEach((el, k) => {
+    const d = k - ci;
+    el.classList.toggle("is-cur", d === 0);
+    el.classList.toggle("is-past", d < 0);
+    el.style.setProperty("--o", d < 0 ? .35 : d === 0 ? 1 : (CM_FADE[d - 1] ?? .22));
+    // ท่อนอื่นเป็น inert: แตะแล้วทะลุไปที่พื้นที่สวด (= ไปต่อ) และโปรแกรมอ่านหน้าจออ่านเฉพาะท่อนปัจจุบัน
+    if (d === 0) { el.removeAttribute("inert"); el.setAttribute("aria-current", "step"); }
+    else { el.setAttribute("inert", ""); el.removeAttribute("aria-current"); }
+  });
+  const cur = pages[ci];
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  cmAuto = Date.now() + (smooth && !reduce ? 700 : 80);
+  document.getElementById("cmBack").hidden = true;
+  stage.scrollTo({ top: Math.max(0, cur.offsetTop - CM_PEEK), behavior: smooth && !reduce ? "smooth" : "auto" });
+  if (cmIO) { cmIO.disconnect(); cmIO.observe(cur); }
+
+  cmHeadSync();
+  const last = CM.i === CM.steps.length - 1 && CM.part === partsOf(CM.i) - 1;
+  const nextBtn = document.getElementById("cmNext"), prevBtn = document.getElementById("cmPrev");
+  nextBtn.firstElementChild.textContent = last ? "จบ" : "ถัดไป";
+  nextBtn.setAttribute("aria-label", last ? "จบการสวด" : "ไปท่อนถัดไป");
+  prevBtn.disabled = CM.i === 0 && CM.part === 0;
 }
 
 function chantGo(delta) {
   if (!CM) return;
-  const n = CM.steps.length;
-  const ni = Math.max(0, Math.min(n, CM.i + delta));
-  if (ni === CM.i) return;
-  CM.i = ni;
+  const n = CM.steps.length, wasDone = CM.i >= n;
+  if (delta > 0) {
+    if (wasDone) return;
+    if (CM.part < partsOf(CM.i) - 1) CM.part++;
+    else { CM.i++; CM.part = 0; }
+  } else {
+    if (wasDone) { CM.i = n - 1; CM.part = partsOf(n - 1) - 1; }
+    else if (CM.part > 0) CM.part--;
+    else if (CM.i > 0) { CM.i--; CM.part = partsOf(CM.i) - 1; }
+    else return;
+  }
   // แก้ hash ตรงที่ ไม่เพิ่มประวัติ ถ้าแอปโหลดใหม่ (อัปเดต) จะกลับมาท่อนเดิม
-  history.replaceState(null, "", `#/chant/${CM.sid}/${ni}`);
-  paintChant();
+  history.replaceState(null, "", `#/chant/${CM.sid}/${CM.i}`);
+  if (CM.i >= n || wasDone || !document.getElementById("cmList")) { CM.size = ""; paintChant(); }
+  else syncChant(true);
 }
 function exitChant() {
   const sid = CM?.sid;
@@ -1154,8 +1397,9 @@ view.addEventListener("click", e => {
   const a = b.dataset.cm;
   if (a === "next") chantGo(1);
   else if (a === "prev") chantGo(-1);
+  else if (a === "back") syncChant(true);
   else if (a === "exit") exitChant();
-  else if (a === "restart") { CM.i = 0; history.replaceState(null, "", `#/chant/${CM.sid}/0`); paintChant(); }
+  else if (a === "restart") { CM.i = 0; CM.part = 0; CM.size = ""; history.replaceState(null, "", `#/chant/${CM.sid}/0`); paintChant(); }
 });
 
 // ============================================================
