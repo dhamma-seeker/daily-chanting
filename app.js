@@ -750,6 +750,11 @@ function renderHome({ keep = false } = {}) {
       <span class="meta"><b>ฝึกสักครู่</b><span>ไม่กี่วินาทีก็ฝึกได้ ตามพระสูตร</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
+    <a class="qp-entry" href="#/topic/snp1.8">
+      <span class="qp-glyph" aria-hidden="true">${ICON.book}</span>
+      <span class="meta"><b>หัวข้อธรรม</b><span>กรณียเมตตสูตร · อ่านแบบปัด/แตะ</span></span>
+      <span class="chev">${ICON.chev}</span>
+    </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
     <nav class="list grouped" aria-label="บทสวด">${rows}</nav>
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;
@@ -1671,6 +1676,7 @@ gearBtn.addEventListener("click", () => { location.hash = "#/settings"; });
 function route() {
   const h = location.hash.replace(/^#\/?/, "");
   if (typeof routeQuick === "function" && routeQuick(h)) return measureTopbar();   // quick.js
+  if (typeof routeTopics === "function" && routeTopics(h)) return measureTopbar();   // topics.js
   const m = h.match(/^sutta\/([a-z0-9.]+)(?:\/(\d+(?:\.\d+)*))?$/);
   const c = h.match(/^chant\/([a-z]+)(?:\/(\d+))?$/);
   if (m && typeof SUTTAS !== "undefined" && SUTTAS[m[1]]) renderSutta(m[1], m[2] || null);

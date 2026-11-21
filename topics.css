@@ -1,0 +1,98 @@
+/* ============================================================
+   หัวข้อธรรม — อ่านพระสูตร/หัวข้อแบบ Story (ปัด/แตะ)
+   ใช้ token จาก styles.css :root · ตัวหนังสือใช้ var(--pali-*)/var(--thai-*)
+   เพื่อให้หน้าตั้งค่าการอ่านควบคุมได้ · motion ตาม MOTION.md
+   ============================================================ */
+
+.tp { position: fixed; inset: 0; z-index: 30; overflow: hidden; background: var(--bg); }
+.tp :focus-visible { outline-color: var(--gold); }
+
+/* ---- แถบบน: หลอดบอกตำแหน่ง + ปุ่มปิด ---- */
+.tp-top { position: absolute; top: 0; left: 0; right: 0; z-index: 40;
+  padding: calc(env(safe-area-inset-top) + 12px) 14px 10px;
+  display: flex; align-items: center; gap: 10px; }
+.tp-progress { flex: 1; display: flex; gap: 4px; }
+.tp-seg { flex: 1; height: 3px; border-radius: 2px; background: rgba(127,140,160,.35); overflow: hidden; }
+.tp.dark .tp-seg { background: rgba(255,255,255,.24); }
+.tp-seg.done { background: var(--gold); }
+.tp-seg.on { background: var(--gold); box-shadow: 0 0 6px rgba(250,204,21,.55); }
+.tp-exit { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px; border: none;
+  background: var(--scrim); color: #fff; display: flex; align-items: center; justify-content: center; }
+.tp.dark .tp-exit { background: rgba(255,255,255,.14); }
+.tp-exit svg { width: 20px; height: 20px; }
+
+/* ---- การ์ด ---- */
+.tp-stage { position: absolute; inset: 0; }
+.tp-card { position: absolute; inset: 0; padding: calc(env(safe-area-inset-top) + 52px) 24px calc(env(safe-area-inset-bottom) + 88px);
+  background: var(--bg); display: flex; flex-direction: column; justify-content: center;
+  opacity: 0; transform: translateY(26px);
+  transition: transform .42s cubic-bezier(.2,.7,.2,1), opacity .42s; pointer-events: none; }
+.tp-card.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.tp-card.above { transform: translateY(-26px); }
+.tp-card.below { transform: translateY(26px); }
+.tp-card.night { background: radial-gradient(120% 90% at 50% 0%, #1B2B5E 0%, var(--night) 55%, #0A1430 100%); color: #E2E8F0; }
+
+/* reveal: ตัวหนังสือค่อย ๆ ขึ้น */
+.tp-card .r { opacity: 0; transform: translateY(12px); }
+.tp-card.active .r { opacity: 1; transform: none;
+  transition: opacity .55s cubic-bezier(.2,.7,.2,1), transform .55s cubic-bezier(.2,.7,.2,1); }
+.tp-card.active .r.d1 { transition-delay: .1s; }
+.tp-card.active .r.d2 { transition-delay: .22s; }
+.tp-card.active .r.d3 { transition-delay: .34s; }
+.tp-card.active .r.d4 { transition-delay: .46s; }
+.tp-card.active .r.d5 { transition-delay: .58s; }
+
+/* หมายเลขคาถา */
+.tp-verse-no { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px; }
+.tp-card.night .tp-verse-no { color: #FACC15; }
+
+/* 3 ชั้น: ไทยก่อน → บาลีไทย → สรุปชาวบ้าน */
+.tp-thai { font-family: var(--thai-ff); font-size: var(--thai-fs); line-height: var(--thai-lh);
+  font-weight: var(--thai-fw); color: var(--thai); }
+.tp-card.night .tp-thai { color: #CBD5E1; }
+.tp-pali { font-family: var(--pali-ff); font-size: var(--pali-fs); line-height: var(--pali-lh);
+  font-weight: var(--pali-fw); font-style: var(--pali-fst); color: var(--pali); margin: 12px 0 0; }
+.tp-card.night .tp-pali { color: #C7D7FE; }
+.tp-sum { margin-top: 18px; background: var(--gold-soft); border: 1px solid var(--gold-line);
+  border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.6; color: var(--gold-ink); }
+.tp-card.night .tp-sum { background: rgba(254,246,224,.07); border-color: rgba(243,223,166,.3); color: #FDE68A; }
+.tp-sum .lab { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  opacity: .75; margin-bottom: 3px; font-weight: 700; }
+.tp-sum b { font-weight: 700; }
+.tp-src { margin-top: 14px; font-size: 12px; color: var(--primary); font-weight: 600; }
+.tp-card.night .tp-src { color: #93B4FF; }
+
+/* ---- ปก ---- */
+.tp-cover-title { font-size: 42px; font-weight: 700; color: #FFFBEB; margin: 4px 0 10px; line-height: 1.15; letter-spacing: -.01em; }
+.tp-cover-ro { font-family: var(--roman-ff); font-style: italic; font-size: 18px; color: #C7D7FE; }
+.tp-cover-sub { font-size: 16px; color: #CBD5E1; }
+.tp-cover-count { font-size: 13px; color: #94A3B8; margin-top: 10px; }
+
+/* ---- จบ ---- */
+.tp-end .tp-sum { margin-bottom: 4px; }
+.tp-end-link { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 600; }
+.tp-end-link svg { width: 20px; height: 20px; color: var(--primary); flex: 0 0 auto; }
+.tp-card.night .tp-end-link { background: rgba(255,255,255,.06); border-color: var(--night-line); color: #E2E8F0; }
+
+/* ---- HUD ล่าง ---- */
+.tp-hud { position: absolute; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px calc(env(safe-area-inset-bottom) + 12px); }
+.tp-hbtn { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); display: flex; align-items: center; justify-content: center; }
+.tp.dark .tp-hbtn { border-color: var(--night-line); background: rgba(255,255,255,.1); color: #E2E8F0; }
+.tp-hbtn:active { background: var(--primary-soft); }
+.tp-hbtn svg { width: 22px; height: 22px; }
+.tp-hint { flex: 1; text-align: center; font-size: 12px; color: var(--muted); }
+.tp.dark .tp-hint { color: #94A3B8; }
+
+/* ---- ลดการเคลื่อนไหว: เหลือแต่จาง ---- */
+@media (prefers-reduced-motion: reduce) {
+  .tp-card { transform: none; transition: opacity .4s; }
+  .tp-card.above, .tp-card.below { transform: none; }
+  .tp-card .r { transform: none; }
+  .tp-card.active .r { transition: opacity .5s; }
+}
