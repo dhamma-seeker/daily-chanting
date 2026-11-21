@@ -760,6 +760,11 @@ function renderHome({ keep = false } = {}) {
       <span class="meta"><b>มหาสติปัฏฐานสูตร</b><span>ทางสายเดียว · สติปัฏฐาน 4</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
+    <a class="qp-entry" href="#/topic/mn118">
+      <span class="qp-glyph" aria-hidden="true">${ICON.book}</span>
+      <span class="meta"><b>อานาปานสติสูตร</b><span>ลมหายใจ 16 ขั้น · 4 จตุรกะ</span></span>
+      <span class="chev">${ICON.chev}</span>
+    </a>
     <a class="qp-entry" href="#/topic/snp1.8">
       <span class="qp-glyph" aria-hidden="true">${ICON.lotus}</span>
       <span class="meta"><b>กรณียเมตตสูตร</b><span>เมตตา · อ่านแบบปัด/แตะ</span></span>

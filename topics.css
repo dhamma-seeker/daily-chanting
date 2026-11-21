@@ -206,6 +206,14 @@
 .dmap-method .flow span { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: #E2E8F0; }
 .dmap-method .flow span.b { background: #FACC15; color: #713F12; font-weight: 700; }
 
+/* น้ำตก (cascade) — ลำดับการปฏิบัติ */
+.dmap-cascade { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.dmap-cascade .step { display: flex; flex-direction: column; gap: 2px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 10px 14px; color: #E2E8F0; font-size: 15px; font-weight: 700; }
+.dmap-cascade .step span { font-size: 12px; color: #94A3B8; font-weight: 500; font-family: var(--roman-ff); }
+.dmap-cascade .step.gold { background: #FACC15; color: #713F12; border-color: #FACC15; }
+.dmap-cascade .step.gold span { color: #713F12; }
+.dmap-cascade .arr { text-align: center; font-size: 12px; color: #FACC15; font-weight: 600; }
+
 /* ---- bottom sheet (แผนที่) ---- */
 .dmap-scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 45; }
 .dmap-scrim.open { opacity: 1; pointer-events: auto; }
