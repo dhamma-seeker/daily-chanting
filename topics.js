@@ -18,11 +18,21 @@ const TOPICS = {
   },
   "sn56.11": {
     type: "map",
+    mapType: "magga",
     title: "ธัมมจักกัปปวัตตนสูตร",
     ref: "SN 56.11",
     ro: "Dhammacakkappavattana Sutta",
     nikaya: "สังยุตตนิกาย",
     sub: "สังยุตตนิกาย มหาวารวรรค · ปฐมเทศนา หมุนวงล้อพระธรรม",
+  },
+  "dn22": {
+    type: "map",
+    mapType: "sati",
+    title: "มหาสติปัฏฐานสูตร",
+    ref: "DN 22",
+    ro: "Mahāsatipaṭṭhāna Sutta",
+    nikaya: "ทีฆนิกาย",
+    sub: "ทีฆนิกาย มหาวรรค · ทางสายเดียว (เอกายนมรรค) สติปัฏฐาน 4",
   },
 };
 
@@ -35,8 +45,11 @@ function routeTopics(h) {
   if (m && TOPICS[m[1]]) { renderTopic(m[1]); return true; }
   m = h.match(/^topic\/([a-z0-9.]+)$/);
   if (m && TOPICS[m[1]]) {
-    if (TOPICS[m[1]].type === "map") renderMap(m[1]);
-    else renderTopic(m[1]);
+    const t = TOPICS[m[1]];
+    if (t.type === "map") {
+      if (t.mapType === "sati") renderSatipatthana(m[1]);
+      else renderMap(m[1]);
+    } else renderTopic(m[1]);
     return true;
   }
   return false;
@@ -407,6 +420,228 @@ function renderMap(id) {
   const scrim = document.getElementById("dmapScrim");
   const openSheet = nodeId => {
     const n = MAP_NODES[nodeId]; if (!n) return;
+    document.getElementById("dmapTag").textContent = n.tag;
+    document.getElementById("dmapTitle").textContent = n.title;
+    document.getElementById("dmapPali2").textContent = n.pali;
+    document.getElementById("dmapDesc").textContent = n.desc;
+    document.getElementById("dmapEv2").textContent = n.ev;
+    document.getElementById("dmapBridge").textContent = n.bridge ? "↳ " + n.bridge : "";
+    sheet.classList.add("open"); scrim.classList.add("open");
+  };
+  const closeSheet = () => { sheet.classList.remove("open"); scrim.classList.remove("open"); };
+  view.querySelectorAll("[data-node]").forEach(el => el.addEventListener("click", () => openSheet(el.dataset.node)));
+  document.getElementById("dmapSheetClose").addEventListener("click", closeSheet);
+  scrim.addEventListener("click", closeSheet);
+
+  const onKey = e => {
+    if (e.key === "Escape") { closeSheet(); goBack(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); goTo(cur + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); goTo(cur - 1); }
+  };
+  addEventListener("keydown", onKey);
+
+  cleanupPage = () => {
+    removeEventListener("keydown", onKey);
+  };
+
+  goTo(0);
+  addEventListener("resize", positionLabels);
+}
+
+// ============================================================
+//  แผนที่มหาสติปัฏฐาน (วงล้อ 4 ซี่ = สติปัฏฐาน 4 · เอกายนมรรค)
+// ============================================================
+const MAP_SATI = [
+  {t:"กาย", full:"กายานุปัสสนา", pali:"kāyānupassanā", grp:"ฐานที่ 1", def:"พิจารณาเห็นกายในกาย — อานาปาน อิริยาบถ ปฏิกูล ธาตุ นวสีวถิกา", ev:"DN 22:2–10"},
+  {t:"เวทนา", full:"เวทนานุปัสสนา", pali:"vedanānupassanā", grp:"ฐานที่ 2", def:"พิจารณาเห็นเวทนาในเวทนา — สุข ทุกข์ อทุกขมสุข ทั้งมีอามิสและไม่มีอามิส", ev:"DN 22:11"},
+  {t:"จิต", full:"จิตตานุปัสสนา", pali:"cittānupassanā", grp:"ฐานที่ 3", def:"พิจารณาเห็นจิตในจิต — มีราคะ/ไม่มีราคะ เป็นต้น 16 อาการ", ev:"DN 22:12"},
+  {t:"ธรรม", full:"ธัมมานุปัสสนา", pali:"dhammānupassanā", grp:"ฐานที่ 4", def:"พิจารณาเห็นธรรมในธรรม — นิวรณ์ 5 ขันธ์ 5 อายตนะ 6 โพชฌงค์ 7 อริยสัจ 4", ev:"DN 22:13–22"},
+];
+
+const MAP_SATI_NODES = {
+  nivarana: {tag:"ธัมมานุปัสสนา", title:"นิวรณ์ 5", pali:"pañca nīvaraṇāni", desc:"เครื่องกั้นใจ 5: กามฉันทะ พยาบาท ถีนมิทธะ อุทธัจจกุกกุจจะ วิจิกิจฉา รู้เท่าทันว่ามี/ไม่มี เกิดแล้ว/ละได้แล้ว", ev:"DN 22:13", bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
+  khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", desc:"รูป เวทนา สัญญา สังขาร วิญญาณ รู้ว่าขันธ์เป็นอย่างนี้ ความเกิดและความดับเป็นอย่างนี้", ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
+  ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", desc:"จักขุ โสตะ ฆานะ ชิวหา กาย มโน + อารมณ์ รู้ชัดอายตนะและสังโยชน์ที่เกิดเพราะอาศัยอายตนะ", ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
+  bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", desc:"สติ ธัมมวิจยะ วิริยะ ปีติ ปัสสัทธิ สมาธิ อุเบกขา รู้ว่ามี/ไม่มี เกิดแล้ว/เจริญเต็มที่แล้ว", ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
+  sacca: {tag:"ธัมมานุปัสสนา", title:"อริยสัจ 4", pali:"cattāri ariyasaccāni", desc:"รู้ตามเป็นจริงว่า นี้ทุกข์ นี้สมุทัย นี้นิโรธ นี้มรรค — หมวดสัจจะนี้บรรจุธัมมจักกัปปวัตตนสูตรทั้งชุด (264 ข้อความ)", ev:"DN 22:17–22", bridge:"↳ ดูเต็มใน ธัมมจักกัปปวัตตนสูตร (SN 56.11)"},
+};
+
+function renderSatipatthana(id) {
+  const meta = TOPICS[id];
+  setChrome({ title: meta.title, back: true, gear: true, bar: true });
+  document.body.classList.remove("chant-mode");
+
+  let cur = 0, rot = 0;
+  const N = MAP_SATI.length;           // 4
+  const spokeAngle = k => k * 90;      // 4 ซี่ ตามทิศหลัก
+
+  const rays = MAP_RAYS.map(r =>
+    `<line x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}" stroke="${r[4]}" stroke-width="3" stroke-linecap="round"/>`
+  ).join("");
+
+  view.innerHTML = `<div class="dmap">
+    <section class="dmap-hero">
+      <div class="dmap-kicker">หมุนหรือแตะซี่ · สติปัฏฐาน 4</div>
+      <div class="dmap-name">${esc(meta.title)}</div>
+      <div class="dmap-ref">${esc(meta.ro)} · ${esc(meta.ref)}</div>
+
+      <div class="dmap-wheel" id="dmapWheel">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="dmapGoldGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#FACC15" stop-opacity=".5"/>
+              <stop offset="1" stop-color="#FACC15" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="dmapSoftBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
+          </defs>
+          <g class="dmap-rays" filter="url(#dmapSoftBlur)">${rays}</g>
+          <circle class="dmap-glow" cx="100" cy="100" r="62" fill="url(#dmapGoldGlow)"/>
+          <g id="dmapRot">
+            <circle class="dmap-rim-in" cx="100" cy="100" r="88"/>
+            <circle class="dmap-rim" cx="100" cy="100" r="82"/>
+            <g id="dmapSpokes"></g>
+          </g>
+          <circle class="dmap-hub" cx="100" cy="100" r="38"/>
+          <text class="dmap-hub-text" x="100" y="102">${esc(meta.ref)}</text>
+          <text class="dmap-hub-sub" x="100" y="118">สติปัฏฐาน</text>
+        </svg>
+        <div id="dmapLabels"></div>
+      </div>
+
+      <div class="dmap-nav">
+        <button type="button" id="dmapPrev" aria-label="ฐานก่อนหน้า">‹</button>
+        <button type="button" id="dmapNext" aria-label="ฐานถัดไป">›</button>
+      </div>
+
+      <div class="dmap-card" aria-live="polite">
+        <span class="grp" id="dmapGrp"></span>
+        <span class="full" id="dmapFull"></span>
+        <span class="pali" id="dmapPali"></span>
+        <span class="def" id="dmapDef"></span>
+        <span class="ev" id="dmapEv"></span>
+      </div>
+
+      <a class="dmap-read" href="#/topic/${esc(id)}/read">${TP_BOOK}<span>อ่านพระสูตรเต็ม · ปัด/แตะ</span></a>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>ธัมมานุปัสสนา · 5 หมวดธรรม</h2><span class="pali">dhammānupassanā</span></div>
+      <div class="dmap-truths">
+        <button type="button" class="dmap-truth" data-node="nivarana"><span class="no">หมวด 1</span><span class="t">นิวรณ์ 5</span><span class="p">nīvaraṇa</span><span class="d">เครื่องกั้นใจ</span></button>
+        <button type="button" class="dmap-truth" data-node="khandha"><span class="no">หมวด 2</span><span class="t">อุปาทานขันธ์ 5</span><span class="p">khandha</span><span class="d">รูป เวทนา สัญญา สังขาร วิญญาณ</span></button>
+        <button type="button" class="dmap-truth" data-node="ayatana"><span class="no">หมวด 3</span><span class="t">อายตนะ 6</span><span class="p">āyatana</span><span class="d">ตา หู จมูก ลิ้น กาย ใจ</span></button>
+        <button type="button" class="dmap-truth" data-node="bojjhanga"><span class="no">หมวด 4</span><span class="t">โพชฌงค์ 7</span><span class="p">bojjhaṅga</span><span class="d">องค์แห่งการตรัสรู้</span></button>
+        <button type="button" class="dmap-truth" data-node="sacca"><span class="no">หมวด 5</span><span class="t">อริยสัจ 4</span><span class="p">ariyasacca</span><span class="d">= บรรจุธัมมจักกัปปวัตตนสูตร</span></button>
+      </div>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>เชื่อมกับธัมมจักกัปปวัตตนสูตร</h2><span class="pali">sammāsati = satipaṭṭhāna</span></div>
+      <div class="dmap-method">
+        <div class="no">สะพานบัญญัติในตัวบาลี (SN 45.8:9.2 · MN 44:12.3)</div>
+        <h3>สัมมาสติ (มรรคองค์ 7) = สติปัฏฐาน 4</h3>
+        <div class="flow">
+          <span>สติปัฏฐาน 4 → สัมมาสติ (องค์ 7)</span>
+          <span>สติปัฏฐาน = สมาธินิมิตต์ (MN 44)</span>
+          <span class="b">→ มรรค 8 → ไตรสิกขา → 3 ปิฎก</span>
+        </div>
+        <a class="dmap-read" href="#/topic/sn56.11" style="margin-top:12px;">${TP_BOOK}<span>เปิดวงล้อ ธัมมจักกัปปวัตตนสูตร</span></a>
+      </div>
+    </section>
+  </div>
+
+  <div class="dmap-scrim" id="dmapScrim"></div>
+  <div class="dmap-sheet" id="dmapSheet" role="dialog" aria-modal="true">
+    <div class="grab"></div>
+    <button type="button" class="close" id="dmapSheetClose" aria-label="ปิด">${ICON.x}</button>
+    <span class="tag" id="dmapTag"></span>
+    <h3 id="dmapTitle"></h3>
+    <div class="pali" id="dmapPali2"></div>
+    <p class="desc" id="dmapDesc"></p>
+    <div class="ev"><div class="lab">หลักฐานในพระไตรปิฎก</div><div class="cite" id="dmapEv2"></div></div>
+    <div class="bridge" id="dmapBridge"></div>
+  </div>`;
+
+  const spokesG = document.getElementById("dmapSpokes");
+  const labelsBox = document.getElementById("dmapLabels");
+  const wheelEl = document.getElementById("dmapWheel");
+
+  let spokesHTML = "";
+  for (let k = 0; k < N; k++) {
+    const a = spokeAngle(k) * Math.PI / 180;
+    const x1 = 100 + 38 * Math.sin(a), y1 = 100 - 38 * Math.cos(a);
+    const x2 = 100 + 82 * Math.sin(a), y2 = 100 - 82 * Math.cos(a);
+    spokesHTML += `<line class="dmap-spoke" data-k="${k}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+  }
+  spokesG.innerHTML = spokesHTML;
+
+  labelsBox.innerHTML = MAP_SATI.map((m, k) =>
+    `<button type="button" class="dmap-label" data-k="${k}" style="left:50%;top:50%;">${esc(m.t)}</button>`
+  ).join("");
+
+  const positionLabels = () => {
+    const box = wheelEl.getBoundingClientRect();
+    const cx = box.width / 2, cy = box.height / 2;
+    const r = box.width / 2 * 0.92;
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => {
+      const k = +lb.dataset.k;
+      const a = (spokeAngle(k) + rot) * Math.PI / 180;
+      lb.style.left = (cx + r * Math.sin(a)) + "px";
+      lb.style.top = (cy - r * Math.cos(a)) + "px";
+    });
+  };
+
+  const renderCard = () => {
+    const m = MAP_SATI[cur];
+    document.getElementById("dmapGrp").textContent = m.grp;
+    document.getElementById("dmapFull").textContent = m.full;
+    document.getElementById("dmapPali").textContent = m.pali;
+    document.getElementById("dmapDef").textContent = m.def;
+    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+  };
+
+  const applyRot = () => {
+    document.getElementById("dmapRot").setAttribute("transform", `rotate(${rot} 100 100)`);
+    spokesG.querySelectorAll(".dmap-spoke").forEach(s => s.classList.toggle("on", +s.dataset.k === cur));
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.classList.toggle("on", +lb.dataset.k === cur));
+    positionLabels();
+    renderCard();
+  };
+  const goTo = k => { cur = ((k % N) + N) % N; rot = -spokeAngle(cur); applyRot(); };
+
+  labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.addEventListener("click", () => goTo(+lb.dataset.k)));
+  spokesG.addEventListener("click", e => { const s = e.target.closest(".dmap-spoke"); if (s) goTo(+s.dataset.k); });
+  document.getElementById("dmapPrev").addEventListener("click", () => goTo(cur - 1));
+  document.getElementById("dmapNext").addEventListener("click", () => goTo(cur + 1));
+
+  let dragging = false, lastA = 0;
+  wheelEl.addEventListener("pointerdown", e => {
+    dragging = true;
+    const r = wheelEl.getBoundingClientRect();
+    lastA = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    wheelEl.setPointerCapture(e.pointerId);
+  });
+  wheelEl.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const r = wheelEl.getBoundingClientRect();
+    const a = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    rot += (a - lastA) * 180 / Math.PI; lastA = a;
+    let best = 0, bd = 1e9;
+    for (let k = 0; k < N; k++) {
+      let d = Math.abs(spokeAngle(k) + rot); d = Math.min(d, 360 - d);
+      if (d < bd) { bd = d; best = k; }
+    }
+    cur = best;
+    applyRot();
+  });
+  const endDrag = () => { dragging = false; };
+  wheelEl.addEventListener("pointerup", endDrag);
+  wheelEl.addEventListener("pointercancel", endDrag);
+
+  const sheet = document.getElementById("dmapSheet");
+  const scrim = document.getElementById("dmapScrim");
+  const openSheet = nodeId => {
+    const n = MAP_SATI_NODES[nodeId]; if (!n) return;
     document.getElementById("dmapTag").textContent = n.tag;
     document.getElementById("dmapTitle").textContent = n.title;
     document.getElementById("dmapPali2").textContent = n.pali;
