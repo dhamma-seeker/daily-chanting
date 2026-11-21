@@ -1,5 +1,6 @@
 /* ============================================================
-   หัวข้อธรรม — อ่านพระสูตร/หัวข้อแบบ Story (ปัด/แตะ)
+   หัวข้อธรรม — อ่านพระสูตร/หัวข้อ
+   · Story (ปัด/แตะ) + Map (วงล้อธัมมจักร)
    ใช้ token จาก styles.css :root · ตัวหนังสือใช้ var(--pali-*)/var(--thai-*)
    เพื่อให้หน้าตั้งค่าการอ่านควบคุมได้ · motion ตาม MOTION.md
    ============================================================ */
@@ -95,4 +96,140 @@
   .tp-card.above, .tp-card.below { transform: none; }
   .tp-card .r { transform: none; }
   .tp-card.active .r { transition: opacity .5s; }
+}
+
+/* ============================================================
+   แผนที่ธัมมจักร (Map) — วงล้อ 8 ซี่ = มรรค 8 · ฉัพพรรณรังสี 6 สี
+   ============================================================ */
+.dmap { padding-bottom: 40px; }
+
+.dmap-hero {
+  background: radial-gradient(90% 70% at 50% 0%, #1E3A5F 0%, #0F1E46 55%, #0A1430 100%);
+  border-radius: 20px; padding: 22px 16px 20px; overflow: hidden; position: relative;
+  color: #E2E8F0;
+}
+.dmap-kicker { text-align: center; font-size: 12px; color: #94A3B8; letter-spacing: .07em; }
+.dmap-name { text-align: center; font-size: 23px; font-weight: 700; color: #FDE68A; margin-top: 3px; }
+.dmap-ref { text-align: center; font-size: 12.5px; color: #93B4FF; font-weight: 600; margin-top: 2px; font-family: var(--roman-ff); }
+
+.dmap-wheel { position: relative; width: min(300px, 88%); aspect-ratio: 1/1; margin: 14px auto 0; touch-action: none; }
+.dmap-wheel svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.dmap-rays { animation: dmapRays 5s ease-in-out infinite; }
+@keyframes dmapRays { 0%,100% { opacity: .5; } 50% { opacity: .85; } }
+.dmap-glow { animation: dmapGlow 4s ease-in-out infinite; }
+@keyframes dmapGlow { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
+.dmap-rim { fill: none; stroke: #FACC15; stroke-width: 5; }
+.dmap-rim-in { fill: none; stroke: #FACC15; stroke-width: 1.6; opacity: .5; }
+.dmap-spoke { stroke: #FDE68A; stroke-width: 3; stroke-linecap: round; opacity: .85; transition: stroke .3s, stroke-width .3s, filter .3s; cursor: pointer; }
+.dmap-spoke.on { stroke: #FACC15; stroke-width: 5.5; filter: drop-shadow(0 0 6px rgba(250,204,21,.9)); }
+.dmap-hub { fill: #0A1430; stroke: #FACC15; stroke-width: 1.5; }
+.dmap-hub-text { fill: #FACC15; font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+.dmap-hub-sub { fill: #93B4FF; font-size: 9.5px; text-anchor: middle; opacity: .9; }
+
+.dmap-label {
+  position: absolute; transform: translate(-50%,-50%);
+  min-width: 44px; height: 30px; padding: 0 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15,30,70,.78); color: #E2E8F0;
+  border: 1px solid rgba(250,204,21,.4); border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; white-space: nowrap;
+  transition: background .25s, color .25s, border-color .25s, box-shadow .25s;
+  will-change: left, top;
+}
+.dmap-label.on { background: #FACC15; color: #713F12; border-color: #FACC15; box-shadow: 0 0 12px rgba(250,204,21,.7); }
+
+.dmap-nav { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 8px; }
+.dmap-nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(250,204,21,.5); background: rgba(255,255,255,.06); color: #FACC15; display: grid; place-items: center; font-size: 20px; line-height: 1; }
+.dmap-nav button:active { background: rgba(250,204,21,.2); }
+.dmap-nav button:focus-visible { outline: 3px solid #93B4FF; outline-offset: 2px; }
+
+.dmap-card {
+  margin-top: 14px; background: var(--surface); color: var(--ink);
+  border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.dmap-card .grp { font-size: 11px; font-weight: 700; color: var(--gold-ink); letter-spacing: .05em; }
+.dmap-card .full { font-size: 20px; font-weight: 700; }
+.dmap-card .pali { font-family: var(--pali-ff); font-size: 12.5px; color: var(--pali); font-weight: 600; }
+.dmap-card .def { font-size: 14.5px; color: var(--thai); line-height: 1.5; margin-top: 2px; }
+.dmap-card .ev { margin-top: 6px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+
+.dmap-read {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; margin-top: 12px; padding: 14px;
+  background: var(--primary); color: var(--on-primary);
+  border-radius: 12px; font-size: 16px; font-weight: 700; text-decoration: none;
+}
+.dmap-read:active { opacity: .9; }
+.dmap-read:focus-visible { outline: 3px solid #FACC15; outline-offset: 2px; }
+.dmap-read svg { width: 20px; height: 20px; }
+
+/* ---- ส่วนย่อย ---- */
+.dmap-sec { margin-top: 26px; }
+.dmap-sec-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.dmap-sec-head h2 { font-size: 16px; font-weight: 700; }
+.dmap-sec-head .pali { font-family: var(--pali-ff); font-size: 11.5px; color: var(--muted); font-weight: 500; }
+
+.dmap-truths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dmap-truth {
+  text-align: left; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 13px 14px; box-shadow: var(--shadow); color: var(--ink);
+  min-height: 96px; display: flex; flex-direction: column; gap: 4px; transition: transform .2s;
+}
+.dmap-truth:active { transform: scale(.98); }
+.dmap-truth:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.dmap-truth .no { font-size: 11px; color: var(--gold-ink); font-weight: 700; letter-spacing: .04em; }
+.dmap-truth .t { font-size: 16px; font-weight: 700; line-height: 1.2; }
+.dmap-truth .p { font-family: var(--pali-ff); font-size: 12px; color: var(--pali); font-weight: 600; }
+.dmap-truth .d { font-size: 12.5px; color: var(--thai); line-height: 1.4; }
+
+.dmap-pitaka { display: flex; flex-direction: column; gap: 10px; }
+.dmap-pitaka-card {
+  display: flex; align-items: center; gap: 12px; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  padding: 14px; box-shadow: var(--shadow); color: var(--ink); min-height: 64px;
+}
+.dmap-pitaka-card:active { transform: scale(.99); }
+.dmap-pitaka-card:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.dmap-pitaka-card .ic { width: 44px; height: 44px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold-ink); }
+.dmap-pitaka-card .ic svg { width: 22px; height: 22px; }
+.dmap-pitaka-card .meta { flex: 1; min-width: 0; }
+.dmap-pitaka-card .meta b { font-size: 15.5px; font-weight: 700; display: block; }
+.dmap-pitaka-card .meta span { font-size: 12px; color: var(--thai); line-height: 1.35; }
+.dmap-pitaka-card .chev { color: var(--muted); flex: none; }
+.dmap-pitaka-card .chev svg { width: 20px; height: 20px; }
+
+.dmap-method { background: var(--night); border-radius: 16px; padding: 16px; color: #E2E8F0; box-shadow: var(--shadow); }
+.dmap-method .no { font-size: 11px; color: #FACC15; font-weight: 700; letter-spacing: .05em; }
+.dmap-method h3 { font-size: 16px; font-weight: 700; margin-top: 2px; color: #FDE68A; }
+.dmap-method .flow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.dmap-method .flow span { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: #E2E8F0; }
+.dmap-method .flow span.b { background: #FACC15; color: #713F12; font-weight: 700; }
+
+/* ---- bottom sheet (แผนที่) ---- */
+.dmap-scrim { position: fixed; inset: 0; background: rgba(15,23,42,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 45; }
+.dmap-scrim.open { opacity: 1; pointer-events: auto; }
+.dmap-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; max-width: 560px; margin: 0 auto;
+  background: var(--surface); color: var(--ink);
+  border-radius: 20px 20px 0 0; box-shadow: var(--shadow-lg);
+  padding: 8px 18px calc(18px + env(safe-area-inset-bottom));
+  transform: translateY(105%); transition: transform .3s cubic-bezier(.32,.72,.24,1);
+  max-height: 82vh; overflow-y: auto;
+}
+.dmap-sheet.open { transform: translateY(0); }
+.dmap-sheet .grab { width: 40px; height: 4px; border-radius: 999px; background: var(--line); margin: 6px auto 14px; }
+.dmap-sheet .close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: none; background: transparent; color: var(--muted); border-radius: 12px; display: grid; place-items: center; }
+.dmap-sheet .close svg { width: 20px; height: 20px; }
+.dmap-sheet .tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--gold-ink); background: var(--gold-soft); padding: 3px 10px; border-radius: 999px; letter-spacing: .04em; }
+.dmap-sheet h3 { font-size: 22px; font-weight: 700; margin-top: 8px; line-height: 1.25; }
+.dmap-sheet .pali { font-family: var(--pali-ff); font-size: 13px; color: var(--pali); font-weight: 600; margin-top: 2px; }
+.dmap-sheet .desc { font-size: 15px; color: var(--thai); line-height: 1.6; margin-top: 10px; }
+.dmap-sheet .ev { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.dmap-sheet .ev .lab { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .05em; margin-bottom: 4px; }
+.dmap-sheet .ev .cite { font-size: 14px; font-weight: 600; color: var(--ink); }
+.dmap-sheet .bridge { margin-top: 10px; font-size: 13px; color: var(--gold-ink); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dmap-rays, .dmap-glow { animation: none; }
 }

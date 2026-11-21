@@ -750,9 +750,14 @@ function renderHome({ keep = false } = {}) {
       <span class="meta"><b>ฝึกสักครู่</b><span>ไม่กี่วินาทีก็ฝึกได้ ตามพระสูตร</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
-    <a class="qp-entry" href="#/topic/snp1.8">
+    <a class="qp-entry" href="#/topic/sn56.11">
       <span class="qp-glyph" aria-hidden="true">${ICON.book}</span>
-      <span class="meta"><b>หัวข้อธรรม</b><span>กรณียเมตตสูตร · อ่านแบบปัด/แตะ</span></span>
+      <span class="meta"><b>หัวข้อธรรม</b><span>ธัมมจักกัปปวัตตนสูตร · วงล้อพระธรรม</span></span>
+      <span class="chev">${ICON.chev}</span>
+    </a>
+    <a class="qp-entry" href="#/topic/snp1.8">
+      <span class="qp-glyph" aria-hidden="true">${ICON.lotus}</span>
+      <span class="meta"><b>กรณียเมตตสูตร</b><span>เมตตา · อ่านแบบปัด/แตะ</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
