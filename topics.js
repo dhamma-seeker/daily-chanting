@@ -68,8 +68,8 @@ const TP_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const TP_BOOK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
 
 function routeTopics(h) {
-  let m = h.match(/^topic\/([a-z0-9.]+)\/read$/);
-  if (m && TOPICS[m[1]]) { renderTopic(m[1]); return true; }
+  let m = h.match(/^topic\/([a-z0-9.]+)\/read(?:\/(\d+))?$/);
+  if (m && TOPICS[m[1]]) { renderTopic(m[1], m[2] != null ? +m[2] : 0); return true; }
   m = h.match(/^topic\/([a-z0-9.]+)$/);
   if (m && TOPICS[m[1]]) {
     const t = TOPICS[m[1]];
@@ -88,7 +88,7 @@ function routeTopics(h) {
 // ============================================================
 //  Story reader (ปัดขึ้น/แตะ = ไปต่อ · ปัดลง = ย้อน)
 // ============================================================
-function renderTopic(id) {
+function renderTopic(id, start = 0) {
   const meta = TOPICS[id];
   setChrome({ title: meta.title, bar: false });
 
@@ -190,6 +190,7 @@ function renderTopic(id) {
   fetch(`topics/${id}.json`).then(r => r.json()).then(data => {
     if (location.hash !== here) return;
     build(data);
+    if (start > 0) cur = Math.min(start, N - 1);
     paint();
   }).catch(() => {
     if (location.hash === here) hint.textContent = "เปิดหัวข้อนี้ไม่ได้ ลองต่อเน็ตแล้วเปิดอีกครั้ง";
@@ -382,6 +383,7 @@ function renderMap(id) {
     <h3 id="dmapTitle"></h3>
     <div class="pali" id="dmapPali2"></div>
     <p class="desc" id="dmapDesc"></p>
+    <div class="dmap-items" id="dmapItems"></div>
     <div class="ev"><div class="lab">หลักฐานในพระไตรปิฎก</div><div class="cite" id="dmapEv2"></div></div>
     <div class="bridge" id="dmapBridge"></div>
   </div>`;
@@ -508,11 +510,20 @@ const MAP_SATI = [
 ];
 
 const MAP_SATI_NODES = {
-  nivarana: {tag:"ธัมมานุปัสสนา", title:"นิวรณ์ 5", pali:"pañca nīvaraṇāni", desc:"เครื่องกั้นใจ 5: กามฉันทะ พยาบาท ถีนมิทธะ อุทธัจจกุกกุจจะ วิจิกิจฉา รู้เท่าทันว่ามี/ไม่มี เกิดแล้ว/ละได้แล้ว", ev:"DN 22:13", bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
-  khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", desc:"รูป เวทนา สัญญา สังขาร วิญญาณ รู้ว่าขันธ์เป็นอย่างนี้ ความเกิดและความดับเป็นอย่างนี้", ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
-  ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", desc:"จักขุ โสตะ ฆานะ ชิวหา กาย มโน + อารมณ์ รู้ชัดอายตนะและสังโยชน์ที่เกิดเพราะอาศัยอายตนะ", ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
-  bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", desc:"สติ ธัมมวิจยะ วิริยะ ปีติ ปัสสัทธิ สมาธิ อุเบกขา รู้ว่ามี/ไม่มี เกิดแล้ว/เจริญเต็มที่แล้ว", ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
-  sacca: {tag:"ธัมมานุปัสสนา", title:"อริยสัจ 4", pali:"cattāri ariyasaccāni", desc:"รู้ตามเป็นจริงว่า นี้ทุกข์ นี้สมุทัย นี้นิโรธ นี้มรรค — หมวดสัจจะนี้บรรจุธัมมจักกัปปวัตตนสูตรทั้งชุด (264 ข้อความ)", ev:"DN 22:17–22", bridge:"↳ ดูเต็มใน ธัมมจักกัปปวัตตนสูตร (SN 56.11)"},
+  nivarana: {tag:"ธัมมานุปัสสนา", title:"นิวรณ์ 5", pali:"pañca nīvaraṇāni", verse:8,
+    desc:"เครื่องกั้นใจที่ปิดกั้นปัญญาและฌาน ภิกษุรู้เท่าทันว่า นิวรณ์ใดมีอยู่/ไม่มี เกิดแล้ว/ละได้แล้ว/จะไม่เกิดอีก",
+    items:[
+      {t:"กามฉันทะ", p:"kāmacchanda", d:"ความพอใจติดใจในกามคุณ 5 (รูป เสียง กลิ่น รส สัมผัส) คือความกำหนัด ความใคร่ ความเพลิดเพลินที่ใจหมกมุ่นหลงติด"},
+      {t:"พยาบาท", p:"byāpāda", d:"ความขัดเคือง ความอาฆาต ความโกรธ ความคิดมุ่งร้ายปองร้ายผู้อื่น"},
+      {t:"ถีนมิทธะ", p:"thīnamiddha", d:"ความหดหู่ท้อถอย (ถีนะ) + ความง่วงซึมง่วงเหงา (มิทธะ) ทำให้ใจไม่คล่อง ไม่ควรแก่การงาน"},
+      {t:"อุทธัจจกุกกุจจะ", p:"uddhaccakukkucca", d:"ความฟุ้งซ่านใจไม่สงบ (อุทธัจจะ) + ความเดือดร้อนใจรำคาญใจถึงความผิดที่ทำแล้ว/ยังไม่ได้ทำ (กุกกุจจะ)"},
+      {t:"วิจิกิจฉา", p:"vicikicchā", d:"ความลังเลสงสัย ไม่ตกลงใจ เคลือบแคลงในพระพุทธ พระธรรม พระสงฆ์ และในสิกขา"},
+    ],
+    ev:"DN 22:13 · นิยามจากวิภังค์ (อภิธรรม)", bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
+  khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", verse:9, desc:"รูป เวทนา สัญญา สังขาร วิญญาณ รู้ว่าขันธ์เป็นอย่างนี้ ความเกิดและความดับเป็นอย่างนี้", ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
+  ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", verse:10, desc:"จักขุ โสตะ ฆานะ ชิวหา กาย มโน + อารมณ์ รู้ชัดอายตนะและสังโยชน์ที่เกิดเพราะอาศัยอายตนะ", ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
+  bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", verse:11, desc:"สติ ธัมมวิจยะ วิริยะ ปีติ ปัสสัทธิ สมาธิ อุเบกขา รู้ว่ามี/ไม่มี เกิดแล้ว/เจริญเต็มที่แล้ว", ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
+  sacca: {tag:"ธัมมานุปัสสนา", title:"อริยสัจ 4", pali:"cattāri ariyasaccāni", verse:12, desc:"รู้ตามเป็นจริงว่า นี้ทุกข์ นี้สมุทัย นี้นิโรธ นี้มรรค — หมวดสัจจะนี้บรรจุธัมมจักกัปปวัตตนสูตรทั้งชุด (264 ข้อความ)", ev:"DN 22:17–22", bridge:"↳ ดูเต็มใน ธัมมจักกัปปวัตตนสูตร (SN 56.11)"},
 };
 
 function renderSatipatthana(id) {
@@ -607,6 +618,7 @@ function renderSatipatthana(id) {
     <h3 id="dmapTitle"></h3>
     <div class="pali" id="dmapPali2"></div>
     <p class="desc" id="dmapDesc"></p>
+    <div class="dmap-items" id="dmapItems"></div>
     <div class="ev"><div class="lab">หลักฐานในพระไตรปิฎก</div><div class="cite" id="dmapEv2"></div></div>
     <div class="bridge" id="dmapBridge"></div>
   </div>`;
@@ -695,7 +707,15 @@ function renderSatipatthana(id) {
     document.getElementById("dmapTitle").textContent = n.title;
     document.getElementById("dmapPali2").textContent = n.pali;
     document.getElementById("dmapDesc").textContent = n.desc;
-    document.getElementById("dmapEv2").textContent = n.ev;
+    const itemsBox = document.getElementById("dmapItems");
+    if (n.items) {
+      itemsBox.innerHTML = n.items.map(it =>
+        `<div class="dmap-item"><div class="t">${esc(it.t)} <span class="p" lang="pi">${esc(it.p)}</span></div><div class="d">${esc(it.d)}</div></div>`
+      ).join("");
+    } else itemsBox.innerHTML = "";
+    document.getElementById("dmapEv2").innerHTML = (n.verse != null)
+      ? `<a href="#/topic/${esc(id)}/read/${n.verse}">${esc(n.ev)} · อ่านในแอป ›</a>`
+      : esc(n.ev);
     document.getElementById("dmapBridge").textContent = n.bridge ? "↳ " + n.bridge : "";
     sheet.classList.add("open"); scrim.classList.add("open");
   };

@@ -238,6 +238,12 @@
 .dmap-sheet .ev .lab { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .05em; margin-bottom: 4px; }
 .dmap-sheet .ev .cite { font-size: 14px; font-weight: 600; color: var(--ink); }
 .dmap-sheet .bridge { margin-top: 10px; font-size: 13px; color: var(--gold-ink); font-weight: 600; }
+.dmap-sheet .dmap-items { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.dmap-sheet .dmap-item { padding: 11px 13px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.dmap-sheet .dmap-item .t { font-size: 15px; font-weight: 700; color: var(--ink); }
+.dmap-sheet .dmap-item .t .p { font-family: var(--pali-ff); font-size: 12px; color: var(--pali); font-weight: 600; margin-left: 5px; }
+.dmap-sheet .dmap-item .d { font-size: 13px; color: var(--thai); line-height: 1.55; margin-top: 3px; }
+.dmap-sheet .ev .cite a { color: var(--gold-ink); text-decoration: none; border-bottom: 1px dashed var(--gold); }
 
 @media (prefers-reduced-motion: reduce) {
   .dmap-rays, .dmap-glow { animation: none; }
