@@ -133,18 +133,37 @@ function renderTopic(id) {
   const next = () => { if (cur < N - 1) { cur++; paint(); } };
   const prev = () => { if (cur > 0) { cur--; paint(); } };
 
-  // ปัดขึ้น/แตะ = ไปต่อ · ปัดลง = ย้อน · เว้นปุ่มและลิงก์
+  // ปัด/แตะ = ไปต่อ · ปัดลง/ปัดขวา = ย้อน · เว้นปุ่มและลิงก์
   let sy = null, sx = null;
   stage.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; });
   stage.addEventListener("pointerup", e => {
     if (sy == null) return;
     const tx = e.clientX, ty = e.clientY;
+    const dx = tx - sx, dy = ty - sy;
     sx = sy = null;
     if (e.target.closest("a, button")) return;
-    const dx = tx - sx, dy = ty - sy, adx = Math.abs(dx), ady = Math.abs(dy);
-    if (ady > 36 && ady > adx) { dy < 0 ? next() : prev(); }
+    const adx = Math.abs(dx), ady = Math.abs(dy);
+    if (adx > 40 || ady > 40) {
+      if (ady >= adx) { dy < 0 ? next() : prev(); }
+      else { dx < 0 ? next() : prev(); }
+    }
     else if (adx < 10 && ady < 10) { next(); }
   });
+
+  // Seekbar: แตะ/ลากบนแถบความคืบหน้าเพื่อข้ามไปการ์ดที่ต้องการ
+  const seekTo = e => {
+    const r = prog.getBoundingClientRect();
+    if (r.width === 0 || N === 0) return;
+    const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    const idx = Math.round(ratio * (N - 1));
+    if (idx !== cur) { cur = idx; paint(); }
+  };
+  let seeking = false;
+  prog.addEventListener("pointerdown", e => { seeking = true; try { prog.setPointerCapture(e.pointerId); } catch {} seekTo(e); });
+  prog.addEventListener("pointermove", e => { if (seeking) seekTo(e); });
+  const stopSeek = () => { seeking = false; };
+  prog.addEventListener("pointerup", stopSeek);
+  prog.addEventListener("pointercancel", stopSeek);
 
   document.getElementById("tpExit").onclick = goBack;
   document.getElementById("tpNext").onclick = next;
