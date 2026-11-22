@@ -43,6 +43,24 @@ const TOPICS = {
     nikaya: "มัชฌิมนิกาย",
     sub: "มัชฌิมนิกาย · อานาปานสติ 16 ขั้น (4 จตุรกะ) → วิชชาวิมุตติ",
   },
+  "mn117": {
+    type: "map",
+    mapType: "cattarisaka",
+    title: "มหาจัตตารีสกสูตร",
+    ref: "MN 117",
+    ro: "Mahācattārīsaka Sutta",
+    nikaya: "มัชฌิมนิกาย",
+    sub: "มัชฌิมนิกาย · วิเคราะห์มรรค 8→10 + 2 ระดับ (โลกิย/โลกุตตร)",
+  },
+  "dn2": {
+    type: "map",
+    mapType: "sikkha",
+    title: "สามัญญผลสูตร",
+    ref: "DN 2",
+    ro: "Sāmaññaphalasutta",
+    nikaya: "ทีฆนิกาย",
+    sub: "ทีฆนิกาย สีลขันธวรรค · ไตรสิกขา (ศีล→สมาธิ→ปัญญา) = 3 ปิฎก",
+  },
 };
 
 const TP_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
@@ -58,6 +76,8 @@ function routeTopics(h) {
     if (t.type === "map") {
       if (t.mapType === "sati") renderSatipatthana(m[1]);
       else if (t.mapType === "anapana") renderAnapana(m[1]);
+      else if (t.mapType === "cattarisaka") renderCattarisaka(m[1]);
+      else if (t.mapType === "sikkha") renderSamannaphala(m[1]);
       else renderMap(m[1]);
     } else renderTopic(m[1]);
     return true;
@@ -816,6 +836,386 @@ function renderAnapana(id) {
     document.getElementById("dmapGrp").textContent = m.grp;
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali;
+    document.getElementById("dmapDef").textContent = m.def;
+    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+  };
+
+  const applyRot = () => {
+    document.getElementById("dmapRot").setAttribute("transform", `rotate(${rot} 100 100)`);
+    spokesG.querySelectorAll(".dmap-spoke").forEach(s => s.classList.toggle("on", +s.dataset.k === cur));
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.classList.toggle("on", +lb.dataset.k === cur));
+    positionLabels();
+    renderCard();
+  };
+  const goTo = k => { cur = ((k % N) + N) % N; rot = -spokeAngle(cur); applyRot(); };
+
+  labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.addEventListener("click", () => goTo(+lb.dataset.k)));
+  spokesG.addEventListener("click", e => { const s = e.target.closest(".dmap-spoke"); if (s) goTo(+s.dataset.k); });
+  document.getElementById("dmapPrev").addEventListener("click", () => goTo(cur - 1));
+  document.getElementById("dmapNext").addEventListener("click", () => goTo(cur + 1));
+
+  let dragging = false, lastA = 0;
+  wheelEl.addEventListener("pointerdown", e => {
+    dragging = true;
+    const r = wheelEl.getBoundingClientRect();
+    lastA = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    wheelEl.setPointerCapture(e.pointerId);
+  });
+  wheelEl.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const r = wheelEl.getBoundingClientRect();
+    const a = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    rot += (a - lastA) * 180 / Math.PI; lastA = a;
+    let best = 0, bd = 1e9;
+    for (let k = 0; k < N; k++) {
+      let d = Math.abs(spokeAngle(k) + rot); d = Math.min(d, 360 - d);
+      if (d < bd) { bd = d; best = k; }
+    }
+    cur = best;
+    applyRot();
+  });
+  const endDrag = () => { dragging = false; };
+  wheelEl.addEventListener("pointerup", endDrag);
+  wheelEl.addEventListener("pointercancel", endDrag);
+
+  const onKey = e => {
+    if (e.key === "Escape") goBack();
+    else if (e.key === "ArrowRight") { e.preventDefault(); goTo(cur + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); goTo(cur - 1); }
+  };
+  addEventListener("keydown", onKey);
+
+  cleanupPage = () => {
+    removeEventListener("keydown", onKey);
+  };
+
+  goTo(0);
+  addEventListener("resize", positionLabels);
+}
+
+// ============================================================
+//  แผนที่มหาจัตตารีสก (วงล้อ 8 ซี่ = มรรค 8 · 2 ระดับ · 8→10)
+// ============================================================
+const MAP_CATTARISAKA = [
+  {t:"ทิฏฐิ", full:"สัมมาทิฏฐิ", pali:"sammādiṭṭhi", grp:"องค์ 1 · ปุพพังคมา (ผู้นำ)", def:"ความเห็นถูก = รู้มิจฉา/สัมมา · 2 ระดับ: โลกิย (สาสว) ↔ โลกุตตร (อนาสว)", ev:"MN 117:4–8"},
+  {t:"สังกัปปะ", full:"สัมมาสังกัปปะ", pali:"sammāsaṅkappa", grp:"องค์ 2", def:"ดำริชอบ = เนกขัมมะ อพยาบาท อวิหิงสา", ev:"MN 117:9–12"},
+  {t:"วาจา", full:"สัมมาวาจา", pali:"sammāvācā", grp:"องค์ 3", def:"เจรจาชอบ = เว้นวจีทุจริต 4", ev:"MN 117:13–15"},
+  {t:"กัมมันตะ", full:"สัมมากัมมันตะ", pali:"sammākammanta", grp:"องค์ 4", def:"การงานชอบ = เว้นกายทุจริต 3", ev:"MN 117:16–18"},
+  {t:"อาชีวะ", full:"สัมมาอาชีวะ", pali:"sammāājīva", grp:"องค์ 5", def:"เลี้ยงชีพชอบ = ละมิจฉาชีวะ", ev:"MN 117:19–21"},
+  {t:"วายามะ", full:"สัมมาวายามะ", pali:"sammāvāyāma", grp:"องค์ 6", def:"เพียรชอบ = สัมมัปปธาน 4", ev:"MN 117:22–24"},
+  {t:"สติ", full:"สัมมาสติ", pali:"sammāsati", grp:"องค์ 7", def:"ระลึกชอบ = สติปัฏฐาน 4", ev:"MN 117:25–27"},
+  {t:"สมาธิ", full:"สัมมาสมาธิ", pali:"sammāsamādhi", grp:"องค์ 8 · แก่นของสูตร", def:"ตั้งมั่นชอบ = องค์ 7 + เอกัคคตา (สอุปนิส สปริกขาร)", ev:"MN 117:28–34"},
+];
+
+function renderCattarisaka(id) {
+  const meta = TOPICS[id];
+  setChrome({ title: meta.title, back: true, gear: true, bar: true });
+  document.body.classList.remove("chant-mode");
+
+  let cur = 0, rot = 0;
+  const N = MAP_CATTARISAKA.length;    // 8
+  const spokeAngle = k => 22.5 + k * 45;
+
+  const rays = MAP_RAYS.map(r =>
+    `<line x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}" stroke="${r[4]}" stroke-width="3" stroke-linecap="round"/>`
+  ).join("");
+
+  view.innerHTML = `<div class="dmap">
+    <section class="dmap-hero">
+      <div class="dmap-kicker">หมุนหรือแตะซี่ · มรรค 8 วิเคราะห์ 2 ระดับ</div>
+      <div class="dmap-name">${esc(meta.title)}</div>
+      <div class="dmap-ref">${esc(meta.ro)} · ${esc(meta.ref)}</div>
+
+      <div class="dmap-wheel" id="dmapWheel">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="dmapGoldGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#FACC15" stop-opacity=".5"/>
+              <stop offset="1" stop-color="#FACC15" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="dmapSoftBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
+          </defs>
+          <g class="dmap-rays" filter="url(#dmapSoftBlur)">${rays}</g>
+          <circle class="dmap-glow" cx="100" cy="100" r="62" fill="url(#dmapGoldGlow)"/>
+          <g id="dmapRot">
+            <circle class="dmap-rim-in" cx="100" cy="100" r="88"/>
+            <circle class="dmap-rim" cx="100" cy="100" r="82"/>
+            <g id="dmapSpokes"></g>
+          </g>
+          <circle class="dmap-hub" cx="100" cy="100" r="38"/>
+          <text class="dmap-hub-text" x="100" y="102">${esc(meta.ref)}</text>
+          <text class="dmap-hub-sub" x="100" y="118">มหาจัตตารีสก</text>
+        </svg>
+        <div id="dmapLabels"></div>
+      </div>
+
+      <div class="dmap-nav">
+        <button type="button" id="dmapPrev" aria-label="องค์ก่อนหน้า">‹</button>
+        <button type="button" id="dmapNext" aria-label="องค์ถัดไป">›</button>
+      </div>
+
+      <div class="dmap-card" aria-live="polite">
+        <span class="grp" id="dmapGrp"></span>
+        <span class="full" id="dmapFull"></span>
+        <span class="pali" id="dmapPali"></span>
+        <span class="def" id="dmapDef"></span>
+        <span class="ev" id="dmapEv"></span>
+      </div>
+
+      <a class="dmap-read" href="#/topic/${esc(id)}/read">${TP_BOOK}<span>อ่านพระสูตรเต็ม · ปัด/แตะ</span></a>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>2 ระดับของมรรค (ทฺวายํ)</h2><span class="pali">dvāyaṁ · MN 117:6</span></div>
+      <div class="dmap-method">
+        <div class="no">วิธีจำแนกเดียวกับอภิธรรม (โลกียทุกะ/สาสวทุกะ/อนาสวทุกะ)</div>
+        <div class="flow">
+          <span>โลกิยะ = สาสว / ปุญญภาคิย / อุปธิเวปกก</span>
+          <span class="b">โลกุตตระ = อนาสว / อริยะ / มัคคังคะ</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>มรรค 8 → 10</h2><span class="pali">aṭṭhaṅga → dasaṅga · MN 117:34</span></div>
+      <div class="dmap-method">
+        <div class="no">เพิ่ม 2 องค์ปลายทางของสุตตันตะ</div>
+        <h3>องค์ 8 = เสขะ · องค์ 10 = อรหันต์</h3>
+        <div class="flow">
+          <span>1–8: ทิฏฐิ → สมาธิ</span>
+          <span>9: สัมมาญาณ</span>
+          <span>10: สัมมาวิมุตติ</span>
+          <span class="b">มหาจัตตารีสก = 20 กุศล + 20 อกุศล</span>
+        </div>
+        <a class="dmap-read" href="#/topic/sn56.11" style="margin-top:12px;">${TP_BOOK}<span>สัมมาทิฏฐิ = ญาณในอริยสัจ 4 → ธัมมจักกัปปวัตตนสูตร</span></a>
+      </div>
+    </section>
+  </div>
+
+  <div class="dmap-scrim" id="dmapScrim"></div>`;
+
+  const spokesG = document.getElementById("dmapSpokes");
+  const labelsBox = document.getElementById("dmapLabels");
+  const wheelEl = document.getElementById("dmapWheel");
+
+  let spokesHTML = "";
+  for (let k = 0; k < N; k++) {
+    const a = spokeAngle(k) * Math.PI / 180;
+    const x1 = 100 + 38 * Math.sin(a), y1 = 100 - 38 * Math.cos(a);
+    const x2 = 100 + 82 * Math.sin(a), y2 = 100 - 82 * Math.cos(a);
+    spokesHTML += `<line class="dmap-spoke" data-k="${k}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+  }
+  spokesG.innerHTML = spokesHTML;
+
+  labelsBox.innerHTML = MAP_CATTARISAKA.map((m, k) =>
+    `<button type="button" class="dmap-label" data-k="${k}" style="left:50%;top:50%;">${esc(m.t)}</button>`
+  ).join("");
+
+  const positionLabels = () => {
+    const box = wheelEl.getBoundingClientRect();
+    const cx = box.width / 2, cy = box.height / 2;
+    const r = box.width / 2 * 0.92;
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => {
+      const k = +lb.dataset.k;
+      const a = (spokeAngle(k) + rot) * Math.PI / 180;
+      lb.style.left = (cx + r * Math.sin(a)) + "px";
+      lb.style.top = (cy - r * Math.cos(a)) + "px";
+    });
+  };
+
+  const renderCard = () => {
+    const m = MAP_CATTARISAKA[cur];
+    document.getElementById("dmapGrp").textContent = m.grp;
+    document.getElementById("dmapFull").textContent = m.full;
+    document.getElementById("dmapPali").textContent = m.pali;
+    document.getElementById("dmapDef").textContent = m.def;
+    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+  };
+
+  const applyRot = () => {
+    document.getElementById("dmapRot").setAttribute("transform", `rotate(${rot} 100 100)`);
+    spokesG.querySelectorAll(".dmap-spoke").forEach(s => s.classList.toggle("on", +s.dataset.k === cur));
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.classList.toggle("on", +lb.dataset.k === cur));
+    positionLabels();
+    renderCard();
+  };
+  const goTo = k => { cur = ((k % N) + N) % N; rot = -spokeAngle(cur); applyRot(); };
+
+  labelsBox.querySelectorAll(".dmap-label").forEach(lb => lb.addEventListener("click", () => goTo(+lb.dataset.k)));
+  spokesG.addEventListener("click", e => { const s = e.target.closest(".dmap-spoke"); if (s) goTo(+s.dataset.k); });
+  document.getElementById("dmapPrev").addEventListener("click", () => goTo(cur - 1));
+  document.getElementById("dmapNext").addEventListener("click", () => goTo(cur + 1));
+
+  let dragging = false, lastA = 0;
+  wheelEl.addEventListener("pointerdown", e => {
+    dragging = true;
+    const r = wheelEl.getBoundingClientRect();
+    lastA = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    wheelEl.setPointerCapture(e.pointerId);
+  });
+  wheelEl.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const r = wheelEl.getBoundingClientRect();
+    const a = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2));
+    rot += (a - lastA) * 180 / Math.PI; lastA = a;
+    let best = 0, bd = 1e9;
+    for (let k = 0; k < N; k++) {
+      let d = Math.abs(spokeAngle(k) + rot); d = Math.min(d, 360 - d);
+      if (d < bd) { bd = d; best = k; }
+    }
+    cur = best;
+    applyRot();
+  });
+  const endDrag = () => { dragging = false; };
+  wheelEl.addEventListener("pointerup", endDrag);
+  wheelEl.addEventListener("pointercancel", endDrag);
+
+  const onKey = e => {
+    if (e.key === "Escape") goBack();
+    else if (e.key === "ArrowRight") { e.preventDefault(); goTo(cur + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); goTo(cur - 1); }
+  };
+  addEventListener("keydown", onKey);
+
+  cleanupPage = () => {
+    removeEventListener("keydown", onKey);
+  };
+
+  goTo(0);
+  addEventListener("resize", positionLabels);
+}
+
+// ============================================================
+//  แผนที่สามัญญผล (วงล้อ 3 ซี่ = ไตรสิกขา · 3 ปิฎกเป็น 3 ขั้น)
+// ============================================================
+const MAP_SIKKHA = [
+  {t:"ศีล", full:"อธิสีลสิกขา", pali:"adhisīlasikkhā", grp:"ขั้นที่ 1", def:"ปาติโมกขสังวร → จูฬ/มัชฌิม/มหาศีล", ev:"DN 2:42–64", pitaka:"วินัยปิฎก"},
+  {t:"สมาธิ", full:"อธิจิตตสิกขา", pali:"adhicittasikkhā", grp:"ขั้นที่ 2", def:"อินทรียสังวร → ละนิวรณ์ 5 → ฌาน 4", ev:"DN 2:64–84", pitaka:"สุตตันตปิฎก"},
+  {t:"ปัญญา", full:"อธิปัญญาสิกขา", pali:"adhipaññāsikkhā", grp:"ขั้นที่ 3", def:"ญาณทัสสนะ → อภิญญา 7 → อาสวักขยญาณ", ev:"DN 2:83–98", pitaka:"อภิธรรมปิฎก"},
+];
+
+function renderSamannaphala(id) {
+  const meta = TOPICS[id];
+  setChrome({ title: meta.title, back: true, gear: true, bar: true });
+  document.body.classList.remove("chant-mode");
+
+  let cur = 0, rot = 0;
+  const N = MAP_SIKKHA.length;          // 3
+  const spokeAngle = k => k * 120;      // 3 ซี่
+
+  const rays = MAP_RAYS.map(r =>
+    `<line x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}" stroke="${r[4]}" stroke-width="3" stroke-linecap="round"/>`
+  ).join("");
+
+  view.innerHTML = `<div class="dmap">
+    <section class="dmap-hero">
+      <div class="dmap-kicker">หมุนหรือแตะซี่ · ไตรสิกขา 3 ขั้น</div>
+      <div class="dmap-name">${esc(meta.title)}</div>
+      <div class="dmap-ref">${esc(meta.ro)} · ${esc(meta.ref)}</div>
+
+      <div class="dmap-wheel" id="dmapWheel">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <radialGradient id="dmapGoldGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#FACC15" stop-opacity=".5"/>
+              <stop offset="1" stop-color="#FACC15" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="dmapSoftBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
+          </defs>
+          <g class="dmap-rays" filter="url(#dmapSoftBlur)">${rays}</g>
+          <circle class="dmap-glow" cx="100" cy="100" r="62" fill="url(#dmapGoldGlow)"/>
+          <g id="dmapRot">
+            <circle class="dmap-rim-in" cx="100" cy="100" r="88"/>
+            <circle class="dmap-rim" cx="100" cy="100" r="82"/>
+            <g id="dmapSpokes"></g>
+          </g>
+          <circle class="dmap-hub" cx="100" cy="100" r="38"/>
+          <text class="dmap-hub-text" x="100" y="102">${esc(meta.ref)}</text>
+          <text class="dmap-hub-sub" x="100" y="118">ไตรสิกขา</text>
+        </svg>
+        <div id="dmapLabels"></div>
+      </div>
+
+      <div class="dmap-nav">
+        <button type="button" id="dmapPrev" aria-label="ขั้นก่อนหน้า">‹</button>
+        <button type="button" id="dmapNext" aria-label="ขั้นถัดไป">›</button>
+      </div>
+
+      <div class="dmap-card" aria-live="polite">
+        <span class="grp" id="dmapGrp"></span>
+        <span class="full" id="dmapFull"></span>
+        <span class="pali" id="dmapPali"></span>
+        <span class="def" id="dmapDef"></span>
+        <span class="ev" id="dmapEv"></span>
+      </div>
+
+      <a class="dmap-read" href="#/topic/${esc(id)}/read">${TP_BOOK}<span>อ่านพระสูตรเต็ม · ปัด/แตะ</span></a>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>3 ปิฎก = 3 ขั้นของมรรคเดียว</h2><span class="pali">tisso sikkhā · MN 44</span></div>
+      <div class="dmap-method">
+        <div class="no">สะพานที่ตัวบาลีบัญญัติ (mn44:11.3–11.5 · an3.89:1.3)</div>
+        <div class="dmap-cascade">
+          <div class="step">1) ศีล → วินัยปิฎก<span>ปาติโมกข์ 364 · สิกขาบท 555</span></div>
+          <div class="arr">↓ อนุปุพพิกถา (ตามลำดับ)</div>
+          <div class="step">2) สมาธิ → สุตตันตปิฎก<span>ฌาน 4 · สติปัฏฐาน</span></div>
+          <div class="arr">↓ อนุปุพพิกถา</div>
+          <div class="step gold">3) ปัญญา → อภิธรรมปิฎก<span>ญาณ 7 · อาสวักขยญาณ = สามัญญผล</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dmap-sec">
+      <div class="dmap-sec-head"><h2>สองรากเอกของแผนที่</h2><span class="pali">WHAT + PATH</span></div>
+      <div class="dmap-method">
+        <div class="no">แกนธรรม (SN 56.11) + แกนปฏิบัติ (DN 2) บรรจบกันที่ 'มรรค'</div>
+        <h3>อริยสัจข้อ 4 = ไตรสิกขา = มรรค</h3>
+        <div class="flow">
+          <span>SN 56.11 = ธรรมะคืออะไร (WHAT)</span>
+          <span class="b">DN 2 = ปฏิบัติอย่างไรเป็นลำดับ (PATH)</span>
+        </div>
+        <a class="dmap-read" href="#/topic/sn56.11" style="margin-top:12px;">${TP_BOOK}<span>เปิดวงล้อ ธัมมจักกัปปวัตตนสูตร</span></a>
+      </div>
+    </section>
+  </div>
+
+  <div class="dmap-scrim" id="dmapScrim"></div>`;
+
+  const spokesG = document.getElementById("dmapSpokes");
+  const labelsBox = document.getElementById("dmapLabels");
+  const wheelEl = document.getElementById("dmapWheel");
+
+  let spokesHTML = "";
+  for (let k = 0; k < N; k++) {
+    const a = spokeAngle(k) * Math.PI / 180;
+    const x1 = 100 + 38 * Math.sin(a), y1 = 100 - 38 * Math.cos(a);
+    const x2 = 100 + 82 * Math.sin(a), y2 = 100 - 82 * Math.cos(a);
+    spokesHTML += `<line class="dmap-spoke" data-k="${k}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+  }
+  spokesG.innerHTML = spokesHTML;
+
+  labelsBox.innerHTML = MAP_SIKKHA.map((m, k) =>
+    `<button type="button" class="dmap-label" data-k="${k}" style="left:50%;top:50%;">${esc(m.t)}</button>`
+  ).join("");
+
+  const positionLabels = () => {
+    const box = wheelEl.getBoundingClientRect();
+    const cx = box.width / 2, cy = box.height / 2;
+    const r = box.width / 2 * 0.92;
+    labelsBox.querySelectorAll(".dmap-label").forEach(lb => {
+      const k = +lb.dataset.k;
+      const a = (spokeAngle(k) + rot) * Math.PI / 180;
+      lb.style.left = (cx + r * Math.sin(a)) + "px";
+      lb.style.top = (cy - r * Math.cos(a)) + "px";
+    });
+  };
+
+  const renderCard = () => {
+    const m = MAP_SIKKHA[cur];
+    document.getElementById("dmapGrp").textContent = m.grp;
+    document.getElementById("dmapFull").textContent = m.full;
+    document.getElementById("dmapPali").textContent = m.pali + " · " + m.pitaka;
     document.getElementById("dmapDef").textContent = m.def;
     document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
   };
