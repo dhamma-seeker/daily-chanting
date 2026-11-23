@@ -75,6 +75,15 @@ const TP_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const TP_RIGHT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
 const TP_BOOK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
 
+// หลักฐานอ้างอิง: ถ้ามี verse → เรนเดอร์เป็นลิงก์เปิดในแอป (deep-link) ถ้าไม่มี → ข้อความเฉย ๆ
+function setEv(el, ev, verse, id) {
+  if (verse != null) {
+    el.innerHTML = `<a href="#/topic/${esc(id)}/read/${verse}">หลักฐาน: ${esc(ev)} · อ่านในแอป ›</a>`;
+  } else {
+    el.textContent = "หลักฐาน: " + (ev || "");
+  }
+}
+
 function routeTopics(h) {
   let m = h.match(/^topic\/([a-z0-9.]+)\/read(?:\/(\d+))?$/);
   if (m && TOPICS[m[1]]) { renderTopic(m[1], m[2] != null ? +m[2] : 0); return true; }
@@ -433,7 +442,7 @@ function renderMap(id) {
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali;
     document.getElementById("dmapDef").textContent = m.def;
-    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+    setEv(document.getElementById("dmapEv"), m.ev, m.verse, id);
   };
 
   const applyRot = () => {
@@ -512,10 +521,10 @@ function renderMap(id) {
 //  แผนที่มหาสติปัฏฐาน (วงล้อ 4 ซี่ = สติปัฏฐาน 4 · เอกายนมรรค)
 // ============================================================
 const MAP_SATI = [
-  {t:"กาย", full:"กายานุปัสสนา", pali:"kāyānupassanā", grp:"ฐานที่ 1", def:"พิจารณาเห็นกายในกาย — อานาปาน อิริยาบถ ปฏิกูล ธาตุ นวสีวถิกา", ev:"DN 22:2–10"},
-  {t:"เวทนา", full:"เวทนานุปัสสนา", pali:"vedanānupassanā", grp:"ฐานที่ 2", def:"พิจารณาเห็นเวทนาในเวทนา — สุข ทุกข์ อทุกขมสุข ทั้งมีอามิสและไม่มีอามิส", ev:"DN 22:11"},
-  {t:"จิต", full:"จิตตานุปัสสนา", pali:"cittānupassanā", grp:"ฐานที่ 3", def:"พิจารณาเห็นจิตในจิต — มีราคะ/ไม่มีราคะ เป็นต้น 16 อาการ", ev:"DN 22:12"},
-  {t:"ธรรม", full:"ธัมมานุปัสสนา", pali:"dhammānupassanā", grp:"ฐานที่ 4", def:"พิจารณาเห็นธรรมในธรรม — นิวรณ์ 5 ขันธ์ 5 อายตนะ 6 โพชฌงค์ 7 อริยสัจ 4", ev:"DN 22:13–22"},
+  {t:"กาย", full:"กายานุปัสสนา", pali:"kāyānupassanā", grp:"ฐานที่ 1", def:"พิจารณาเห็นกายในกาย — อานาปาน อิริยาบถ ปฏิกูล ธาตุ นวสีวถิกา", ev:"DN 22:2–10", verse:3},
+  {t:"เวทนา", full:"เวทนานุปัสสนา", pali:"vedanānupassanā", grp:"ฐานที่ 2", def:"พิจารณาเห็นเวทนาในเวทนา — สุข ทุกข์ อทุกขมสุข ทั้งมีอามิสและไม่มีอามิส", ev:"DN 22:11", verse:4},
+  {t:"จิต", full:"จิตตานุปัสสนา", pali:"cittānupassanā", grp:"ฐานที่ 3", def:"พิจารณาเห็นจิตในจิต — มีราคะ/ไม่มีราคะ เป็นต้น 16 อาการ", ev:"DN 22:12", verse:5},
+  {t:"ธรรม", full:"ธัมมานุปัสสนา", pali:"dhammānupassanā", grp:"ฐานที่ 4", def:"พิจารณาเห็นธรรมในธรรม — นิวรณ์ 5 ขันธ์ 5 อายตนะ 6 โพชฌงค์ 7 อริยสัจ 4", ev:"DN 22:13–22", verse:6},
 ];
 
 const MAP_SATI_NODES = {
@@ -534,10 +543,44 @@ const MAP_SATI_NODES = {
       {t:"SN 46.51 · อาหาร/อนาหาร + ธาตุสาม", href:"#/topic/sn46.51/read/1"},
     ],
     bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
-  khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", verse:9, desc:"รูป เวทนา สัญญา สังขาร วิญญาณ รู้ว่าขันธ์เป็นอย่างนี้ ความเกิดและความดับเป็นอย่างนี้", ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
-  ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", verse:10, desc:"จักขุ โสตะ ฆานะ ชิวหา กาย มโน + อารมณ์ รู้ชัดอายตนะและสังโยชน์ที่เกิดเพราะอาศัยอายตนะ", ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
-  bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", verse:11, desc:"สติ ธัมมวิจยะ วิริยะ ปีติ ปัสสัทธิ สมาธิ อุเบกขา รู้ว่ามี/ไม่มี เกิดแล้ว/เจริญเต็มที่แล้ว", ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
-  sacca: {tag:"ธัมมานุปัสสนา", title:"อริยสัจ 4", pali:"cattāri ariyasaccāni", verse:12, desc:"รู้ตามเป็นจริงว่า นี้ทุกข์ นี้สมุทัย นี้นิโรธ นี้มรรค — หมวดสัจจะนี้บรรจุธัมมจักกัปปวัตตนสูตรทั้งชุด (264 ข้อความ)", ev:"DN 22:17–22", bridge:"↳ ดูเต็มใน ธัมมจักกัปปวัตตนสูตร (SN 56.11)"},
+  khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", verse:9, desc:"ภิกษุรู้ชัดว่า รูปเป็นอย่างนี้ ความเกิดและความดับของรูปเป็นอย่างนี้ (ฉันเดียวกันกับเวทนา สัญญา สังขาร วิญญาณ)",
+    items:[
+      {t:"รูป", p:"rūpa", d:"ส่วนที่เป็นรูป ได้แก่ ธาตุ 4 (ดิน น้ำ ไฟ ลม) และรูปที่อาศัยธาตุ"},
+      {t:"เวทนา", p:"vedanā", d:"ความรู้สึก สุข ทุกข์ ไม่สุขไม่ทุกข์"},
+      {t:"สัญญา", p:"saññā", d:"ความจำได้หมายรู้"},
+      {t:"สังขาร", p:"saṅkhārā", d:"ความปรุงแต่ง ความจงใจ (เจตนา) ทั้งหลาย"},
+      {t:"วิญญาณ", p:"viññāṇa", d:"ความรู้แจ้งอารมณ์ทางตา หู จมูก ลิ้น กาย ใจ"},
+    ],
+    ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
+  ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", verse:10, desc:"ภิกษุรู้ชัดซึ่งจักขุและรูป (ฉันเดียวกันกับโสตะ ฆานะ ชิวหา กาย มโน) และรู้ชัดซึ่งสังโยชน์ที่เกิดเพราะอาศัยอายตนะคู่นั้น",
+    items:[
+      {t:"ตา + รูป", p:"cakkhu · rūpa", d:"ตาเห็นรูป สังโยชน์เกิดเพราะอาศัยตาและรูป"},
+      {t:"หู + เสียง", p:"sota · sadda", d:"หูได้ยินเสียง สังโยชน์เกิดเพราะอาศัยหูและเสียง"},
+      {t:"จมูก + กลิ่น", p:"ghāna · gandha", d:"จมูกรู้กลิ่น สังโยชน์เกิดเพราะอาศัยจมูกและกลิ่น"},
+      {t:"ลิ้น + รส", p:"jivhā · rasa", d:"ลิ้นรู้รส สังโยชน์เกิดเพราะอาศัยลิ้นและรส"},
+      {t:"กาย + สัมผัส", p:"kāya · phoṭṭhabba", d:"กายรู้สัมผัส สังโยชน์เกิดเพราะอาศัยกายและสัมผัส"},
+      {t:"ใจ + ธรรมารมณ์", p:"mana · dhammā", d:"ใจรู้ธรรมารมณ์ สังโยชน์เกิดเพราะอาศัยใจและธรรมารมณ์"},
+    ],
+    ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
+  bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", verse:11, desc:"ภิกษุรู้ชัดว่าโพชฌงค์ใดมีอยู่/ไม่มี และโพชฌงค์ที่ยังไม่เกิดเกิดขึ้นอย่างไร ที่เกิดแล้วเจริญถึงความบริบูรณ์อย่างไร",
+    items:[
+      {t:"สติ", p:"satisambojjhaṅga", d:"ความระลึกได้ ดำรงสติอยู่"},
+      {t:"ธัมมวิจยะ", p:"dhammavicayasambojjhaṅga", d:"การเลือกเฟ้นธรรม วิจัยธรรมด้วยปัญญา"},
+      {t:"วิริยะ", p:"vīriyasambojjhaṅga", d:"ความเพียรไม่ย่อท้อ"},
+      {t:"ปีติ", p:"pītisambojjhaṅga", d:"ความอิ่มใจเอิบอิ่ม (ไม่ใช่กามฉันทะ)"},
+      {t:"ปัสสัทธิ", p:"passaddhisambojjhaṅga", d:"ความสงบระงับกายใจ"},
+      {t:"สมาธิ", p:"samādhisambojjhaṅga", d:"ความตั้งมั่นแห่งจิต"},
+      {t:"อุเบกขา", p:"upekkhāsambojjhaṅga", d:"ความวางเฉย เป็นกลาง ไม่ยินดียินร้าย"},
+    ],
+    ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
+  sacca: {tag:"ธัมมานุปัสสนา", title:"อริยสัจ 4", pali:"cattāri ariyasaccāni", verse:12, desc:"ภิกษุรู้ชัดตามเป็นจริงว่า นี้ทุกข์ นี้ทุกขสมุทัย นี้ทุกขนิโรธ นี้ทุกขนิโรธคามินีปฏิปทา — หมวดสัจจะนี้บรรจุธัมมจักกัปปวัตตนสูตรทั้งชุดไว้ในตัว",
+    items:[
+      {t:"ทุกข์", p:"dukkha", d:"ความเกิด แก่ เจ็บ ตาย ความโศก ความทุกข์ใจ ว่าโดยย่อ = อุปาทานขันธ์ 5"},
+      {t:"สมุทัย", p:"dukkhasamudaya", d:"เหตุเกิดทุกข์ = ตัณหา 3 (กามตัณหา ภวตัณหา วิภวตัณหา)"},
+      {t:"นิโรธ", p:"dukkhanirodha", d:"ความดับตัณหาโดยไม่เหลือ = นิพพาน"},
+      {t:"มรรค", p:"dukkhanirodhagāminī paṭipadā", d:"ทางให้ถึงความดับทุกข์ = อริยอัฏฐังคิกมรรค 8 องค์"},
+    ],
+    ev:"DN 22:17–22", bridge:"↳ ดูเต็มใน ธัมมจักกัปปวัตตนสูตร (SN 56.11)"},
 };
 
 function renderSatipatthana(id) {
@@ -673,7 +716,7 @@ function renderSatipatthana(id) {
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali;
     document.getElementById("dmapDef").textContent = m.def;
-    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+    setEv(document.getElementById("dmapEv"), m.ev, m.verse, id);
   };
 
   const applyRot = () => {
@@ -731,8 +774,8 @@ function renderSatipatthana(id) {
         `<div class="dmap-item">
           <div class="dmi-t">${esc(it.t)} <span class="dmi-p" lang="pi">${esc(it.p)}</span></div>
           <div class="dmi-d">${esc(it.d)}</div>
-          <div class="dmi-ah"><span class="dmi-lab">อาหาร</span>${esc(it.ah || "")}</div>
-          <div class="dmi-an"><span class="dmi-lab">อนาหาร</span>${esc(it.an || "")}</div>
+          ${it.ah ? `<div class="dmi-ah"><span class="dmi-lab">อาหาร</span>${esc(it.ah)}</div>` : ""}
+          ${it.an ? `<div class="dmi-an"><span class="dmi-lab">อนาหาร</span>${esc(it.an)}</div>` : ""}
         </div>`
       ).join("");
     } else itemsBox.innerHTML = "";
@@ -771,10 +814,10 @@ function renderSatipatthana(id) {
 //  แผนที่อานาปานสติ (วงล้อ 4 จตุรกะ = 16 ขั้น · น้ำตกสู่วิชชาวิมุตติ)
 // ============================================================
 const MAP_ANAPANA = [
-  {t:"กาย", full:"จตุรกะ 1 · กายานุปัสสนา", pali:"kāyānupassanā", grp:"16 ขั้น · ข้อ 1–4", def:"ลมหายใจยาว/สั้น → รู้ทั่วกาย → ทำกายสังขารให้สงบ", ev:"MN 118:18"},
-  {t:"เวทนา", full:"จตุรกะ 2 · เวทนานุปัสสนา", pali:"vedanānupassanā", grp:"16 ขั้น · ข้อ 5–8", def:"รู้ปีติ → รู้สุข → รู้จิตตสังขาร → ทำใจให้สงบ", ev:"MN 118:19"},
-  {t:"จิต", full:"จตุรกะ 3 · จิตตานุปัสสนา", pali:"cittānupassanā", grp:"16 ขั้น · ข้อ 9–12", def:"รู้จิต → ยังจิตให้บันเทิง → ตั้งมั่น → เปลื้องปล่อย", ev:"MN 118:20"},
-  {t:"ธรรม", full:"จตุรกะ 4 · ธัมมานุปัสสนา", pali:"dhammānupassanā", grp:"16 ขั้น · ข้อ 13–16", def:"เห็นอนิจจะ → วิราคะ → นิโรธ → ปฏินิสสัคคะ", ev:"MN 118:21"},
+  {t:"กาย", full:"จตุรกะ 1 · กายานุปัสสนา", pali:"kāyānupassanā", grp:"16 ขั้น · ข้อ 1–4", def:"ลมหายใจยาว/สั้น → รู้ทั่วกาย → ทำกายสังขารให้สงบ", ev:"MN 118:18", verse:4},
+  {t:"เวทนา", full:"จตุรกะ 2 · เวทนานุปัสสนา", pali:"vedanānupassanā", grp:"16 ขั้น · ข้อ 5–8", def:"รู้ปีติ → รู้สุข → รู้จิตตสังขาร → ทำใจให้สงบ", ev:"MN 118:19", verse:5},
+  {t:"จิต", full:"จตุรกะ 3 · จิตตานุปัสสนา", pali:"cittānupassanā", grp:"16 ขั้น · ข้อ 9–12", def:"รู้จิต → ยังจิตให้บันเทิง → ตั้งมั่น → เปลื้องปล่อย", ev:"MN 118:20", verse:6},
+  {t:"ธรรม", full:"จตุรกะ 4 · ธัมมานุปัสสนา", pali:"dhammānupassanā", grp:"16 ขั้น · ข้อ 13–16", def:"เห็นอนิจจะ → วิราคะ → นิโรธ → ปฏินิสสัคคะ", ev:"MN 118:21", verse:7},
 ];
 
 function renderAnapana(id) {
@@ -904,7 +947,7 @@ function renderAnapana(id) {
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali;
     document.getElementById("dmapDef").textContent = m.def;
-    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+    setEv(document.getElementById("dmapEv"), m.ev, m.verse, id);
   };
 
   const applyRot = () => {
@@ -964,14 +1007,14 @@ function renderAnapana(id) {
 //  แผนที่มหาจัตตารีสก (วงล้อ 8 ซี่ = มรรค 8 · 2 ระดับ · 8→10)
 // ============================================================
 const MAP_CATTARISAKA = [
-  {t:"ทิฏฐิ", full:"สัมมาทิฏฐิ", pali:"sammādiṭṭhi", grp:"องค์ 1 · ปุพพังคมา (ผู้นำ)", def:"ความเห็นถูก = รู้มิจฉา/สัมมา · 2 ระดับ: โลกิย (สาสว) ↔ โลกุตตร (อนาสว)", ev:"MN 117:4–8"},
-  {t:"สังกัปปะ", full:"สัมมาสังกัปปะ", pali:"sammāsaṅkappa", grp:"องค์ 2", def:"ดำริชอบ = เนกขัมมะ อพยาบาท อวิหิงสา", ev:"MN 117:9–12"},
-  {t:"วาจา", full:"สัมมาวาจา", pali:"sammāvācā", grp:"องค์ 3", def:"เจรจาชอบ = เว้นวจีทุจริต 4", ev:"MN 117:13–15"},
-  {t:"กัมมันตะ", full:"สัมมากัมมันตะ", pali:"sammākammanta", grp:"องค์ 4", def:"การงานชอบ = เว้นกายทุจริต 3", ev:"MN 117:16–18"},
-  {t:"อาชีวะ", full:"สัมมาอาชีวะ", pali:"sammāājīva", grp:"องค์ 5", def:"เลี้ยงชีพชอบ = ละมิจฉาชีวะ", ev:"MN 117:19–21"},
-  {t:"วายามะ", full:"สัมมาวายามะ", pali:"sammāvāyāma", grp:"องค์ 6", def:"เพียรชอบ = สัมมัปปธาน 4", ev:"MN 117:22–24"},
-  {t:"สติ", full:"สัมมาสติ", pali:"sammāsati", grp:"องค์ 7", def:"ระลึกชอบ = สติปัฏฐาน 4", ev:"MN 117:25–27"},
-  {t:"สมาธิ", full:"สัมมาสมาธิ", pali:"sammāsamādhi", grp:"องค์ 8 · แก่นของสูตร", def:"ตั้งมั่นชอบ = องค์ 7 + เอกัคคตา (สอุปนิส สปริกขาร)", ev:"MN 117:28–34"},
+  {t:"ทิฏฐิ", full:"สัมมาทิฏฐิ", pali:"sammādiṭṭhi", grp:"องค์ 1 · ปุพพังคมา (ผู้นำ)", def:"ความเห็นถูก = รู้มิจฉา/สัมมา · 2 ระดับ: โลกิย (สาสว) ↔ โลกุตตร (อนาสว)", ev:"MN 117:4–8", verse:3},
+  {t:"สังกัปปะ", full:"สัมมาสังกัปปะ", pali:"sammāsaṅkappa", grp:"องค์ 2", def:"ดำริชอบ = เนกขัมมะ อพยาบาท อวิหิงสา", ev:"MN 117:9–12", verse:2},
+  {t:"วาจา", full:"สัมมาวาจา", pali:"sammāvācā", grp:"องค์ 3", def:"เจรจาชอบ = เว้นวจีทุจริต 4", ev:"MN 117:13–15", verse:2},
+  {t:"กัมมันตะ", full:"สัมมากัมมันตะ", pali:"sammākammanta", grp:"องค์ 4", def:"การงานชอบ = เว้นกายทุจริต 3", ev:"MN 117:16–18", verse:2},
+  {t:"อาชีวะ", full:"สัมมาอาชีวะ", pali:"sammāājīva", grp:"องค์ 5", def:"เลี้ยงชีพชอบ = ละมิจฉาชีวะ", ev:"MN 117:19–21", verse:2},
+  {t:"วายามะ", full:"สัมมาวายามะ", pali:"sammāvāyāma", grp:"องค์ 6", def:"เพียรชอบ = สัมมัปปธาน 4", ev:"MN 117:22–24", verse:2},
+  {t:"สติ", full:"สัมมาสติ", pali:"sammāsati", grp:"องค์ 7", def:"ระลึกชอบ = สติปัฏฐาน 4", ev:"MN 117:25–27", verse:2},
+  {t:"สมาธิ", full:"สัมมาสมาธิ", pali:"sammāsamādhi", grp:"องค์ 8 · แก่นของสูตร", def:"ตั้งมั่นชอบ = องค์ 7 + เอกัคคตา (สอุปนิส สปริกขาร)", ev:"MN 117:28–34", verse:1},
 ];
 
 function renderCattarisaka(id) {
@@ -1096,7 +1139,7 @@ function renderCattarisaka(id) {
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali;
     document.getElementById("dmapDef").textContent = m.def;
-    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+    setEv(document.getElementById("dmapEv"), m.ev, m.verse, id);
   };
 
   const applyRot = () => {
@@ -1156,9 +1199,9 @@ function renderCattarisaka(id) {
 //  แผนที่สามัญญผล (วงล้อ 3 ซี่ = ไตรสิกขา · 3 ปิฎกเป็น 3 ขั้น)
 // ============================================================
 const MAP_SIKKHA = [
-  {t:"ศีล", full:"อธิสีลสิกขา", pali:"adhisīlasikkhā", grp:"ขั้นที่ 1", def:"ปาติโมกขสังวร → จูฬ/มัชฌิม/มหาศีล", ev:"DN 2:42–64", pitaka:"วินัยปิฎก"},
-  {t:"สมาธิ", full:"อธิจิตตสิกขา", pali:"adhicittasikkhā", grp:"ขั้นที่ 2", def:"อินทรียสังวร → ละนิวรณ์ 5 → ฌาน 4", ev:"DN 2:64–84", pitaka:"สุตตันตปิฎก"},
-  {t:"ปัญญา", full:"อธิปัญญาสิกขา", pali:"adhipaññāsikkhā", grp:"ขั้นที่ 3", def:"ญาณทัสสนะ → อภิญญา 7 → อาสวักขยญาณ", ev:"DN 2:83–98", pitaka:"อภิธรรมปิฎก"},
+  {t:"ศีล", full:"อธิสีลสิกขา", pali:"adhisīlasikkhā", grp:"ขั้นที่ 1", def:"ปาติโมกขสังวร → จูฬ/มัชฌิม/มหาศีล", ev:"DN 2:42–64", verse:3, pitaka:"วินัยปิฎก"},
+  {t:"สมาธิ", full:"อธิจิตตสิกขา", pali:"adhicittasikkhā", grp:"ขั้นที่ 2", def:"อินทรียสังวร → ละนิวรณ์ 5 → ฌาน 4", ev:"DN 2:64–84", verse:5, pitaka:"สุตตันตปิฎก"},
+  {t:"ปัญญา", full:"อธิปัญญาสิกขา", pali:"adhipaññāsikkhā", grp:"ขั้นที่ 3", def:"ญาณทัสสนะ → อภิญญา 7 → อาสวักขยญาณ", ev:"DN 2:83–98", verse:7, pitaka:"อภิธรรมปิฎก"},
 ];
 
 function renderSamannaphala(id) {
@@ -1284,7 +1327,7 @@ function renderSamannaphala(id) {
     document.getElementById("dmapFull").textContent = m.full;
     document.getElementById("dmapPali").textContent = m.pali + " · " + m.pitaka;
     document.getElementById("dmapDef").textContent = m.def;
-    document.getElementById("dmapEv").textContent = "หลักฐาน: " + m.ev;
+    setEv(document.getElementById("dmapEv"), m.ev, m.verse, id);
   };
 
   const applyRot = () => {
