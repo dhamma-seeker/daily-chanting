@@ -729,10 +729,10 @@ function renderSatipatthana(id) {
     if (n.items) {
       itemsBox.innerHTML = n.items.map(it =>
         `<div class="dmap-item">
-          <div class="t">${esc(it.t)} <span class="p" lang="pi">${esc(it.p)}</span></div>
-          <div class="d">${esc(it.d)}</div>
-          <div class="ah"><span class="lab">อาหาร</span>${esc(it.ah || "")}</div>
-          <div class="an"><span class="lab">อนาหาร</span>${esc(it.an || "")}</div>
+          <div class="dmi-t">${esc(it.t)} <span class="dmi-p" lang="pi">${esc(it.p)}</span></div>
+          <div class="dmi-d">${esc(it.d)}</div>
+          <div class="dmi-ah"><span class="dmi-lab">อาหาร</span>${esc(it.ah || "")}</div>
+          <div class="dmi-an"><span class="dmi-lab">อนาหาร</span>${esc(it.an || "")}</div>
         </div>`
       ).join("");
     } else itemsBox.innerHTML = "";
