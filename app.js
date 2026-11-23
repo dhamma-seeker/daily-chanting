@@ -780,6 +780,11 @@ function renderHome({ keep = false } = {}) {
       <span class="meta"><b>กรณียเมตตสูตร</b><span>เมตตา · อ่านแบบปัด/แตะ</span></span>
       <span class="chev">${ICON.chev}</span>
     </a>
+    <a class="qp-entry" href="#/topic/sn46.51">
+      <span class="qp-glyph" aria-hidden="true">${ICON.book}</span>
+      <span class="meta"><b>อาหารสูตร</b><span>อาหาร/อนาหารของนิวรณ์ 5</span></span>
+      <span class="chev">${ICON.chev}</span>
+    </a>
     <h2 class="section-label">บทสวดทั้งหมด</h2>
     <nav class="list grouped" aria-label="บทสวด">${rows}</nav>
     <p class="home-note">${ICON.wifiOff}<span>ใช้ได้แม้ไม่มีเน็ต · อัปเดตเองเมื่อมีเน็ต</span></p>`;

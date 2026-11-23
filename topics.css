@@ -244,6 +244,12 @@
 .dmap-sheet .dmap-item .t .p { font-family: var(--pali-ff); font-size: 12px; color: var(--pali); font-weight: 600; margin-left: 5px; }
 .dmap-sheet .dmap-item .d { font-size: 13px; color: var(--thai); line-height: 1.55; margin-top: 3px; }
 .dmap-sheet .ev .cite a { color: var(--gold-ink); text-decoration: none; border-bottom: 1px dashed var(--gold); }
+.dmap-sheet .ev .cite .sep { color: var(--muted); margin: 0 4px; }
+.dmap-sheet .dmap-note { margin-top: 10px; padding: 11px 13px; border-radius: 12px; background: var(--gold-soft); border: 1px solid var(--gold); font-size: 13px; color: var(--gold-ink); line-height: 1.55; }
+.dmap-sheet .dmap-item .ah, .dmap-sheet .dmap-item .an { font-size: 12.5px; color: var(--thai); line-height: 1.45; margin-top: 4px; }
+.dmap-sheet .dmap-item .ah .lab, .dmap-sheet .dmap-item .an .lab { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; padding: 1px 7px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
+.dmap-sheet .dmap-item .ah .lab { color: var(--muted); background: var(--surface); border: 1px solid var(--line); }
+.dmap-sheet .dmap-item .an .lab { color: var(--gold-ink); background: var(--gold-soft); }
 
 @media (prefers-reduced-motion: reduce) {
   .dmap-rays, .dmap-glow { animation: none; }

@@ -61,6 +61,14 @@ const TOPICS = {
     nikaya: "ทีฆนิกาย",
     sub: "ทีฆนิกาย สีลขันธวรรค · ไตรสิกขา (ศีล→สมาธิ→ปัญญา) = 3 ปิฎก",
   },
+  "sn46.51": {
+    type: "story",
+    title: "อาหารสูตร",
+    ref: "SN 46.51",
+    ro: "Āhārasutta",
+    nikaya: "สังยุตตนิกาย · โพชฌงคสังยุตต์",
+    sub: "อาหาร/อนาหารของนิวรณ์ 5 — สิ่งที่เลี้ยงนิวรณ์กับสิ่งที่ทำให้อด",
+  },
 };
 
 const TP_LEFT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`;
@@ -383,6 +391,7 @@ function renderMap(id) {
     <h3 id="dmapTitle"></h3>
     <div class="pali" id="dmapPali2"></div>
     <p class="desc" id="dmapDesc"></p>
+    <div class="dmap-note" id="dmapNote"></div>
     <div class="dmap-items" id="dmapItems"></div>
     <div class="ev"><div class="lab">หลักฐานในพระไตรปิฎก</div><div class="cite" id="dmapEv2"></div></div>
     <div class="bridge" id="dmapBridge"></div>
@@ -511,15 +520,20 @@ const MAP_SATI = [
 
 const MAP_SATI_NODES = {
   nivarana: {tag:"ธัมมานุปัสสนา", title:"นิวรณ์ 5", pali:"pañca nīvaraṇāni", verse:8,
-    desc:"เครื่องกั้นใจที่ปิดกั้นปัญญาและฌาน ภิกษุรู้เท่าทันว่า นิวรณ์ใดมีอยู่/ไม่มี เกิดแล้ว/ละได้แล้ว/จะไม่เกิดอีก",
+    desc:"เครื่องกั้นใจที่ปิดกั้นปัญญาและฌาน นิวรณ์ไม่ได้โตเอง มันโตเพราะถูกป้อนด้วยอโยนิโสมนสิการ (ใส่ใจไม่แยบคาย) และดับได้ด้วยโยนิโสมนสิการ (ใส่ใจแยบคาย) ต่ออนาหารของมัน",
+    method:"วิธีลดการหล่อเลี้ยง (4 ขั้น): รู้ว่านิวรณ์ตัวไหนกำลังทำงาน → มองดูว่าใจกำลังจดจ่อนิมิตอะไรอยู่ → ตัดอาหาร (หยุดใส่ใจไม่แยบคาย) → เติมอนาหาร (ใส่ใจแยบคายต่อนิมิตฝั่งตรงข้าม) แล้วทำให้เป็นอาจิณคือทำบ่อย ๆ จนเป็นกระแสใจใหม่",
     items:[
-      {t:"กามฉันทะ", p:"kāmacchanda", d:"ความพอใจติดใจในกามคุณ 5 (รูป เสียง กลิ่น รส สัมผัส) คือความกำหนัด ความใคร่ ความเพลิดเพลินที่ใจหมกมุ่นหลงติด"},
-      {t:"พยาบาท", p:"byāpāda", d:"ความขัดเคือง ความอาฆาต ความโกรธ ความคิดมุ่งร้ายปองร้ายผู้อื่น"},
-      {t:"ถีนมิทธะ", p:"thīnamiddha", d:"ความหดหู่ท้อถอย (ถีนะ) + ความง่วงซึมง่วงเหงา (มิทธะ) ทำให้ใจไม่คล่อง ไม่ควรแก่การงาน"},
-      {t:"อุทธัจจกุกกุจจะ", p:"uddhaccakukkucca", d:"ความฟุ้งซ่านใจไม่สงบ (อุทธัจจะ) + ความเดือดร้อนใจรำคาญใจถึงความผิดที่ทำแล้ว/ยังไม่ได้ทำ (กุกกุจจะ)"},
-      {t:"วิจิกิจฉา", p:"vicikicchā", d:"ความลังเลสงสัย ไม่ตกลงใจ เคลือบแคลงในพระพุทธ พระธรรม พระสงฆ์ และในสิกขา"},
+      {t:"กามฉันทะ", p:"kāmacchanda", d:"ความพอใจติดใจในกามคุณ 5 (รูป เสียง กลิ่น รส สัมผัส) คือความกำหนัด ความใคร่", ah:"นิมิตงาม (subhanimitta)", an:"นิมิตไม่งาม / อสุภะ (asubhanimitta)"},
+      {t:"พยาบาท", p:"byāpāda", d:"ความขัดเคือง อาฆาต ความคิดมุ่งร้ายปองร้ายผู้อื่น", ah:"นิมิตกระทบใจ (paṭighanimitta)", an:"เมตตาเจโตวิมุตติ (mettācetovimutti)"},
+      {t:"ถีนมิทธะ", p:"thīnamiddha", d:"ความหดหู่ท้อถอย (ถีนะ) + ความง่วงซึมง่วงเหงา (มิทธะ)", ah:"ไม่ยินดี เกียจคร้าน ง่วงหลังอาหาร ใจหดหู่", an:"ธาตุสาม = วิริยะ (ริเริ่ม · ก้าวออก · บากบั่น)"},
+      {t:"อุทธัจจกุกกุจจะ", p:"uddhaccakukkucca", d:"ความฟุ้งซ่าน (อุทธัจจะ) + ความเดือดร้อนใจรำคาญใจ (กุกกุจจะ)", ah:"ใจไม่สงบ (cetaso avūpasamo)", an:"ใจสงบระงับ (cetaso vūpasamo)"},
+      {t:"วิจิกิจฉา", p:"vicikicchā", d:"ความลังเลสงสัย ไม่ตกลงใจ เคลือบแคลงในพระรัตนตรัยและสิกขา", ah:"ธรรมเป็นที่ตั้งแห่งความสงสัย (vicikicchāṭṭhānīyā)", an:"แยกแยะกุศล/อกุศล มีโทษ/ไม่มีโทษ ฝ่ายดำ/ขาว"},
     ],
-    ev:"DN 22:13 · นิยามจากวิภังค์ (อภิธรรม)", bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
+    refs:[
+      {t:"DN 22:13 · วิธีพิจารณา", href:"#/topic/dn22/read/8"},
+      {t:"SN 46.51 · อาหาร/อนาหาร + ธาตุสาม", href:"#/topic/sn46.51/read/1"},
+    ],
+    bridge:"→ อภิธรรม (นิวรณ์ 387 ข้อความ)"},
   khandha: {tag:"ธัมมานุปัสสนา", title:"อุปาทานขันธ์ 5", pali:"pañcupādānakkhandhā", verse:9, desc:"รูป เวทนา สัญญา สังขาร วิญญาณ รู้ว่าขันธ์เป็นอย่างนี้ ความเกิดและความดับเป็นอย่างนี้", ev:"DN 22:14", bridge:"→ อภิธรรม (วิภังค์/ธัมมสังคณี, ขันธ์ 4963 ข้อความ)"},
   ayatana: {tag:"ธัมมานุปัสสนา", title:"อายตนะ 6", pali:"cha āyatanāni", verse:10, desc:"จักขุ โสตะ ฆานะ ชิวหา กาย มโน + อารมณ์ รู้ชัดอายตนะและสังโยชน์ที่เกิดเพราะอาศัยอายตนะ", ev:"DN 22:15", bridge:"→ อภิธรรม (ธาตุกถา/ยมก, อายตนะ 298 ข้อความ)"},
   bojjhanga: {tag:"ธัมมานุปัสสนา", title:"โพชฌงค์ 7", pali:"satta bojjhaṅgā", verse:11, desc:"สติ ธัมมวิจยะ วิริยะ ปีติ ปัสสัทธิ สมาธิ อุเบกขา รู้ว่ามี/ไม่มี เกิดแล้ว/เจริญเต็มที่แล้ว", ev:"DN 22:16", bridge:"→ โพธิปักขิยธรรม 37 (DN 16:3.50.5)"},
@@ -618,6 +632,7 @@ function renderSatipatthana(id) {
     <h3 id="dmapTitle"></h3>
     <div class="pali" id="dmapPali2"></div>
     <p class="desc" id="dmapDesc"></p>
+    <div class="dmap-note" id="dmapNote"></div>
     <div class="dmap-items" id="dmapItems"></div>
     <div class="ev"><div class="lab">หลักฐานในพระไตรปิฎก</div><div class="cite" id="dmapEv2"></div></div>
     <div class="bridge" id="dmapBridge"></div>
@@ -707,15 +722,28 @@ function renderSatipatthana(id) {
     document.getElementById("dmapTitle").textContent = n.title;
     document.getElementById("dmapPali2").textContent = n.pali;
     document.getElementById("dmapDesc").textContent = n.desc;
+    const note = document.getElementById("dmapNote");
+    note.textContent = n.method || "";
+    note.style.display = n.method ? "" : "none";
     const itemsBox = document.getElementById("dmapItems");
     if (n.items) {
       itemsBox.innerHTML = n.items.map(it =>
-        `<div class="dmap-item"><div class="t">${esc(it.t)} <span class="p" lang="pi">${esc(it.p)}</span></div><div class="d">${esc(it.d)}</div></div>`
+        `<div class="dmap-item">
+          <div class="t">${esc(it.t)} <span class="p" lang="pi">${esc(it.p)}</span></div>
+          <div class="d">${esc(it.d)}</div>
+          <div class="ah"><span class="lab">อาหาร</span>${esc(it.ah || "")}</div>
+          <div class="an"><span class="lab">อนาหาร</span>${esc(it.an || "")}</div>
+        </div>`
       ).join("");
     } else itemsBox.innerHTML = "";
-    document.getElementById("dmapEv2").innerHTML = (n.verse != null)
-      ? `<a href="#/topic/${esc(id)}/read/${n.verse}">${esc(n.ev)} · อ่านในแอป ›</a>`
-      : esc(n.ev);
+    const evBox = document.getElementById("dmapEv2");
+    if (n.refs) {
+      evBox.innerHTML = n.refs.map(r => `<a href="${esc(r.href)}">${esc(r.t)} · อ่านในแอป ›</a>`).join(' <span class="sep">·</span> ');
+    } else if (n.verse != null && n.ev) {
+      evBox.innerHTML = `<a href="#/topic/${esc(id)}/read/${n.verse}">${esc(n.ev)} · อ่านในแอป ›</a>`;
+    } else {
+      evBox.textContent = n.ev || "";
+    }
     document.getElementById("dmapBridge").textContent = n.bridge ? "↳ " + n.bridge : "";
     sheet.classList.add("open"); scrim.classList.add("open");
   };
